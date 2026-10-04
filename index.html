@@ -252,14 +252,15 @@ input:focus,select:focus{outline:2px solid var(--gold)}.row{display:grid;grid-te
 // Configuration & Target Email
 const TARGET_EMAIL = 'mmsbf26001@stu.xim.edu.in';
 const KEY = 'cfoSurveyDB';
-let ENDPOINT = localStorage.getItem('cfo_sheet_endpoint') || '';
+const DEFAULT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw97qit3HKxEdaPgrET1n4V8I6PDCFmZxXl28h6i3YPWqf7H-ET9Jl3zV6NxgMOQhjGLw/exec';
+let ENDPOINT = localStorage.getItem('cfo_sheet_endpoint') || DEFAULT_ENDPOINT;
 
 const $=i=>document.getElementById(i);
 let DB=[];try{DB=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){}
 let P=null,cur='';
 
 function openSyncModal(){
-  $('cfgEndpoint').value = ENDPOINT;
+  $('cfgEndpoint').value = ENDPOINT || DEFAULT_ENDPOINT;
   $('syncModal').classList.add('on');
 }
 function closeSyncModal(){
