@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Hot Seat: CFO Poker Table</title>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#120c10;--panel:#1d1419;--ink:#f4ead8;--mute:#a99d90;--gold:#f2c14e;--good:#5fe39a;--bad:#ff6b5e;--felt1:#1f8a5f;--felt2:#0b4633;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:radial-gradient(circle at 50% 0,#2a1a22,var(--bg) 60%);color:var(--ink);font:16px/1.45 'Instrument Sans',system-ui,sans-serif}
+#app{max-width:720px;margin:0 auto;height:100%;display:flex;flex-direction:column;padding:4px 10px 8px}
+.disp{font-family:'Alfa Slab One',Georgia,serif;font-weight:400}
+.hud{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:2px 0}
+.lv{font-size:.78rem;color:var(--mute)}.lv b{color:var(--gold);font-size:.95rem}
+#dots{display:flex;gap:3px;margin-top:4px}#dots i{flex:1;max-width:18px;height:6px;border-radius:3px}
+.stat{text-align:center;font-size:.68rem;color:var(--mute)}.stat b{display:block;font-size:1.1rem;color:var(--ink)}
+#chips{color:var(--gold)}.hot b{color:#ff8a3d;text-shadow:0 0 12px #ff8a3d}
+.mute{background:none;border:0;color:var(--mute);cursor:pointer;font:inherit;font-size:.65rem;padding:0}
+.table{position:relative;flex:none;background:radial-gradient(ellipse at 50% 45%,var(--felt1),var(--felt2) 75%);border:8px solid #5a3820;border-radius:28px 28px 70px 70px/28px 28px 40px 40px;box-shadow:inset 0 0 0 3px #f2c14e55,inset 0 0 60px #000b,0 14px 30px #000c;padding:6px 8px 6px;margin:2px 0}
+.seats,#mid{position:relative;z-index:1}
+.seats{display:flex;justify-content:space-between;gap:4px}
+.seat{position:relative;text-align:center;font-size:.56rem;color:#cfe8dc;flex:1;line-height:1.2}
+.av{position:relative;width:28px;height:28px;border-radius:50%;margin:0 auto 2px;display:grid;place-items:center;font-family:'Alfa Slab One',serif;font-size:.8rem;color:#fff;border:3px solid #0006;opacity:.55;transition:.3s}
+.seat.on .av{opacity:1;box-shadow:0 0 0 3px var(--gold),0 0 18px var(--gold);transform:scale(1.15)}
+.dbtn{position:absolute;right:-8px;bottom:-6px;width:15px;height:15px;border-radius:50%;background:#f7f0e2;color:#2a1a22;font-size:.5rem;display:grid;place-items:center;border:2px solid var(--gold)}
+.pot{text-align:center;margin:4px 0 0}.pot small{color:#bfe3d0;font-size:.65rem;margin-right:6px}.pot b{font-size:1.35rem;color:var(--gold)}
+.ttl{text-align:center;font-size:.82rem}
+#sw{position:absolute;top:4px;right:6px;z-index:3;font-size:.62rem;background:#000a;color:var(--gold);border:1px solid #f2c14e66;border-radius:10px;padding:1px 7px;font-variant-numeric:tabular-nums}
+#sw.low{color:#fff;background:#b3261e;border-color:#ff6b5e;animation:pl 1s infinite}
+.panel{flex:1;min-height:0;overflow:hidden;margin-top:6px;padding:10px;background:var(--panel);border:1px solid #3a2c33;border-radius:14px;display:flex;flex-direction:column}
+.panel.rep{overflow-y:auto;display:block}
+.say{background:#f7f0e2;color:#2a1a22;border-radius:14px;padding:9px 12px;font-size:.93rem;position:relative;margin:6px 0 2px;line-height:1.38}
+.say::before{content:"";position:absolute;top:-8px;left:22px;border:8px solid transparent;border-top:0;border-bottom-color:#f7f0e2}
+.lbl{font-size:.74rem;color:var(--mute);margin:6px 0 3px}
+.stk{display:grid;gap:6px}
+.sb{padding:5px 2px;background:#2a1e25;border:1px solid #4a3a43;border-radius:10px;color:var(--ink);font:inherit;font-size:.68rem;cursor:pointer;line-height:1.2}
+.sb b{display:block;font-size:.84rem;color:var(--gold)}
+.sb.on{background:var(--gold);color:#2a1a10;border-color:var(--gold)}.sb.on b{color:#2a1a10}
+.sb:disabled,.act:disabled{cursor:default}.sb:disabled:not(.on){opacity:.4}
+.pay{font-size:.78rem;margin:5px 0;color:var(--mute);min-height:30px;display:flex;align-items:center;justify-content:center;text-align:center}.pay .g{color:var(--good)}.pay .b{color:var(--bad)}
+.act{display:flex;gap:10px;align-items:center;width:100%;margin:4px 0;padding:9px 10px;background:#2a1e25;border:2px solid #4a3a43;border-radius:10px;color:var(--ink);font:inherit;font-size:.88rem;line-height:1.3;text-align:left;cursor:pointer;transition:.15s}
+.act:hover:not(:disabled){transform:translateY(-2px);border-color:var(--gold)}
+.act:focus-visible,.sb:focus-visible,.go:focus-visible,#how:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.tag{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:'Alfa Slab One',serif;font-size:.75rem;color:#1a1014;background:var(--gold)}
+.act.spot{background:#4a3a1a;border-color:var(--gold);box-shadow:0 0 20px #f2c14e88;transform:scale(1.02)}
+.act.lock{border-color:#fff}
+.act.right{background:#14402b;border-color:var(--good);opacity:1!important}.act.wrong{background:#4a1d1a;border-color:var(--bad);opacity:1!important}
+.act:disabled:not(.spot):not(.right):not(.wrong):not(.lock){opacity:.5}
+.meter{font-family:'Alfa Slab One',serif;font-size:1.5rem;color:var(--gold);text-shadow:0 0 14px #f2c14e88}
+.meter.g{color:var(--good)}.meter.b{color:var(--bad);animation:sh .45s}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:40;max-width:720px;margin:0 auto;background:var(--panel);border:2px solid var(--gold);border-bottom:0;border-radius:18px 18px 0 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px #000c;animation:in .35s;font-size:.88rem}
+.sheet .big{font-size:1.3rem}.sheet.ok .big{color:var(--good)}.sheet.miss .big{color:var(--bad)}.sheet p{margin:.3em 0}.sheet .tr b{color:#ffb4ab}.sheet .rs{color:var(--mute);font-size:.8rem}
+@keyframes in{from{opacity:0;transform:translateY(12px)}}
+.go{width:100%;padding:11px;border:0;border-radius:10px;background:linear-gradient(#ffd66b,#f2a93e);color:#2a1a10;font-family:'Alfa Slab One',serif;font-size:1rem;cursor:pointer;margin-top:8px;box-shadow:0 4px 0 #a96a12}
+.go:active{transform:translateY(3px);box-shadow:0 1px 0 #a96a12}
+.go.alt{background:#2a1e25;color:var(--ink);box-shadow:0 4px 0 #0008;border:1px solid #4a3a43}
+.go.pulse{animation:pl 1.3s infinite}@keyframes pl{50%{transform:scale(1.03);box-shadow:0 4px 0 #a96a12,0 0 22px #f2c14e}}
+.shake{animation:sh .45s}@keyframes sh{20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.row{display:grid;grid-template-columns:110px 1fr 40px;gap:8px;align-items:center;font-size:.85rem;margin:5px 0}
+.bar{height:8px;background:#3a2c33;border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--good));transition:width 1.2s}
+.bar.lowb i{background:var(--bad)}
+.note{color:var(--mute);font-size:.82rem}.box{border-left:3px solid var(--gold);padding:2px 10px;margin:8px 0;font-size:.88rem}.box.bd{border-color:var(--bad)}
+.box ul{margin:2px 0;padding-left:18px}
+#fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:95}
+.c{position:absolute;left:50%;top:38%;width:9px;height:14px;animation:fly 1.2s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(720deg);opacity:0}}
+.pop{position:absolute;left:50%;top:32%;transform:translateX(-50%);font-family:'Alfa Slab One',serif;font-size:2.3rem;animation:up 1.3s ease-out forwards;text-shadow:0 3px 0 #000a;white-space:nowrap}
+@keyframes up{from{opacity:0;transform:translate(-50%,20px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.2)}to{opacity:0;transform:translate(-50%,-90px) scale(1)}}
+.bn{position:absolute;left:0;right:0;top:40%;text-align:center;font-family:'Alfa Slab One',serif;font-size:2rem;color:var(--gold);text-shadow:0 4px 0 #000a;animation:bn 1.4s forwards}
+.bn small{display:block;font-family:'Instrument Sans',sans-serif;font-size:.9rem;color:#fff;text-shadow:none}
+@keyframes bn{0%{transform:translateX(-100%);opacity:0}25%{transform:none;opacity:1}75%{opacity:1}100%{transform:translateX(100%);opacity:0}}
+#how{position:fixed;right:0;top:46%;z-index:45;writing-mode:vertical-rl;padding:14px 7px;background:var(--gold);color:#2a1a10;border:0;border-radius:10px 0 0 10px;font:inherit;font-weight:600;font-size:.82rem;cursor:pointer;box-shadow:-3px 3px 12px #0008}
+.ov{position:fixed;inset:0;z-index:70;background:#000d;display:none;place-items:center;padding:16px}.ov.on{display:grid}
+.ovc{background:var(--panel);border:2px solid var(--gold);border-radius:18px;padding:18px;max-width:440px;width:100%;max-height:88vh;overflow-y:auto;font-size:.9rem}
+.ovc h2{margin:0 0 8px;font-size:1.4rem;color:var(--gold)}.ovc ol{padding-left:20px;margin:6px 0}.ovc li{margin:5px 0}
+.fin{position:fixed;inset:0;z-index:75;background:#000e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:16px}
+.fin small{color:var(--mute);font-size:1rem}.fin .num{font-size:5rem;color:var(--gold);text-shadow:0 0 30px #f2c14e88}
+.fin .rk{font-size:1.8rem;min-height:2.4rem;color:#fff;animation:in .3s}.fin .rk.stamp{color:var(--good);animation:stamp .5s}
+@keyframes stamp{from{transform:scale(2.6) rotate(-8deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+.sl{margin:4px 0 0}#rg{width:100%;height:30px;accent-color:var(--gold);margin:0;cursor:pointer}
+.tk{display:flex;justify-content:space-between;font-size:.58rem;color:var(--mute);padding:0 4px}.sv{text-align:center;font-size:.8rem;color:var(--mute)}.sv b{color:var(--gold);font-size:1.05rem}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.tags span{background:#2a1e25;border:1px solid var(--gold);border-radius:14px;padding:2px 10px;font-size:.78rem}
+.fit{text-align:center;font-family:'Alfa Slab One',serif;font-size:1rem;padding:6px;border-radius:10px;margin:6px 0}.fit.y{background:#14402b;color:var(--good)}.fit.n{background:#4a1d1a;color:var(--bad)}.fit.m{background:#4a3a1a;color:var(--gold)}
+.gauge{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,#3b7fe0,#5fe39a,#f2c14e,#ff6b5e);margin:14px 0 4px}.gauge i{position:absolute;top:-5px;width:4px;height:20px;background:#fff;border-radius:2px;box-shadow:0 0 8px #fff}
+.gl{display:flex;justify-content:space-between;font-size:.62rem;color:var(--mute)}
+.bets{display:flex;align-items:flex-end;gap:3px;height:48px}.bets i{flex:1;border-radius:3px 3px 0 0}
+.h4{font-size:.74rem;color:var(--mute);margin:10px 0 2px;text-transform:uppercase;letter-spacing:.05em}
+#app{position:relative;z-index:1}
+body::before,body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:30;opacity:0;transition:opacity .4s}
+body::before{box-shadow:inset 0 0 110px 20px #ff2a1a}body.tense::before{opacity:.55;animation:thr 1s infinite}@keyframes thr{50%{opacity:.15}}
+body::after{box-shadow:inset 0 0 90px 10px #ff8a1f}body.hot::after{opacity:.5;animation:fire 1.4s infinite}body.inf::after{box-shadow:inset 0 0 120px 24px #ff3b8a;opacity:.7;animation:fire 1s infinite}@keyframes fire{50%{opacity:.25}}
+#bg{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}#bg i{position:absolute;bottom:-40px;width:4px;height:4px;border-radius:50%;background:#f2c14e;opacity:0;animation:dust linear infinite}
+#bg i.su{width:auto;height:auto;background:none;color:#fff;border-radius:0}@keyframes dust{10%{opacity:var(--o,.6)}to{transform:translateY(-110vh) translateX(var(--x));opacity:0}}
+#vg{position:fixed;inset:0;pointer-events:none;z-index:35;background:radial-gradient(circle at 50% 72%,transparent var(--vr),#000e 100%);opacity:0;transition:opacity .5s}#vg.on{opacity:1}
+#fl{position:fixed;inset:0;pointer-events:none;z-index:79;opacity:0}@keyframes fl{from{opacity:.5}to{opacity:0}}
+.stack{display:inline-flex;margin-left:12px;vertical-align:middle}.stack i{width:12px;height:12px;border-radius:50%;margin-left:-4px;border:2px dashed #fffa;box-shadow:0 2px 2px #0009;transition:.25s}
+.stack i:nth-child(4n+1){background:#d84a4a}.stack i:nth-child(4n+2){background:#e0b12e}.stack i:nth-child(4n+3){background:#3b7fe0}.stack i:nth-child(4n){background:#2a2a2a}.stack i.up{transform:translateY(-9px);box-shadow:0 0 10px var(--gold)}
+.table.heat{animation:heat 1s infinite}@keyframes heat{50%{box-shadow:inset 0 0 0 3px #f2c14e55,inset 0 0 60px #000b,0 0 36px #ff6a1f}}
+.sv.allin{color:var(--bad);animation:pl .6s infinite}.sv.allin b{color:var(--bad)}
+.say{animation:pp .4s}@keyframes pp{from{transform:scale(.85) translateY(10px);opacity:0}}
+#ops .act{animation:dl .5s backwards}#ops .act:nth-child(2){animation-delay:.12s}#ops .act:nth-child(3){animation-delay:.24s}@keyframes dl{from{transform:translateY(40px) rotate(-4deg);opacity:0}}
+.hero{font-size:2rem;line-height:1.1;margin-top:8px;text-align:center;background:linear-gradient(90deg,#f2c14e,#fff,#f2c14e);background-size:200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 3s linear infinite}@keyframes shine{to{background-position:200%}}
+.emo{position:absolute;left:50%;top:-6px;font-size:1.4rem;z-index:4;animation:emo 1.4s forwards}@keyframes emo{from{transform:translate(-50%,10px) scale(.4);opacity:0}20%{opacity:1;transform:translate(-50%,-6px) scale(1.2)}to{transform:translate(-50%,-38px);opacity:0}}
+.fc{position:absolute;width:14px;height:14px;border-radius:50%;border:3px dashed #fffa;transition:transform .7s cubic-bezier(.3,.7,.4,1);box-shadow:0 2px 4px #000a}
+.cn{position:absolute;top:-30px;animation:cn 1.9s ease-in forwards}@keyframes cn{to{transform:translateY(110vh) rotate(540deg)}}
+.qt{color:var(--gold);font-style:italic}
+.act{position:relative;overflow:hidden;background:linear-gradient(135deg,#34262e,#221820);box-shadow:0 4px 10px #0007;will-change:transform}
+.act>span{position:relative;z-index:1}
+.act::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,#ffffff33,transparent);transform:skewX(-20deg);animation:sheen 3.6s infinite}
+.act:nth-child(2)::after{animation-delay:.7s}.act:nth-child(3)::after{animation-delay:1.4s}@keyframes sheen{0%,55%{left:-60%}100%{left:130%}}
+.cs{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-style:normal;font-size:1.7rem;opacity:.22}
+@keyframes dl{0%{transform:perspective(600px) rotateY(-90deg) translateY(30px);opacity:0}60%{transform:perspective(600px) rotateY(12deg);opacity:1}100%{transform:none}}
+.act.lock{transform:translateY(-4px) scale(1.03);box-shadow:0 0 24px #fff7}
+.act.right{animation:cwin .8s;box-shadow:0 0 28px #5fe39aaa}@keyframes cwin{40%{transform:scale(1.07) rotate(-1deg)}}
+.act.wrong{animation:sh .45s;filter:saturate(.7)}
+.act:disabled:not(.right):not(.wrong):not(.lock):not(.spot){transform:scale(.97);opacity:.4}
+.sp{position:absolute;font-size:16px;animation:spk .9s forwards}@keyframes spk{to{transform:translate(var(--dx),var(--dy)) scale(.2) rotate(180deg);opacity:0}}
+#ops{display:grid;grid-template-columns:repeat(3,minmax(0,150px));justify-content:center;gap:10px;margin-top:10px;padding-bottom:6px}
+.act.pc{display:block;width:100%;margin:0;padding:0;background:none;border:0;border-radius:10px;height:clamp(140px,23vh,180px);perspective:700px;overflow:visible;transform:rotate(var(--r));box-shadow:0 8px 14px #000a;pointer-events:none}
+#ops.rdy .act.pc{pointer-events:auto}
+.act.pc::after{content:"";display:none;animation:none;background:none;left:auto;top:-10px;right:-8px;width:30px;height:30px;border-radius:50%;transform:none;position:absolute;place-items:center;font-size:1rem;color:#fff;z-index:3}
+.act.pc.right::after{content:"✓";display:grid;background:#2fbf71}.act.pc.wrong::after{content:"✗";display:grid;background:#e5483c}
+#ops .act.pc{animation:cdeal .5s backwards;animation-delay:calc(var(--i)*.15s)}
+@keyframes cdeal{from{transform:translate(0,-190px) rotate(-30deg) scale(.4);opacity:0}}
+.act.pc .in{position:absolute;inset:0;transform-style:preserve-3d;animation:cf .7s both;animation-delay:calc(.45s + var(--i)*.15s)}
+@keyframes cf{from{transform:rotateY(180deg)}to{transform:rotateY(0)}}
+.pc .fr,.pc .bk{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.pc .fr{background:linear-gradient(160deg,#fffdf6,#efe4cc);color:#2a1a22;display:flex;align-items:center;justify-content:center;padding:26px 7px;text-align:center;font-size:clamp(.66rem,2.6vw,.8rem);line-height:1.28;font-weight:600;overflow:hidden}
+.pc .fr span{position:relative;z-index:1}
+.pc .bk{transform:rotateY(180deg);background:repeating-linear-gradient(45deg,#8c1c26 0 6px,#a8222e 6px 12px);border:3px solid #f7f0e2;display:grid;place-items:center;color:#f2c14e;font-size:2.2rem}
+.pc .ix{position:absolute;left:6px;top:4px;font-size:.8rem;line-height:1;text-align:center}.pc .ix.b{left:auto;top:auto;right:6px;bottom:4px;transform:rotate(180deg)}
+.pc .wm{position:absolute;font-style:normal;font-size:4.4rem;opacity:.08}
+.act.pc.spot{transform:translateY(-12px) scale(1.05);background:none;box-shadow:0 0 28px #f2c14e}.act.pc.spot .fr{outline:3px solid #f2c14e}
+.act.pc.lock{transform:translateY(-8px) scale(1.04);box-shadow:0 0 26px #fff}
+.act.pc.right{box-shadow:0 0 30px #5fe39a;background:none}.act.pc.right .fr{outline:3px solid #2fbf71}
+.act.pc.wrong{background:none;box-shadow:0 0 22px #ff6b5e}.act.pc.wrong .fr{outline:3px solid #e5483c;filter:saturate(.6)}
+.act.pc:disabled:not(.right):not(.wrong):not(.lock):not(.spot){transform:scale(.95);opacity:.45}
+.table{padding:6px 10px 6px}.table::before{content:"";position:absolute;inset:5px;border:2px solid #f2c14e44;border-radius:inherit;pointer-events:none}
+.potrow{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:2px 0}
+.pile{display:flex;align-items:flex-end;gap:3px;width:100px;height:58px;justify-content:center}
+.co{display:flex;flex-direction:column-reverse}.co i{display:block;width:24px;height:6px;border-radius:50%;border:1px dashed #fffb;margin-top:-1px;box-shadow:0 1px 1px #0009}
+.pile.bet .co i{box-shadow:0 0 8px var(--gold)}
+.potc{text-align:center;min-width:120px}.potc small{display:block;letter-spacing:.3em;font-size:.62rem;color:#bfe3d0}
+.potc b{display:block;font-size:2.4rem;line-height:1.05;color:var(--gold);text-shadow:0 0 18px #f2c14ecc,0 3px 0 #0008;animation:br 2.4s infinite}@keyframes br{50%{transform:scale(1.05)}}
+.potc b.hit{animation:hitp .9s;color:#b8ffd6}.potc b.hurt{animation:sh .6s;color:var(--bad)}@keyframes hitp{40%{transform:scale(1.4);text-shadow:0 0 30px #5fe39a}}
+.table .tk{color:#bfe3d0}.table .sv{color:#fff;font-size:.78rem}.table .pay{color:#d6efe2;min-height:28px;margin:2px 0 0}.table .meter{font-size:1.3rem;line-height:1}
+.hn{display:inline-block;margin-right:6px;font-style:normal;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:#8a6a2a}
+.act.pc{height:clamp(130px,21vh,170px)}
+.pw{display:flex;gap:6px;margin-top:6px}.pwb{flex:1;padding:5px 2px;background:#2a1e25;border:1px solid var(--gold);border-radius:18px;color:var(--ink);font:inherit;font-size:.7rem;cursor:pointer}
+.pwb.on{background:#1d3a66;border-color:#6fb7ff;box-shadow:0 0 12px #6fb7ff;animation:pl 1s infinite}.pwb.used{opacity:.35;text-decoration:line-through;cursor:default}
+.sc{color:var(--gold);font-size:.62rem}.dl{position:absolute;left:50%;top:-4px;font-style:normal;font-size:.7rem;font-weight:700;animation:emo 1.8s forwards;z-index:4}.dl.up{color:#9dffc4}.dl.dn{color:#ff9a90}
+.act.pc.burn{opacity:.2!important;filter:grayscale(1);pointer-events:none;animation:burn .8s forwards}@keyframes burn{40%{filter:brightness(1.6) sepia(1) saturate(4);transform:scale(1.08)}to{transform:translateY(16px) scale(.85) rotate(8deg)}}
+.act.pc{height:clamp(120px,19vh,160px)}
+.rail{position:relative;--f:.22;--c:#5fe39a;--rot:0deg;background:linear-gradient(#1c1217,#0c0709);border:1px solid #f2c14e99;border-radius:14px;padding:20px 14px 3px;margin:6px 0 2px;box-shadow:inset 0 2px 8px #000c,0 0 12px var(--c)}
+.rail.ai{animation:ai .5s infinite}@keyframes ai{50%{box-shadow:inset 0 2px 8px #000c,0 0 28px #ff3b30}}
+.table .sv{display:none}
+#rg{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:0;position:relative;z-index:2;cursor:grab;touch-action:none;display:block}#rg:active{cursor:grabbing}#rg:disabled{cursor:default}
+#rg::-webkit-slider-runnable-track{height:12px;border-radius:6px;background:linear-gradient(90deg,var(--c) calc(15px + (100% - 30px)*var(--f)),#2a1d24 0);box-shadow:inset 0 2px 4px #000c,0 0 10px var(--c)}
+#rg::-moz-range-track{height:12px;border-radius:6px;background:linear-gradient(90deg,var(--c) calc(15px + (100% - 30px)*var(--f)),#2a1d24 0);box-shadow:inset 0 2px 4px #000c,0 0 10px var(--c)}
+#rg::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;margin-top:-9px;background:transparent;border:0}#rg::-moz-range-thumb{width:30px;height:30px;background:transparent;border:0}
+#chp{position:absolute;z-index:3;width:30px;height:30px;border-radius:50%;pointer-events:none;left:calc(29px + (100% - 58px)*var(--f));top:35px;transform:translate(-50%,-50%) rotate(var(--rot)) scale(var(--sc,1));background:repeating-conic-gradient(#fff 0 12deg,var(--c) 12deg 45deg);box-shadow:0 3px 6px #000c,0 0 16px var(--c);transition:left .12s,transform .18s}
+#chp::after{content:"$";position:absolute;inset:6px;border-radius:50%;background:#1a1014;color:var(--c);display:grid;place-items:center;font-family:'Alfa Slab One',serif;font-size:.7rem;border:2px solid #fff6}
+#chp::before{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--c);opacity:0}
+.rail.drag{--sc:1.3}.rail.drag #chp::before{animation:ring .7s infinite}@keyframes ring{from{transform:scale(.8);opacity:.9}to{transform:scale(1.7);opacity:0}}
+.rail:not(.moved) #chp{animation:nudge 1.2s infinite}@keyframes nudge{50%{margin-left:7px}}
+#bub{position:absolute;z-index:3;left:clamp(44px,calc(29px + (100% - 58px)*var(--f)),calc(100% - 44px));top:2px;transform:translateX(-50%);font-family:'Alfa Slab One',serif;font-size:.72rem;color:#1a1014;background:var(--c);padding:0 8px;border-radius:9px;white-space:nowrap;box-shadow:0 0 12px var(--c);pointer-events:none}
+#bub::after{content:"";position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-bottom:0;border-top-color:var(--c)}
+#bub.pop{animation:bp .25s}@keyframes bp{50%{transform:translateX(-50%) scale(1.25)}}
+.rail .tk{padding:0 7px;margin-top:1px}.tk span{min-width:18px;text-align:center;transition:.15s}.tk span.pass{color:var(--c)}.tk span.on{color:#fff;font-weight:700;transform:scale(1.4)}
+.tp{position:absolute;width:6px;height:6px;border-radius:50%;animation:tp .7s forwards}@keyframes tp{to{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+@property --vr{syntax:'<percentage>';inherits:false;initial-value:30%}
+#vg.on{animation:narrow 2.4s .4s forwards}@keyframes narrow{to{--vr:8%}}
+#sl{position:fixed;left:0;right:0;bottom:0;height:62%;pointer-events:none;z-index:34;background:radial-gradient(ellipse at 50% 85%,#f2c14e55,transparent 62%);opacity:0;transition:opacity .8s}#sl.on{opacity:.7}body.gold #sl.on,body.final #sl.on{opacity:1}
+#ops .act.pc{animation:cdeal .6s backwards;animation-delay:calc(var(--i)*.35s)}
+@keyframes cdeal{from{transform:translate(0,-260px) rotate(-45deg) scale(.4);opacity:0}65%{transform:translate(0,10px) rotate(5deg) scale(1.08);opacity:1}82%{transform:translate(0,-5px) rotate(-1deg) scale(.98)}}
+.act.pc .in{animation:cf .7s both;animation-delay:calc(1.35s + var(--i)*.15s)}
+.tv{animation:tv .25s}@keyframes tv{25%{transform:translateY(3px)}60%{transform:translateY(-1px)}}
+.rp{position:absolute;width:20px;height:8px;margin:-4px 0 0 -10px;border-radius:50%;border:2px solid #fff8;animation:rp .6s forwards}@keyframes rp{to{transform:scale(7,3);opacity:0}}
+body.lockin .act.pc:disabled:not(.lock){opacity:.15;transform:scale(.9) translateY(10px)}
+body.lockin .act.pc.lock{transform:translateY(-16px) scale(1.14);z-index:6;box-shadow:0 0 34px #fff}
+.slam{position:absolute;left:0;right:0;top:36%;text-align:center;font-family:'Alfa Slab One',serif;font-size:clamp(2rem,10vw,3.4rem);text-shadow:0 0 24px currentColor,0 5px 0 #000b;animation:sl .5s cubic-bezier(.2,.9,.3,1) both,slo .4s 1.1s forwards}
+.slam small{display:block;font-family:'Instrument Sans',sans-serif;font-size:1rem;color:#fff;text-shadow:none}
+@keyframes sl{from{transform:scale(3);filter:blur(10px);opacity:0}60%{filter:blur(0);opacity:1}to{transform:scale(1)}}@keyframes slo{to{opacity:0;transform:scale(1.1)}}
+#app.sk{animation:sh .45s}
+.vd{position:absolute;left:50%;top:34%;font-family:'Alfa Slab One',serif;font-size:clamp(1.3rem,7vw,2.3rem);padding:6px 16px;border:5px solid currentColor;border-radius:8px;white-space:nowrap;background:#000b;transform:translateX(-50%) rotate(-7deg);animation:stp .45s cubic-bezier(.2,1.4,.4,1) both,slo2 .4s 1.6s forwards}
+@keyframes stp{from{transform:translateX(-50%) rotate(-7deg) scale(3);opacity:0}to{transform:translateX(-50%) rotate(-7deg) scale(1);opacity:1}}@keyframes slo2{to{opacity:0}}
+body.allin::before{opacity:.5;animation:thr 1.2s infinite}
+body.allin .table{animation:redheat .8s infinite}@keyframes redheat{50%{box-shadow:inset 0 0 0 3px #ff3b3055,inset 0 0 60px #000b,0 0 44px #ff3b30}}
+body.allin .pile.bet .co i{animation:cpl .6s infinite alternate}@keyframes cpl{to{transform:translateY(-3px);box-shadow:0 0 10px #ff3b30}}
+.sb2{position:absolute;left:50%;top:100%;transform:translateX(-50%);z-index:5;background:#f7f0e2;color:#2a1a22;font-size:.62rem;line-height:1.2;padding:2px 7px;border-radius:9px;white-space:nowrap;animation:pp .3s;box-shadow:0 2px 6px #000a}
+.seat:first-child .sb2{left:0;transform:none}.seat:last-child .sb2{left:auto;right:0;transform:none}
+.pulse{animation:pls .5s}@keyframes pls{40%{transform:scale(1.4);filter:brightness(1.6)}}
+.bt{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:6px;white-space:nowrap;animation:btin .4s}.bt b{background:#000b;border-radius:10px;padding:1px 8px;font-size:.72rem}.bt b.up{color:#9dffc4}.bt b.dn{color:#ff9a90}@keyframes btin{from{opacity:0}}
+#bc{display:flex;align-items:center;gap:8px;margin-top:5px;font-size:.66rem}#bc small{min-width:98px;font-weight:600}
+.bcb{position:relative;flex:1;height:8px;border-radius:4px;background:linear-gradient(90deg,#b3261e,#f2c14e 50%,#2fbf71)}.bcb i#bcm{position:absolute;top:-4px;left:50%;width:6px;height:16px;margin-left:-3px;border-radius:3px;background:#fff;box-shadow:0 0 8px #fff;transition:left .6s}
+body.gold .table{filter:brightness(1.15) saturate(1.15)}body.cold .table{filter:brightness(.72) saturate(1.2) hue-rotate(-15deg)}
+body.cold{background:radial-gradient(circle at 50% 0,#2a1015,#0a0305 65%)}body.final{background:radial-gradient(circle at 50% 0,#1a0f14,#05030a 65%)}
+#app{transition:scale 30s linear}body.final #app{scale:1.035}
+#bg i.gd{display:none;width:5px;height:5px;background:#ffd66b;box-shadow:0 0 8px #ffd66b}body.gold #bg i.gd{display:block}body.cold #bg i{background:#a33}
+.table.ev{box-shadow:inset 0 0 0 3px #ffd66b,inset 0 0 60px #000b,0 0 34px #ffd66b}
+.act.pc.gold .fr{background:linear-gradient(160deg,#fff4c2,#e3b84a)}.act.pc.gold .bk{background:repeating-linear-gradient(45deg,#b8860b 0 6px,#e0b12e 6px 12px)}
+.act.pc{height:clamp(115px,18vh,155px)}
+
+#board{display:flex;align-items:center;gap:4px;margin:4px 0 0;padding:3px 6px;background:#190f14;border:1px solid #3a2c33;border-radius:12px}
+.bm{position:relative;flex:1;text-align:center;font-size:.56rem;color:var(--mute);line-height:1.1}.bf{display:block;font-size:1.2rem;transition:.3s}
+.bmb{display:block;height:4px;border-radius:2px;background:#3a2c33;margin:2px 6px 0;overflow:hidden}.bmb b{display:block;height:100%;transition:width .8s}
+.bti{font-size:.5rem;color:var(--gold);text-align:center;min-width:44px;letter-spacing:.06em}.bti b{display:block;font-size:1.05rem;color:#fff}
+.bm.bounce .bf{animation:bnc .7s}@keyframes bnc{30%{transform:scale(1.5) rotate(-8deg)}60%{transform:scale(.9)}}
+.vt{position:absolute;left:50%;top:-2px;font-style:normal;font-size:1.3rem;background:#000d;border-radius:50%;width:32px;height:32px;display:grid;place-items:center;z-index:3;transform:translateX(-50%);animation:spq .6s infinite linear}
+.vt.rv{animation:vpop .5s both}.vt.u{box-shadow:0 0 14px #5fe39a}.vt.d{box-shadow:0 0 14px #ff6b5e}
+@keyframes vpop{from{transform:translateX(-50%) scale(2.2) rotateY(180deg)}to{transform:translateX(-50%) scale(1)}}@keyframes spq{to{transform:translateX(-50%) rotateY(360deg)}}
+.table{height:clamp(190px,31vh,260px);margin:24px 6px 10px;padding:0;border-radius:50%/46%;border-width:9px}.table::before{border-radius:inherit}
+.seats{position:absolute;inset:0;display:block}.seat{position:absolute;transform:translate(-50%,-50%);width:62px;flex:none;z-index:2}
+.seat .av{animation:bob 3.2s ease-in-out infinite}.seat:nth-child(2n) .av{animation-delay:-1s}.seat:nth-child(3n) .av{animation-delay:-2s}@keyframes bob{50%{transform:translateY(-3px)}}
+.seat.on .av{animation:none}.seat.you .av{opacity:1;box-shadow:0 0 0 2px var(--gold)}
+#mid{position:absolute;left:50%;top:50%;transform:translate(-50%,-46%);width:80%;z-index:1}.pile{width:80px}
+#hero{position:absolute;left:0;right:0;top:50%;transform:translateY(-130%);z-index:2;margin:0;animation:shine 3s linear infinite,flick 6s infinite}@keyframes flick{93%{opacity:1}94%{opacity:.4}96%{opacity:1}97%{opacity:.6}}
+#sw{top:-16px;right:26px}
+.panel{margin-top:0;padding:4px 6px;border:0;background:none;overflow-y:auto}
+#ops{grid-template-columns:repeat(5,minmax(0,1fr));justify-content:stretch;gap:6px;margin-top:8px}#ops.intro{display:block}
+.act.pc{height:clamp(96px,15vh,128px)}
+#ops .act.pc{animation:cdeal .55s backwards;animation-delay:calc(var(--i)*.22s)}.act.pc .in{animation-delay:calc(1.25s + var(--i)*.1s)}
+.pc .fr{padding:20px 3px;font-size:clamp(.55rem,2.4vw,.7rem)}.pc .ix{font-size:.7rem}.pc .wm{font-size:3rem}
+.dock{margin-top:4px;background:linear-gradient(#241a20,#140e12);border:1px solid #4a3a43;border-radius:14px;padding:2px 10px 7px;box-shadow:0 -4px 14px #0008}
+.dock .rail{margin:6px 0 2px}.sv{display:none}.dock .pay{color:#d6efe2;min-height:22px;margin:2px 0 0;text-align:center;justify-content:center}.dock .meter{font-size:1.1rem;line-height:1}
+.pwb.lockd{opacity:.3}.pwb.shk{animation:sh .4s}.vd small{display:block;font-family:'Instrument Sans',sans-serif;font-size:.8rem;color:#fff;text-align:center}
+.sheet.push .big{color:var(--gold)}
+#bg .beam{position:absolute;left:50%;top:32%;width:150vmax;height:150vmax;margin:-75vmax 0 0 -75vmax;background:conic-gradient(from 0deg,transparent 0 8%,#f2c14e1c 10%,transparent 14% 50%,#f2c14e1c 52%,transparent 56%);animation:spn 24s linear infinite;pointer-events:none}@keyframes spn{to{transform:rotate(360deg)}}
+.row.sm{grid-template-columns:70px 1fr 34px}
+.cn2{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b0,#f2c14e 55%,#b8860b);border:2px solid #8a6a10;box-shadow:0 2px 3px #0008;opacity:0;animation:cfall 2s forwards}
+@keyframes cfall{0%{opacity:1;transform:translate(0,0) scaleX(1);animation-timing-function:cubic-bezier(.2,.7,.4,1)}35%{opacity:1;transform:translate(calc(var(--dx)*.6),var(--up)) scaleX(.2);animation-timing-function:cubic-bezier(.5,0,.9,.6)}70%{transform:translate(calc(var(--dx)*.85),calc(var(--fall)*.5)) scaleX(1)}100%{opacity:0;transform:translate(var(--dx),var(--fall)) scaleX(.3)}}
+.lb{position:fixed;inset:0;z-index:90;background:#000c;display:grid;place-items:center;padding:10px;animation:in .3s}
+.slotm{position:relative;width:min(430px,100%);background:linear-gradient(#b3121d,#7a0a12);border:4px solid #e8b94a;border-radius:26px 26px 14px 14px;padding:10px 12px 12px;box-shadow:0 0 40px #000,inset 0 0 30px #0006;animation:smin .6s cubic-bezier(.2,1.3,.4,1)}
+@keyframes smin{from{transform:scale(.3) rotate(-6deg);opacity:0}}
+.slt{text-align:center;font-size:2rem;color:#ffd24a;text-shadow:2px 2px 0 #a60010,0 0 14px #ff9a2a;letter-spacing:.04em;animation:glw 1s infinite alternate}@keyframes glw{to{text-shadow:2px 2px 0 #a60010,0 0 26px #ffd24a}}
+.sgn{position:relative;background:#080508;border:3px solid #e8b94a;border-radius:10px;text-align:center;padding:6px 0;margin:8px 0;color:#fff;font-size:1.25rem}
+.bulbs{position:absolute;left:4px;right:4px;height:6px;top:-3px;background:radial-gradient(circle,#ffe58a 0 2px,transparent 3px) 0 0/12px 6px repeat-x;animation:blk .8s steps(2) infinite}.bulbs.b2{top:auto;bottom:-3px;animation-delay:.4s}@keyframes blk{50%{opacity:.25}}
+.smain{display:flex;gap:8px;align-items:stretch;position:relative}
+.reels{flex:1.6;display:flex;gap:2px;background:#000;border:3px solid #e8b94a;border-radius:8px;overflow:hidden;position:relative}
+.reels::before{content:"";position:absolute;left:0;right:0;top:56px;height:56px;border-top:2px solid #f2c14e99;border-bottom:2px solid #f2c14e99;z-index:2;pointer-events:none}
+.reel{flex:1;height:168px;overflow:hidden;background:linear-gradient(90deg,#9aa6a8,#fff 40%,#9aa6a8);position:relative}
+.reel::after{content:"";position:absolute;inset:0;background:linear-gradient(#000a,transparent 32%,transparent 68%,#000a);pointer-events:none}
+.strip{position:absolute;left:0;right:0;top:0}.strip.spin{filter:blur(2px)}
+.strip i{display:block;height:56px;line-height:56px;text-align:center;font-style:normal;font-size:2rem}
+.s7{font-family:'Alfa Slab One',serif!important;font-size:2.5rem!important;background:linear-gradient(#fff2a0,#ff9a1f,#d04a00);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1px #7a2a00}
+.spanel{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+.cw{background:#0a0709;border:2px solid #e8b94a;border-radius:6px;padding:3px 8px}.cw small{display:block;color:#ffb83d;font-size:.62rem;letter-spacing:.06em}.cw b{font-size:1.1rem;color:#fff}
+.ln{background:#3a0508;border:2px solid #e8b94a;border-radius:6px;padding:4px 8px;font-size:.68rem;color:#fff}.ln p{margin:3px 0}.ln u{text-decoration:none;color:#ffb83d;font-weight:700}
+.spanel .go{margin-top:auto;padding:9px;font-size:1rem}.spanel .go:disabled{opacity:.6}
+.lev{position:relative;width:24px}.lev::before{content:"";position:absolute;left:9px;top:14px;width:6px;height:96px;background:linear-gradient(90deg,#667,#cde,#667);border-radius:3px}
+.lev i{position:absolute;left:1px;top:-4px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff9a9a,#c4121a 60%,#6a050a);box-shadow:0 3px 6px #000a;transition:transform .3s;cursor:pointer}.lev.pull i{transform:translateY(90px)}
+.ladder{display:flex;align-items:center;gap:6px;margin-top:10px;background:#2a0307;border:2px solid #e8b94a;border-radius:8px;padding:5px}
+.tiers{display:flex;gap:3px;flex:1}.tiers b{flex:1;text-align:center;background:#4a1a1e;border:2px solid #777;border-radius:6px;font-size:.78rem;padding:2px 0;color:#ccc}.tiers b small{display:block;font-size:.55rem;color:#999}
+.tiers b.on,.jp.on{background:#d01a1a;border-color:#ffd24a;color:#fff;box-shadow:0 0 12px #ff4a4a}
+.jp{flex:none;width:58px;height:58px;border-radius:50%;background:#4a4a4a;border:4px dotted #fff;color:#ccc;display:grid;place-items:center;font-size:.55rem;text-align:center;line-height:1.1;font-weight:700}
+.coin{position:absolute;left:50%;bottom:8px;width:4px;height:4px}
+.slotm.won{animation:smwin .5s 3}@keyframes smwin{50%{transform:scale(1.03)}}
+#app{max-width:none;margin:0;height:100dvh;padding:4px 14px 8px}
+.mute{font-size:1rem;padding:0 3px}
+.table{height:clamp(190px,33vh,340px);margin-bottom:40px}
+#sw{top:auto;right:auto;left:50%;bottom:-36px;transform:translateX(-50%);width:70px;height:70px;border:0;border-radius:50%;padding:0;flex-direction:column;align-items:center;justify-content:center;background:conic-gradient(#f2c14e calc(var(--p,100)*1%),#2a1d24 0);box-shadow:0 0 16px #f2c14e99,0 4px 10px #000a;z-index:6;animation:none}
+#sw::before{content:"";position:absolute;inset:6px;border-radius:50%;background:#120c10}
+#sw b,#sw small{position:relative}#sw b{font-family:'Alfa Slab One',serif;font-size:1.8rem;line-height:1;color:#fff;font-weight:400}#sw small{font-size:.5rem;letter-spacing:.2em;color:var(--mute)}
+#sw.low{background:conic-gradient(#ff3b30 calc(var(--p,100)*1%),#3a1010 0);box-shadow:0 0 24px #ff3b30,0 4px 10px #000a;animation:swp 1s infinite}#sw.low b{color:#ff9a90}
+@keyframes swp{50%{transform:translateX(-50%) scale(1.15)}}
+.act.pc{height:clamp(92px,16vh,190px)}
+@media(min-width:900px){html{font-size:19px}.seat{width:90px}.seat .av{width:40px;height:40px}.pile{width:110px}}
+@media(min-width:1400px){html{font-size:22px}}
+#app{overflow-y:auto;overflow-x:hidden}#app>*{flex-shrink:0}
+.say{font-size:1.02rem;margin:4px 0 8px}.say::before{display:none}
+.panel{flex:none;overflow:visible}.panel.rep{overflow:visible}
+.table{height:clamp(150px,24vh,300px)}
+.pwb{transition:box-shadow .3s}.pwb:not(.used):not(.lockd):not(.on){box-shadow:0 0 9px #f2c14e77}
+.pwb.on{animation:lg 1.6s ease-in-out infinite;background:#1d3a66;border-color:#9dc7ff}
+@keyframes lg{0%,100%{box-shadow:0 0 8px #6fb7ff88}50%{box-shadow:0 0 22px 4px #9dc7ff}}
+#ops.mc{grid-template-columns:repeat(2,minmax(0,1fr))}#ops.mc .act.pc{height:clamp(70px,11vh,96px)}
+.mc .pc .fr{font-size:clamp(.66rem,2.8vw,.82rem);padding:12px 20px 10px}
+@media(min-width:760px){#ops.mc{grid-template-columns:repeat(4,minmax(0,1fr))}#ops.mc .act.pc{height:clamp(110px,16vh,150px)}}
+.rl{margin:7px 0}.rl b{color:var(--gold)}.ovc .two{display:grid;grid-template-columns:auto 1fr;gap:3px 10px}
+#say{position:relative;padding-top:14px}
+.deck{position:absolute;right:14px;top:0;width:34px;height:46px;z-index:0}
+.deck i{position:absolute;inset:0;border-radius:5px;border:2px solid #f7f0e2;background:repeating-linear-gradient(45deg,#8c1c26 0 4px,#a8222e 4px 8px);box-shadow:0 2px 3px #000a}
+.deck i:nth-child(2){transform:translate(2px,-2px) rotate(3deg)}.deck i:nth-child(3){transform:translate(-1px,-4px) rotate(-3deg)}
+.say.qd{position:relative;z-index:1;transform-origin:100% 0;animation:qdeal 1s cubic-bezier(.2,.8,.3,1) both}
+@keyframes qdeal{0%{transform:translate(0,-14px) scale(.1,.2) rotate(8deg);opacity:0}15%{opacity:1}60%{transform:scale(1.04) rotate(-1deg)}100%{transform:none}}
+.bhint{font-size:.72rem;color:var(--mute);text-align:center;margin:6px 0 0;line-height:1.3}.bhint b{color:var(--gold)}
+.bm.sus{z-index:5;animation:sus .3s infinite alternate;filter:drop-shadow(0 0 10px #fff)}@keyframes sus{to{filter:drop-shadow(0 0 18px #fff)}}
+.say.qd{animation:none;opacity:0}.say.qd.in{opacity:1;animation:pp .4s}
+.qbig{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:16px;background:#000b;pointer-events:none}
+.qc{width:min(92vw,560px);background:#f7f0e2;color:#2a1a22;border:3px solid var(--gold);border-radius:18px;padding:22px 20px;font-size:clamp(1.15rem,4.6vw,1.7rem);font-weight:600;line-height:1.35;text-align:center;box-shadow:0 0 40px #f2c14e99}
+.qc .hn{display:block;margin-bottom:8px}.qc p{margin:0}
+#ops.mc .act.pc{height:clamp(104px,15vh,135px)}.mc .pc .fr{font-size:clamp(.62rem,2.5vw,.78rem);padding:12px 18px 10px}
+
+/* --- UX polish: Hot Seat --- */
+@keyframes cf{0%{transform:rotateY(180deg)}62%{transform:rotateY(-12deg) translateZ(26px)}82%{transform:rotateY(5deg)}100%{transform:rotateY(0)}}
+.dfly{position:fixed;right:auto;bottom:auto;margin:0;z-index:96;box-shadow:0 0 14px var(--gold)}
+.table::after{content:"";position:absolute;inset:-5px;border-radius:inherit;pointer-events:none;z-index:0;box-shadow:0 0 40px 8px var(--aura,#4a8dff);opacity:.5;transition:box-shadow .9s;animation:aura 3.2s ease-in-out infinite}
+@keyframes aura{50%{opacity:.85}}
+.pf{position:absolute;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle,#fff6c0,#f2c14e 55%,#f2c14e00 75%);box-shadow:0 0 12px #f2c14e;pointer-events:none}
+@property --c{syntax:'<color>';inherits:true;initial-value:#5fe39a}
+.rail{transition:--c .35s ease}
+@keyframes jit{0%{translate:0 0}25%{translate:1px -1px}50%{translate:-1px 1px}75%{translate:1px 1px}100%{translate:0 0}}
+body.allin #app:not(.sk){animation:jit .16s linear infinite}
+@media(prefers-reduced-motion:reduce){body.allin #app,.table::after{animation:none!important}.rail{transition:none}}
+@keyframes fl{from{opacity:.1}to{opacity:0}}
+.table::after{opacity:.3;animation:none;box-shadow:0 0 26px 4px var(--aura,#4a8dff)}
+body.gold .table{filter:none}
+#sl,#fl{display:none!important}
+body::before,body::after{animation:none!important}
+body.tense::before{opacity:.22}body.hot::after{opacity:.16}body.inf::after{opacity:.22}body.allin::before{opacity:.25}
+.table.heat,body.allin .table,.table.ev{animation:none!important}
+.qc{box-shadow:0 0 0 #0000}
+.go.pulse,.pill{animation:none!important}
+
+/* --- Two-column layout (laptops, tablets, landscape) --- */
+.cols{display:contents}.colL,.colR{display:contents}
+@media(min-width:640px){
+#app{overflow:hidden;padding:4px 18px 10px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:16px;flex:1;min-height:0}
+.colL,.colR{display:flex;flex-direction:column;min-height:0;min-width:0}
+.colR{overflow-y:auto;overflow-x:hidden;padding:2px 4px 4px 0}
+.colL{justify-content:center;gap:10px}
+.colL #board{order:2;margin:0}
+.colL .table{order:1;height:clamp(230px,52vh,520px);margin:18px 8px 54px;flex:none}
+.colR #say{flex:none}
+.colR .panel{flex:none;padding:2px 0}
+.colR .dock{margin-top:auto;flex:none}
+#ops{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+#ops.mc{grid-template-columns:repeat(2,minmax(0,1fr))}
+.act.pc{height:clamp(110px,20vh,170px)}
+#ops.mc .act.pc{height:clamp(84px,14vh,120px)}
+.pc .fr{padding:20px 5px;font-size:clamp(.6rem,1.05vw,.8rem)}
+.mc .pc .fr{padding:12px 20px 10px;font-size:clamp(.7rem,1.15vw,.88rem)}
+.say{font-size:clamp(.95rem,1.4vw,1.15rem)}
+#hero{transform:translateY(-120%)}
+}
+@media(min-width:640px) and (max-width:899px){
+.pc .fr{font-size:.62rem;padding:20px 3px}
+.colL .table{height:clamp(200px,40vh,380px)}
+}
+@media(min-width:640px) and (max-height:520px){
+.colL .table{height:clamp(150px,52vh,300px);margin:12px 8px 48px}
+.act.pc{height:clamp(84px,24vh,120px)}
+#ops.mc .act.pc{height:clamp(66px,17vh,90px)}
+.bhint{display:none}
+}
+
+@media(min-width:640px){
+.colR{padding-right:30px}
+.colR .panel{padding:10px 12px 4px}
+}
+@media(min-width:640px) and (max-height:520px){
+.say{font-size:.78rem;padding:6px 10px;margin:2px 0 4px}
+#say{padding-top:8px}
+.act.pc{height:clamp(70px,22vh,92px)}
+.pc .fr{padding:16px 2px;font-size:.54rem}
+.pc .wm{font-size:2rem}
+.colR .panel{padding:6px 10px 2px}
+.dock{padding:0 8px 4px}.dock .rail{padding-top:18px;margin:2px 0}
+.dock .pay{min-height:16px;font-size:.68rem}
+.pwb{padding:3px 2px;font-size:.62rem}.pw{margin-top:3px}
+.colL .table{height:clamp(140px,48vh,260px)}
+}
+</style></head><body><div id="bg"></div><div id="app">
+<div class="hud"><div class="lv"><span id="lvn"></span><div id="dots"></div></div><div class="stat" id="stk"><b>x0</b>streak</div><div class="stat"><b id="chips">1000</b>chips <button class="mute" id="mu" aria-label="Toggle sound">🔊</button> <button class="mute" id="mm" aria-label="Toggle music">🎵</button> <button class="mute" id="fsb" aria-label="Full screen">⛶</button></div></div>
+<div class="cols"><div class="colL"><div id="board"></div>
+<div class="table" id="table"><div id="sw" style="display:none"></div><div class="seats" id="seats"></div><div id="hero" class="hero disp">THE HOT SEAT</div><div id="mid"><div class="potrow"><div class="pile" id="pp"></div><div class="potc"><small>THE POT</small><b class="disp" id="pv">$1000</b></div><div class="pile bet" id="bp"></div></div></div></div></div>
+<div class="colR"><div id="say"></div>
+<div class="panel" id="panel"><div id="ops"></div></div>
+<div class="dock" id="dock" style="display:none"><p class="bhint"><b>Bet first.</b> Drag the chip, then tap a card. Right wins your bet, wrong loses it. Bigger bet, bigger swing.</p><div class="sl rail" id="rail"><div id="bub"></div><div id="chp"></div><input type="range" id="rg" min="10" max="100" step="10" value="30" aria-label="Stake percentage"><div class="tk"><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span><span>60</span><span>70</span><span>80</span><span>90</span><span>100</span></div><div class="sv" id="sv"></div></div><div class="pay" id="py"></div>
+<div class="pw"><button class="pwb" data-w="ins">🛡 Insurance</button><button class="pwb" data-w="time">⏱ +10s</button><button class="pwb" data-w="ask">📣 Ask the Board</button></div></div></div></div></div>
+<button id="how" aria-label="How to play">How to play</button>
+<div class="ov" id="ov"><div class="ovc"><h2 class="disp">How to play</h2>
+<div class="rl"><b>Goal.</b> Play 30 hands. Finish with chips and a CFO-fit verdict.</div>
+<div class="h4">Every hand</div><ol><li><b>Read the question.</b> The clock (under the table) gives 10 seconds on statements, 20 on puzzles, 40 on dilemmas. Run out and you lose your stake.</li><li><b>Set your bet.</b> Drag the chip from 10% to 100% of your pot (100% is ALL IN). Your bet is locked when you tap a card.</li><li><b>Tap a card.</b> Five board members vote. Most for you: <b>win</b> your stake. Split: <b>push</b>, stake back. Most against: <b>lose</b> it.</li></ol>
+<div class="h4">Three kinds of question</div><div class="two"><b>18</b><span>Statements. Rate how true each is of you. Some are asked twice from different angles, so just answer honestly.</span><b>4</b><span>IQ puzzles. One answer is right.</span><b>8</b><span>CFO dilemmas. Several options are defensible; pick the best. One is a half-credit push.</div>
+<div class="h4">Boosts</div><div class="two"><b>🔥</b><span>3 wins in a row pays 1.5x, 6 pays 2x, and opens a Lucky Bonus slot machine.</span><b>🛡</b><span>Insurance: a loss costs half, a win pays 25% less.</span><b>⏱</b><span>+10 seconds.</span><b>📣</b><span>Ask the Board: a lean on statements, or removes one wrong card on puzzles and dilemmas.</span></div>
+<p class="note">Lifelines: once each per game, one per hand, after the cards are face-up.</p><button class="go" id="cl">Got it</button></div></div>
+<div id="sl"></div><div id="vg"></div><div id="fl"></div><div id="fx"></div>
+<script>
+function s(f,d=.12,t='sine',v=.07,w=0,mu=0){if(!snd_on||(mu&&!mus))return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;const a=AC.currentTime+w;g.gain.setValueAtTime(v,a);g.gain.exponentialRampToValueAtTime(.001,a+d);o.connect(g);g.connect(AC.destination);o.start(a);o.stop(a+d)}catch(e){}}
+function noise(d=.05,f=6000,v=.05,w=0,ty='highpass',mu=0){if(!snd_on||(mu&&!mus))return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const b=AC.createBuffer(1,Math.max(1,AC.sampleRate*d|0),AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1;const n=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain(),t=AC.currentTime+w;n.buffer=b;fl.type=ty;fl.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);n.connect(fl);fl.connect(g);g.connect(AC.destination);n.start(t)}catch(e){}}
+function burst(n,cols=['#f2c14e','#5fe39a','#ff9d3d','#fff']){for(let i=0;i<n;i++){const e=document.createElement('i');e.className='c';e.style.background=cols[i%cols.length];e.style.setProperty('--dx',(Math.random()*500-250)+'px');e.style.setProperty('--dy',(Math.random()*300+80)+'px');$('fx').appendChild(e);setTimeout(()=>e.remove(),1300)}}
+function pop(t,c){const e=document.createElement('div');e.className='pop';e.textContent=t;e.style.color=c;$('fx').appendChild(e);setTimeout(()=>e.remove(),1400)}
+function banner(t,u=''){const e=document.createElement('div');e.className='bn';e.innerHTML=t+(u?'<small>'+u+'</small>':'');$('fx').appendChild(e);setTimeout(()=>e.remove(),1400)}
+function tween(a,b,cb){const t0=performance.now();(function f(t){const p=Math.min(1,(t-t0)/800);cb(Math.round(a+(b-a)*p));if(p<1)requestAnimationFrame(f)})(t0)}
+function spark(el,c='#f2c14e'){if(!el)return;const r=el.getBoundingClientRect();for(let i=0;i<12;i++){const e=document.createElement('span');e.className='sp';e.textContent='✦';e.style.cssText=`left:${r.left+r.width/2}px;top:${r.top+r.height/2}px;color:${c};--dx:${Math.cos(i*.52)*(60+Math.random()*80)}px;--dy:${Math.sin(i*.52)*(30+Math.random()*40)}px`;$('fx').appendChild(e);setTimeout(()=>e.remove(),900)}}
+function flash(c){const f=$('fl');f.style.background=c;f.style.animation='none';f.offsetWidth;f.style.animation=RMo?'none':'fl .35s'}
+function rain(n,src){const el=src||$('pv'),r=el.getBoundingClientRect(),ox=r.left+r.width/2,oy=r.top+r.height/2,H=(typeof innerHeight=='number'?innerHeight:700);
+ for(let i=0;i<n;i++){const e=document.createElement('i');e.className='cn2';e.style.left=ox+'px';e.style.top=oy+'px';e.style.setProperty('--dx',(Math.random()*280-140)+'px');e.style.setProperty('--up',(-(120+Math.random()*200))+'px');e.style.setProperty('--fall',(H-oy+40)+'px');e.style.animationDelay=(Math.random()*1.1)+'s';e.style.animationDuration=(1.5+Math.random()*.6)+'s';$('fx').appendChild(e);setTimeout(()=>e.remove(),3400);if(i%4==0)coinPing(Math.random()*1.2)}}
+function slam(t,c='#fff',sub=''){const e=document.createElement('div');e.className='slam';e.style.color=c;e.innerHTML=t+(sub?'<small>'+sub+'</small>':'');$('fx').appendChild(e);s(70,.3,'sine',.25);noise(.25,500,.1,0,'lowpass');setTimeout(()=>e.remove(),1500)}
+function shakeApp(){const a=$('app');a.classList.remove('sk');void a.offsetWidth;a.classList.add('sk');setTimeout(()=>a.classList.remove('sk'),500)}
+function riser(d){if(!snd_on)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type='sawtooth';o.frequency.setValueAtTime(90,t);o.frequency.exponentialRampToValueAtTime(700,t+d);g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(.06,t+d);g.gain.linearRampToValueAtTime(.001,t+d+.1);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+.2)}catch(e){}}
+function say2(i,em,t){const el=$('seats').children[i];if(!el)return;const x=document.createElement('span');x.className='sb2';x.innerHTML='<b>'+em+'</b> '+t;el.appendChild(x);setTimeout(()=>x.remove(),2300)}
+function react(i,t){const el=$('seats').children[i];if(!el)return;const x=document.createElement('span');x.className='emo';x.textContent=t;el.appendChild(x);setTimeout(()=>x.remove(),1500)}
+function fly2(a,b,n=8){if(!a||!b)return;const A=a.getBoundingClientRect(),B=b.getBoundingClientRect(),ax=A.left+A.width/2,ay=A.top+A.height/2,bx=B.left+B.width/2-ax,by=B.top+B.height/2-ay;
+ for(let i=0;i<n;i++){const e=document.createElement('i');e.className='fc';e.style.left=ax+'px';e.style.top=ay+'px';e.style.background=CC[i%4];e.style.transition='transform .28s ease-out';$('fx').appendChild(e);const ox=Math.random()*90-45,oy=-30-Math.random()*50;
+  setTimeout(()=>{e.style.transform=`translate(${ox}px,${oy}px) rotate(200deg)`},20+i*40);
+  setTimeout(()=>{e.style.transition='transform .6s cubic-bezier(.5,0,.8,.4)';e.style.transform=`translate(${bx}px,${by}px) rotate(700deg) scale(.6)`},360+i*60);
+  setTimeout(()=>{s(1700+Math.random()*700,.04,'triangle',.04);e.remove();if(i==n-1){b.classList.add('pulse');setTimeout(()=>b.classList.remove('pulse'),500)}},1000+i*60)}}
+function startMus(){if(mlt)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}const go=()=>{const t=document.body.classList.contains('tense'),k=st16%16,b=BASS[k];
+ if(b)s(b,.22,'triangle',.06,0,1);if(k%4==0)s(62,.12,'sine',.09,0,1);if(k%2==1)noise(.03,7000,.012,0,'highpass',1);if(k==0||k==10)CH[(st16>>4)%2].forEach(f=>s(f,.5,'sine',.012,0,1));
+ if(k==0&&document.body.classList.contains('cold'))s(41,.6,'sine',.07,0,1);if(k==8&&document.body.classList.contains('gold'))s(1047,.12,'triangle',.02,0,1);st16++;mlt=setTimeout(go,60000/((96+((Math.min(idx,29)/6)|0)*7+((t||document.body.classList.contains('allin'))?18:0)+(document.body.classList.contains('final')?10:0))*4))};go()}
+function trail(){const r=$('chp').getBoundingClientRect(),c=$('rail').style.getPropertyValue('--c');for(let i=0;i<5;i++){const e=document.createElement('i');e.className='tp';e.style.cssText=`left:${r.left+r.width/2}px;top:${r.top+r.height/2}px;background:${c};--dx:${Math.random()*60-30}px;--dy:${-20-Math.random()*50}px`;if(pctSel>=100){e.textContent='🔥';e.style.background='none';e.style.width='auto'}$('fx').appendChild(e);setTimeout(()=>e.remove(),700)}}
+function bindRail(){const g=$('rg'),r=$('rail'),off=()=>r.classList.remove('drag');g.addEventListener('pointerdown',()=>{r.classList.add('drag','moved');s(600,.05,'triangle',.05)});['pointerup','pointercancel','blur'].forEach(v=>g.addEventListener(v,off));window.addEventListener('pointerup',off)}
+function railFx(){const f=(pctSel-10)/90,c=pctSel>=100?'#ff3b30':pctSel>=70?'#ff8a3d':pctSel>=40?'#f2c14e':'#5fe39a',r=$('rail'),b=$('bub');r.style.setProperty('--f',f);r.style.setProperty('--c',c);r.style.setProperty('--rot',pctSel*14+'deg');r.classList.toggle('ai',pctSel>=100);document.body.classList.toggle('allin',pctSel>=100);if(pctSel>=100){if(!aiT)aiT=setInterval(beat,1100)}else{clearInterval(aiT);aiT=0}b.textContent=pctSel>=100?'🔥 ALL IN 🔥':pctSel+'% · $'+stake;b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');document.querySelectorAll('.tk span').forEach((e,i)=>{e.classList.toggle('on',i*10+10==pctSel);e.classList.toggle('pass',i*10+10<pctSel)})}
+function piles(rev){const T=chips<=0?0:Math.min(36,Math.max(4,Math.ceil(chips/40))),b=rev?0:Math.round(T*pctSel/100),col=(n,c)=>{let o='';const per=Math.ceil(n/c);for(let j=0;j<c;j++){const m=Math.min(per,n-j*per);if(m<=0)break;o+='<span class="co">'+Array.from({length:m},(_,i)=>`<i style="background:${CC[(i+j)%4]}"></i>`).join('')+'</span>'}return o};$('pp').innerHTML=col(T-b,4);$('bp').innerHTML=col(b,2)}
+function stakes(){stake=pctSel>=100?chips:Math.min(chips,Math.max(10,Math.round(chips*pctSel/1000)*10));$('rg').value=pctSel;railFx();document.querySelectorAll('#stk2 i').forEach((e,i)=>e.classList.toggle('up',i<pctSel/10));$('sv').classList.toggle('allin',pctSel>=100);$('table').classList.toggle('heat',pctSel>=70);$('sv').innerHTML=`YOUR BET <b>$${stake}</b> · ${pctSel}% of the pot${pctSel==100?' · ALL IN':''}`;
+ $('py').innerHTML=`Right: <b class="g">&nbsp;+$${gainFor(stake)}&nbsp;</b>${mult()>1?'('+mult()+'x streak)':''} &nbsp;·&nbsp; Wrong: <b class="b">&nbsp;-$${lossFor(stake)}</b>${insOn?' 🛡':''}`;piles()}
+var qT0=Date.now();function clock(sec){qT0=Date.now();dlg=Date.now()+sec*1000;clearInterval(tm);$('sw').style.display='flex';const u=()=>{const lim=sec>10?10:5,r=Math.max(0,Math.ceil((dlg-Date.now())/1000));swSet(r,sec);$('sw').className=r<=lim?'low':'';document.body.classList.toggle('tense',r<=lim&&r>0);if(r<=lim&&r>0&&r!=lr){beat();if(r<=5)s(880,.06,'square',.06)}lr=r;if(r<=0){clearInterval(tm);pick(-1)}};lr=99;u();tm=setInterval(u,250)}
+function rivals(){const o=RC;RC=RC.map((c,i)=>{const b=Math.max(10,Math.round(c*(.1+Math.random()*.35)/10)*10);return Math.max(50,c+(Math.random()<RP[i]?b:-b))});RD=RC.map((c,i)=>c-o[i]);RDc=RD.slice()}
+function rivalFly(){const ch=$('seats').children,g=[],l=[];RDc.forEach((d,i)=>{d>0?g.push(i):d<0&&l.push(i)});g.forEach((gi,j)=>fly2(l.length?ch[l[j%l.length]]:$('pv'),ch[gi],4));
+ const top=RDc.map((d,i)=>[SEATS[i][0],d]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,3),e=document.createElement('div');e.className='bt';e.innerHTML=top.map(([n,d])=>`<b class="${d>0?'up':'dn'}">${n} ${d>0?'+':''}${d}</b>`).join('');e.style.top=($('table').getBoundingClientRect().bottom-4)+'px';$('fx').appendChild(e);setTimeout(()=>e.remove(),2800)}
+function thud(i){const t=$('table');t.classList.remove('tv');void t.offsetWidth;t.classList.add('tv');const c=document.querySelectorAll('.act')[i];if(!c)return;const r=c.getBoundingClientRect(),e=document.createElement('i');e.className='rp';e.style.left=(r.left+r.width/2)+'px';e.style.top=(r.bottom-6)+'px';$('fx').appendChild(e);setTimeout(()=>e.remove(),700)}
+function think(){clearInterval(thT);thT=setInterval(()=>{if(done)return;const o=Q[idx].o;let i;do{i=Math.random()*6|0}while(i==o);const m=pctSel>=70?[['😬',"That's risky."],['🤨','You sure?']]:[['😏','Confident?'],['🤨','Interesting...'],['🙄','Hmm.']],p=m[Math.random()*m.length|0];say2(i,p[0],p[1])},3000)}
+function lead(){let m=0;RC.forEach((c,i)=>{if(c>RC[m])m=i});return m}
+function pickEV(){EV=null;if(idx>0&&idx<27&&idx-lastEv>2&&Math.random()<.3){EV=EVS[Math.random()*4|0];lastEv=idx}}
+function EVfx(){$('table').classList.toggle('ev',!!EV);if(!EV)return;setTimeout(()=>{slam(EV.n,'#ffd66b','Bonus payouts live');[392,523,659,784,1047].forEach((f,i)=>s(f,.2,'square',.05,i*.09))},700);document.querySelectorAll('.act').forEach(b=>b.classList.add('gold'));$('mid').querySelector('.potc small').textContent=EV.n}
+function finalFx(){if(idx==27)setTimeout(()=>{document.body.classList.add('final');slam('FINAL TABLE','#f2c14e','3 HANDS REMAIN');[262,330,392,523].forEach((f,i)=>s(f,.3,'sawtooth',.05,i*.12))},1500);else if(idx==28)setTimeout(()=>banner('2 HANDS REMAIN'),1500);else if(idx==29)setTimeout(()=>banner('LAST HAND'),1500)}
+function tableHTML(){const ft=[...SEATS.map((p,i)=>[p[0],RC[i]]),['YOU',chips]].sort((a,b)=>b[1]-a[1]),mx=Math.max(...ft.map(x=>x[1]),1),pl=ft.findIndex(x=>x[0]=='YOU')+1;
+ setTimeout(()=>document.querySelectorAll('.ft i').forEach(b=>b.style.width=b.dataset.w+'%'),150);
+ return `<div class="h4">Final table: you finished #${pl} of 7 ${pl==1?'👑':''}</div>`+ft.map((x,i)=>{const me=x[0]=='YOU';return `<div class="row" style="grid-template-columns:80px 1fr 56px"><span style="${me?'color:var(--gold);font-weight:600':''}">${i+1}. ${x[0]}</span><div class="bar ft"><i data-w="${Math.round(x[1]/mx*100)}" style="${me?'background:var(--gold)':''}"></i></div><b>$${x[1]}</b></div>`}).join('')}
+const EVS=[{n:'⚡ HIGH STAKES HAND',w:1.5,l:1},{n:'⚡ BOARD SHOWDOWN',w:1.25,l:1,b:2},{n:'⚡ AUDIT CRISIS',w:1.25,l:1.25},{n:'⚡ QUARTER-END REVIEW',w:1,l:1,f:150}];
+
+const $=i=>document.getElementById(i);
+const SEATS=[["Chirag","CEO","C","#d9702f"],["Dev","Controller","D","#3f78d8"],["Anjali","Sales","A","#c93f7e"],["Vikram","Plant","V","#2f9c6a"],["Meera","Treasury","M","#8b57cc"],["Director","Board","B","#b8901c"]];
+const POS=[[50,2],[17,13],[83,13],[3,56],[97,56],[16,92]];
+const TIER=["Warm-up","Pressure round","Heat round","Showdown","Final round"],R=["Junior Analyst","Senior Analyst","Finance Controller","VP Finance","Chief Financial Officer"];
+const DIMS=['INT','PEO','VIS','RIG','RSK','IQ','ETH'],OWN={INT:0,PEO:1,VIS:2,RIG:3,RSK:4,IQ:3,ETH:0,SD:0},SH={INT:'Integrity',PEO:'People',VIS:'Vision',RIG:'Rigor',RSK:'Resilience',IQ:'IQ puzzle',ETH:'Decision',SD:'Candour'},DN={INT:'Integrity',PEO:'People & EQ',VIS:'Vision & influence',RIG:'Analytical rigor',RSK:'Resilience & risk',IQ:'Reasoning (IQ)',ETH:'Decision judgement'},BD=['Chair','HR','Investor','Audit','Risk'];
+const L=['Strongly disagree','Disagree','Neutral','Agree','Strongly agree'],SU=['♣','♦','♠','♥','★'],CC=['#d84a4a','#e0b12e','#3b7fe0','#2a2a2a'],RP=[.62,.58,.5,.55,.5,.6];
+const BASS=[55,0,0,82,0,65,0,0,73,0,0,82,0,98,0,73],CH=[[220,262,330,392],[196,247,294,370]];
+const QC=["Now that's a CFO answer.","Hmm. I'm impressed.","I like your honesty.","That's why we're talking."],QW=["Ouch. The board noticed.","That one will cost you.","Careful. The room is watching.","Not what I hoped to hear."],QP=["Fair. I need to see more."];
+const LK=(d,o,i,q,lo,hi,ok,pr,rv)=>({d,o,i,q,lo,hi,ok,pr,rv}),SD=(o,q)=>({d:'SD',o,i:2,q,lo:'',hi:'claims implausible perfection',ok:'a candid self-view'}),
+DC=(o,q,m,c,p,ex,src)=>({d:'ETH',o,i:3,t:40,q,m,c,p,lo:'chose a weaker judgement call',hi:'chose a weaker judgement call',ex,src}),
+IQ=(o,q,m,c,ex,src)=>({d:'IQ',o,i:3,q,m,c,lo:'missed the reasoning trap',hi:'missed the reasoning trap',ex,src});
+const LQ=[null,
+LK('INT',0,2,"I sometimes soften a bad number in the first draft so the conversation stays constructive.",'','softens bad news','honest framing of bad news','P1',1),
+LK('INT',0,4,"I would escalate a questionable accounting call even if I could not prove it was wrong.",'stays silent without proof','','willingness to escalate','P1',0),
+LK('INT',5,2,"When loyalty to my team and company policy clash, loyalty wins.",'','puts loyalty above policy','policy over loyalty','',0),
+LK('PEO',1,2,"I find it hard to give blunt feedback to senior colleagues I like.",'','avoids hard feedback','direct feedback','P2',1),
+LK('PEO',1,4,"I give direct, critical feedback to people I am close to without much hesitation.",'softens or avoids feedback','','direct candour','P2',0),
+LK('PEO',2,2,"Disagreement in my team usually slows us down more than it helps.",'','treats dissent as friction','values productive dissent','',0),
+LK('VIS',2,2,"I am more comfortable defending the numbers than proposing where the business should go.",'','scorekeeper over strategist','strategic partnership','P3',1),
+LK('VIS',0,4,"I regularly bring the CEO strategic options nobody asked me for.",'reactive, not strategic','','proactive strategic input','P3',0),
+LK('VIS',4,3,"When presenting to the board, being accurate matters more to me than being persuasive.",'prioritises persuasion over accuracy','accuracy without influence','','',0),
+LK('RIG',3,2,"When my forecast is wrong, it is usually because circumstances changed, not because my assumptions were off.",'','blames circumstances','owns forecast errors','P4',1),
+LK('RIG',3,4,"When a forecast misses, I first look for what was wrong in my own assumptions.",'defends own assumptions','','owns forecast errors','P4',0),
+LK('RIG',1,3,"I would delay a decision to get better data even if a competitor moves first.",'decides ahead of evidence','slow, analysis-bound','balance of speed and evidence','',0),
+LK('RSK',4,2,"A decision that turns out badly keeps me awake even when the process was sound.",'','ruminates on outcomes','steady under outcome risk','P5',1),
+LK('RSK',4,4,"I judge a decision by its process and information, not by how it turned out.",'results-driven judgement','','process-based judgement','P5',0),
+LK('RSK',3,4,"I am comfortable making a major call with about 70% of the information I would like.",'needs near-certainty','','decisive under ambiguity','',0)],
+S1=SD(0,"I have never felt annoyed when a colleague challenged my numbers."),S2=SD(1,"I have never taken credit for work that was partly someone else's."),S3=SD(5,"I have never been tempted to cut a corner when I thought nobody would notice."),
+I1=IQ(3,"A bat and a ball cost $1.10 together. The bat costs $1.00 more than the ball. How much does the ball cost?",['10 cents','5 cents','1 cent','15 cents'],1,'Ball 5c, bat $1.05. Most people blurt 10c.','Frederick 2005, Cognitive Reflection Test'),
+I2=IQ(1,"If 5 machines take 5 minutes to make 5 widgets, how long would 100 machines take to make 100 widgets?",['100 minutes','50 minutes','5 minutes','20 minutes'],2,'Each machine makes one widget in 5 minutes, so 100 machines make 100 in 5.','Frederick 2005, Cognitive Reflection Test'),
+I3=IQ(4,"Complete the series: 2, 6, 12, 20, 30, ?",['38','40','42','44'],2,'The gaps grow 4, 6, 8, 10, so the next gap is 12: 42.','ICAR-style number series, Condon & Revelle 2014'),
+I4=IQ(2,"In a town of 1,000, 500 are choir members, 100 of them men. Of the 500 non-members, 300 are men. A man is picked at random. What is the chance he is a choir member?",['25%','20%','50%','80%'],0,'100 choir men out of 400 men in total is 25%.','Berlin Numeracy Test, Cokely et al. 2012'),
+D1=DC(4,"Capital for one project only. A: NPV $4.0M, IRR 14%, payback 6 years. B: NPV $2.5M, IRR 22%, payback 2 years. WACC is 9%. The CEO likes B's quick win. Which do you back?",['B: the higher IRR and faster payback cut risk','A: it adds more value at a 9% cost of capital','B, then recycle the cash into later projects','Defer both until the next budget cycle'],1,2,'For mutually exclusive projects NPV, not IRR, measures value added. B wins only if capital stays scarce.','Corporate-finance NPV rule (Brealey, Myers & Allen)'),
+D2=DC(0,"A customer worth 18% of revenue hints it may switch suppliers. Nothing is confirmed. The investor call is Thursday and analysts will ask about demand.",['Say nothing until confirmed; answer only what is asked','Brief two key analysts privately so they are not surprised','Take it to the disclosure committee and counsel before Thursday','Quietly raise the receivables reserve and move on'],2,0,'Disclosure belongs in a formal process. Silence can be defensible, but private briefings breach Reg FD and a quiet reserve hides the risk.','SEC Regulation FD; disclosure-committee practice'),
+D3=DC(2,"The board wants 8% cost out this year. The fastest route is laying off 60 people in the unit that feeds next year's growth. Other routes take longer.",['Lay off the 60: certain savings, target hit this year','Cut every budget 8%: simple and fair','Freeze hiring and defer plant maintenance','Cut the lowest-return programmes first and show a path to 8% in two quarters'],3,1,'Cuts should follow return, not speed or fairness. Deferring maintenance only moves cost into future risk.','Strategy-linked budgeting (Kaplan & Norton); COSO ERM'),
+D4=DC(5,"An analyst privately says the VP Sales may be booking revenue early on two deals. She has no proof. The VP is close to the CEO.",['Report it to the audit committee as suspected fraud now','Ask internal audit to review the two contracts quietly first','Ask the VP Sales for his version','Wait for the external auditors to test it at year-end'],1,0,'A proportionate, confidential fact check protects the company and the person accused, with escalation if it holds up.','IMA Statement of Ethical Professional Practice; COSO'),
+D5=DC(1,"The CEO wants guidance of 12% growth. Your base case is 9% and 12% has about a 25% chance. Missing guidance has cost the stock around 15% before.",['Guide 12% and label it a stretch','Guide 11% as a compromise','Guide a 9-10% range and explain the assumptions','Give no numeric guidance this year'],2,3,'Guide to what you can deliver with high probability. Compromises and stretch labels still invite a miss.','Ben-David, Graham & Harvey 2013 (CFO overconfidence)'),
+D6=DC(4,"Covenant headroom is 8% and would fall to 3% if sales soften. The bank offers an amendment now for a 50bp fee. Waiting may be free, but a breach would hand the bank leverage.",['Wait and track headroom monthly','Cut capex now to protect headroom','Raise equity to repay part of the debt','Take the amendment now and pay the fee'],3,1,'The fee is cheap insurance bought while you have leverage. Cutting capex trades growth for the same protection.','Treasury risk practice; COSO ERM'),
+D7=DC(0,"Close is tomorrow. A $300k inventory variance (0.2% of revenue) is unexplained. The board pack goes out in 12 hours.",['Send the pack with the variance disclosed as unreconciled and under review','Book it to a suspense account so the pack is clean','Delay the pack a day to finish the reconciliation','Adjust cost of sales so the numbers tie'],0,2,'Small and unresolved is disclosed, not hidden. A short delay is acceptable, but the board needs the facts on time.','SOX s.302 certification; IMA Statement'),
+D8=DC(3,"Your best treasury analyst holds the bank relationships. She says she will leave unless promoted over two more senior colleagues.",['Offer a retention bonus and a dated, criteria-based path to promotion','Promote her now; losing the relationships costs more','Refuse and accept she may leave','Promote her and give the two seniors raises'],0,1,'Pay for the retention risk, not the ultimatum. A criteria-based path protects fairness and the relationships.','Procedural-justice research (Colquitt 2001)');
+const Q=[1,4,'I1',7,3,'D1',10,13,'S1',6,'I2','D2',9,2,'D3',12,'S2','D4',5,'I3',15,8,'D5','D6',11,'I4',14,'S3','D7','D8'].map(x=>typeof x=='number'?LQ[x]:({I1,I2,I3,I4,D1,D2,D3,D4,D5,D6,D7,D8,S1,S2,S3})[x]);
+const GAPT={INT:"Integrity is the gate for a CFO. Your answers showed room to bend under pressure.",PEO:"People skills lagged. A CFO has to build trust and psychological safety, not just be right.",VIS:"Influence lagged. The CFO seat is a strategic partner, not a scorekeeper.",RIG:"Analytical discipline lagged. Watch overconfidence and gut-over-evidence calls.",RSK:"Resilience and risk judgement lagged. Balance decisiveness, calm and buy-in.",IQ:"Reasoning slipped on the puzzles. Slow down and test the first answer that feels right.",ETH:"Judgement slipped on the dilemmas. Strong CFOs weigh disclosure, value and people together, not just the safest-sounding option."};
+const AR={Steward:['INT','RIG','Guardian of trust and accuracy. Boards sleep well with you; stretch into storytelling and influence.'],Catalyst:['PEO','VIS','Turns people and vision into momentum. Make sure rigour backs the energy.'],Strategist:['VIS','RSK','Shapes direction and takes smart risks. Anchor it with evidence and process.'],Operator:['RIG','RSK','Disciplined, calm and efficient. Stretch into inspiring others and shaping strategy.']};
+let bonusTotal=0,chips,idx,streak,best,res,stake,pctSel=30,done,bust,tm,thT,dt,aiT=0,PW,hl='',insOn,used,RC=[],RD=[],RDc=[],BT=[50,50,50,50,50],lost=0,EV=null,lastEv=-9,VD='',dlg,lr=0,snd_on=true,mus=true,mlt=null,st16=0,AC,AMB;
+const win=()=>{[523,659,784,1047].forEach((f,i)=>s(f,.22,'triangle',.1,i*.08));ding(1568,.35);for(let i=0;i<6;i++)coinPing(.4+i*.07);noise(.5,6000,.05,.1)},
+lose=()=>{glide(400,120,.9,'sawtooth',.06);[330,311,294,262].forEach((f,i)=>s(f,.32,'sawtooth',.05,i*.22));boom()},
+beat=()=>{s(62,.14,'sine',.22);s(52,.16,'sine',.17,.17)},whoosh=()=>sweep(400,4000,.6,.08),
+applause=d=>{for(let i=0;i<d*14;i++)noise(.04,2500+Math.random()*3000,.035,Math.random()*d)},
+gasp=()=>{noise(.45,1400,.07,0,'bandpass');s(220,.35,'sawtooth',.03,.05)},
+shuffle=()=>{for(let i=0;i<12;i++)noise(.05,3000+Math.random()*2500,.05,i*.06)};
+const mult=()=>streak>=6?2:streak>=3?1.5:1,gainFor=v=>Math.round(v*mult()*(insOn?.75:1)*(EV?EV.w:1))+(EV&&EV.f?EV.f:0),lossFor=v=>Math.round((insOn?v/2:v)*(EV&&EV.l?EV.l:1));
+const face=t=>t>=75?'😄':t>=55?'🙂':t>=40?'😐':t>=25?'😟':'😠',inst=o=>$('ov').classList.toggle('on',o);
+function glide(f0,f1,d,ty='sine',v=.08,w=0){if(!snd_on)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+w;o.type=ty;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
+function sweep(f0,f1,d,v=.06,w=0){if(!snd_on)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const b=AC.createBuffer(1,Math.max(1,AC.sampleRate*d|0),AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1;const n=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain(),t=AC.currentTime+w;n.buffer=b;f.type='bandpass';f.Q.value=3;f.frequency.setValueAtTime(f0,t);f.frequency.exponentialRampToValueAtTime(f1,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);n.connect(f);f.connect(g);g.connect(AC.destination);n.start(t)}catch(e){}}
+const ding=(f=1046,w=0)=>{s(f,.5,'sine',.09,w);s(f*1.5,.4,'sine',.04,w);s(f*2,.3,'sine',.02,w)},buzz=(w=0)=>{glide(150,90,.35,'sawtooth',.07,w);glide(155,95,.35,'square',.03,w)},clink=()=>{s(2400+Math.random()*500,.05,'triangle',.05);noise(.03,7000,.04)},boom=()=>{glide(140,38,.6,'sine',.3);noise(.35,500,.12,0,'lowpass');s(190,.1,'square',.05)},coinPing=w=>s(2200+Math.random()*900,.06,'triangle',.03,w),click=()=>{s(520,.03,'square',.035);noise(.02,5000,.03)};
+function swSet(r,tot){const e=$('sw');e.innerHTML='<b>'+r+'</b><small>SEC</small>';e.style.setProperty('--p',Math.max(0,Math.min(100,r/tot*100)))}
+function goFs(){try{const e=document.documentElement;if(!document.fullscreenElement&&!document.webkitFullscreenElement){const p=(e.requestFullscreen||e.webkitRequestFullscreen).call(e);if(p&&p.catch)p.catch(()=>{})}}catch(x){}}
+function amb(){if(AMB||!AC)return;try{const b=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1;const n=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();n.buffer=b;n.loop=true;f.type='lowpass';f.frequency.value=420;g.gain.value=.018;n.connect(f);f.connect(g);g.connect(AC.destination);n.start();AMB=g}catch(e){}}
+function ambSet(){if(AMB)AMB.gain.value=(snd_on&&mus)?.018:0}
+function typeIt(id,t){const e=$(id);if(!e)return;let i=0;const iv=setInterval(()=>{if($(id)!==e){clearInterval(iv);return}e.textContent=t.slice(0,++i);if(i%3==0)s(1300+Math.random()*300,.012,'square',.012);if(i>=t.length)clearInterval(iv)},Math.max(8,900/t.length))}
+function hud(){const i=Math.min(idx,Q.length-1);$('dots').innerHTML=Q.map((_,j)=>{const r=res[j];return '<i style="background:'+(r?(r.diff<=1?'var(--good)':r.diff==2?'var(--gold)':'var(--bad)'):(j==i?'#fff':'#4a3a43'))+'"></i>'}).join('');$('lvn').innerHTML=`<b>${TIER[i/6|0]}</b> · you're #${1+RC.filter(c=>c>chips).length} at the table`;$('stk').className='stat'+(streak>=2?' hot':'');$('stk').innerHTML=`<b>${streak>=2?'🔥 ':''}${streak}${mult()>1?' · '+mult()+'x':''}</b>streak`;$('chips').textContent=chips;const b=document.body.classList;b.toggle('hot',streak>=3&&streak<6);b.toggle('inf',streak>=6);b.toggle('gold',streak>=2);b.toggle('cold',lost>=2)}
+function seats(on){const mx=Math.max(...RC,chips);$('seats').innerHTML=SEATS.map((p,i)=>`<div class="seat ${i===on?'on':''}" style="left:${POS[i][0]}%;top:${POS[i][1]}%"><div class="av" style="background:${p[3]}">${p[2]}${i===on?'<span class="dbtn">D</span>':''}</div>${RC[i]>=mx?'👑':''}${p[0]}<br><b class="sc">$${RC[i]}</b>${RD[i]?`<i class="dl ${RD[i]>0?'up':'dn'}">${RD[i]>0?'+':''}${RD[i]}</i>`:''}</div>`).join('')+`<div class="seat you" style="left:84%;top:92%"><div class="av" style="background:var(--gold);color:#2a1a10;font-size:.6rem">YOU</div><b class="sc">$${chips}</b></div>`;RD=[]}
+function board(){$('board').innerHTML=BD.map((n,i)=>`<div class="bm" id="bm${i}"><span class="bf">${face(BT[i])}</span>${n}<i class="bmb"><b style="width:${BT[i]}%;background:${BT[i]>=55?'var(--good)':BT[i]>=35?'var(--gold)':'var(--bad)'}"></b></i></div>`).join('')+`<div class="bti">BOARD TRUST<b>${Math.round(BT.reduce((a,b)=>a+b,0)/5)}</b></div>`}
+function trust(own,diff){const ch=[12,8,-3,-10,-14][diff],m=EV&&EV.b||1;BT=BT.map((t,i)=>Math.max(0,Math.min(100,t+Math.round((i==own?ch:ch*.25)*m))));return ch}
+function votes(diff,own,cb){const o=[0,1,2,3,4].filter(i=>i!=own).sort(()=>Math.random()-.5);let v=Array(5).fill('🤔');
+ if(diff<=1){v[own]='👍';(diff==0?o:o.slice(0,3)).forEach(i=>v[i]='👍')}else if(diff==2){o.slice(0,2).forEach(i=>v[i]='👍');o.slice(2,4).forEach(i=>v[i]='👎')}else{v[own]='👎';o.forEach(i=>v[i]='👎');if(diff==3)v[o[0]]='👍'}
+ document.querySelectorAll('.bm').forEach(m=>m.insertAdjacentHTML('beforeend','<em class="vt">❔</em>'));
+ const U=[],D=[],ord=[],T=[250,650,1100,1600,2400];let fu=0,fd=0;v.forEach((x,i)=>(x=='👍'?U:D).push(i));U.sort(()=>Math.random()-.5);
+ while(U.length||D.length){if(D.length)ord.push(D.pop());if(U.length)ord.push(U.pop())}
+ setTimeout(()=>{const e=$('bm'+ord[4]);if(e)e.classList.add('sus');const m=$('mt');if(m)m.textContent='LAST VOTE...';s(60,.5,'sine',.2);riser(.5)},T[4]-600);
+ ord.forEach((i,n)=>setTimeout(()=>{const x=v[i],e=document.querySelector('#bm'+i+' .vt');if(e){e.className='vt rv '+(x=='👍'?'u':x=='👎'?'d':'m');e.textContent=x}if(x=='👍'){fu++;ding(880+n*110)}else if(x=='👎'){fd++;buzz()}else s(330,.12,'triangle',.06);const m=$('mt');if(m)m.textContent='FOR '+fu+' · AGAINST '+fd;beat();if(n==3)shakeApp();if(n==4){const b=$('bm'+i);if(b)b.classList.remove('sus')}},T[n]));
+ setTimeout(()=>cb(v.filter(x=>x=='👍').length,v.filter(x=>x=='👎').length),T[4]+300)}
+function bsay(i,em,t){const el=$('bm'+i);if(!el)return;const x=document.createElement('span');x.className='sb2';x.innerHTML='<b>'+em+'</b> '+t;el.appendChild(x);setTimeout(()=>x.remove(),3200)}
+function pwr(){document.querySelectorAll('.pwb').forEach(b=>{const w=b.dataset.w;b.classList.toggle('used',!PW[w]&&w!=hl);b.classList.toggle('on',w==hl);b.classList.toggle('lockd',!!hl&&w!=hl)})}
+function usePw(w){if(done||idx>=Q.length||!$('ops').classList.contains('rdy')){s(150,.1,'square',.05);return}
+ if(hl||!PW[w]){s(150,.1,'square',.05);const b=document.querySelector('.pwb[data-w="'+w+'"]');if(b){b.classList.add('shk');setTimeout(()=>b.classList.remove('shk'),400)}return}
+ const q=Q[idx];hl=w;PW[w]=0;used[w]++;
+ if(w=='ins'){insOn=true;pop('SHIELD UP','#6fb7ff');whoosh();s(440,.2,'triangle',.08);stakes()}
+ else if(w=='time'){dlg+=10000;pop('+10 SECONDS','var(--gold)');[660,880].forEach((x,i)=>s(x,.15,'triangle',.08,i*.1))}
+ else{if(q.m){const w=[0,1,2,3].filter(j=>j!=q.c&&j!=q.p),j=w[Math.random()*w.length|0],cb=document.querySelectorAll('.act')[j];if(cb)cb.classList.add('burn');bsay(OWN[q.d],'🧐','Not '+'ABCD'[j]+'.')}else bsay(OWN[q.d],'🧐',q.i>=4?'I lean towards AGREE.':q.i<=2?'I lean towards DISAGREE.':'I lean NEUTRAL.');pop('BOARD STEER','#9dc7ff');[523,659].forEach((x,i)=>s(x,.18,'sine',.07,i*.12))}
+ pwr()}
+function intro(){clearInterval(tm);clearInterval(thT);clearTimeout(dt);clearInterval(aiT);aiT=0;document.body.classList.remove('tense','hot','inf','allin','gold','cold','final','lockin');$('sl').classList.remove('on');document.querySelectorAll('.sheet').forEach(e=>e.remove());
+ $('panel').className='panel';chips=1000;idx=0;streak=0;best=0;res=[];stake=0;pctSel=30;bust=false;done=true;PW={ins:1,time:1,ask:1};insOn=false;hl='';used={ins:0,time:0,ask:0};RC=[1000,1000,1000,1000,1000,1000];RD=[];BT=[50,50,50,50,50];lost=0;EV=null;lastEv=-9;VD='';bonusTotal=0;
+ $('dock').style.display='none';$('hero').style.display='block';$('sw').style.display='none';hud();seats(0);board();$('pv').textContent='$1000';piles(1);
+ $('say').innerHTML=`<p class="say"><b>Chirag (CEO):</b> The CFO chair is open. Thirty hands: leadership statements, IQ puzzles and judgement calls with no obvious answer. Bet on yourself, and the Board votes on every answer.</p>`;
+ $('ops').className='intro';$('ops').innerHTML=`<button class="go pulse" id="dealb">DEAL ME IN</button><button class="go alt" onclick="inst(true)">How to play</button>`;$('dealb').onclick=()=>{goFs();startMus();amb();ambSet();shuffle();deal()}}
+function deal(){const q=Q[idx];done=false;insOn=false;hl='';pickEV();$('hero').style.display='none';$('dock').style.display='block';$('mid').querySelector('.potc small').textContent='THE POT';$('rg').disabled=false;
+ seats(q.o);hud();board();pwr();stakes();
+ $('say').innerHTML=`<div class="deck"><i></i><i></i><i></i></div><p class="say qd"><i class="hn">Hand ${idx+1} · ${SH[q.d]}</i><b>${SEATS[q.o][0]} (${SEATS[q.o][1]}):</b> “<span id="tw">${q.q}</span>” <em>${q.m?'Pick the best answer.':'How true is this of you?'}</em></p>`;qBig(q);
+ $('app').scrollTop=0;$('ops').className=q.m?'mc':'';$('ops').innerHTML=(q.m?q.m:L).map((t,k)=>{const su=SU[k],c=(su=='♦'||su=='♥')?'#c4281c':'#1a1014';return `<button class="act pc" data-k="${k}" style="--i:${k};--r:${[-6,-3,0,3,6][k]}deg"><div class="in"><div class="bk">♠</div><div class="fr"><b class="ix" style="color:${c}">${k+1}<br>${su}</b><em class="wm" style="color:${c}">${su}</em><span>${t}</span><b class="ix b" style="color:${c}">${k+1}<br>${su}</b></div></div></button>`}).join('');
+ document.querySelectorAll('.act').forEach(b=>b.onclick=()=>pick(+b.dataset.k));
+ idx%6==0?(banner(TIER[idx/6|0],idx?'Pressure builds':'Good luck'),[392,494,587].forEach((f,i)=>s(f,.2,'triangle',.06,i*.1))):banner('HAND '+(idx+1));
+ [0,1,2,3,4].forEach(i=>{setTimeout(()=>{sweep(1500,5000,.14,.07);s(95,.14,'sine',.16);thud(i)},450+i*220);sweep(3000,7000,.1,.05,1.3+i*.1);s(1800,.03,'square',.03,1.4+i*.1)});
+ setTimeout(()=>{$('sl').classList.add('on');s(520,.2,'triangle',.06)},1300);EVfx();finalFx();
+ $('sw').style.display='flex';$('sw').className='';swSet(Q[idx].t||(Q[idx].m?20:10),Q[idx].t||(Q[idx].m?20:10));const me=idx;clearTimeout(dt);dt=setTimeout(()=>{if(idx==me&&!done){$('ops').classList.add('rdy');clock(Q[idx].t||(Q[idx].m?20:10));think()}},QH+800)}
+var QH=5200;function qBig(q){QH=Math.min(9500,Math.max(5200,2500+q.q.length*30));const sy=$('say'),card=sy.querySelector('.say'),dk=sy.querySelector('.deck'),vw=innerWidth,vh=innerHeight,d=dk.getBoundingClientRect(),w=document.createElement('div');w.className='qbig';
+w.innerHTML='<div class="qc"><i class="hn">'+card.querySelector('.hn').textContent+'</i><p><span id="qbt"></span></p></div>';document.body.appendChild(w);
+const c=w.firstChild,dx=d.left+d.width/2-vw/2,dy=d.top+d.height/2-vh/2;
+sweep(800,3500,.3,.08);s(110,.12,'sine',.15,.45);
+w.animate([{opacity:0},{opacity:1}],{duration:400,fill:'forwards'});
+c.animate([{transform:`translate(${dx}px,${dy}px) scale(.12) rotate(10deg)`,opacity:0},{transform:'none',opacity:1}],{duration:750,easing:'cubic-bezier(.2,.9,.3,1)',fill:'forwards'});
+setTimeout(()=>typeIt('qbt',q.q),700);
+setTimeout(()=>{const t=card.getBoundingClientRect(),r=c.getBoundingClientRect();w.animate([{opacity:1},{opacity:0}],{duration:600,fill:'forwards'});
+ c.animate([{transform:'none'},{transform:`translate(${t.left+t.width/2-r.left-r.width/2}px,${t.top+t.height/2-r.top-r.height/2}px) scale(${t.width/r.width})`}],{duration:600,easing:'ease-in-out',fill:'forwards'});
+ setTimeout(()=>{w.remove();card.classList.add('in');s(300,.08,'triangle',.06)},560)},QH)}
+function pick(k){if(done)return;done=true;clearInterval(tm);clearInterval(thT);clearTimeout(dt);
+ const tk=+((Date.now()-qT0)/1000).toFixed(1),q=Q[idx],B=[...document.querySelectorAll('.act')],r=k+1,diff=k<0?3:q.m?(k==q.c?0:k==q.p?2:4):Math.abs(r-q.i),out=diff<=1?'w':diff==2?'p':'l',st=stake,pct=Math.round(st/chips*100),gain=gainFor(st),ls=lossFor(st),own=OWN[q.d];
+ B.forEach(b=>{b.disabled=true;b.style.transform=''});$('rg').disabled=true;document.body.classList.remove('tense');document.body.classList.add('lockin');$('vg').classList.add('on');
+ boom();sweep(300,2500,.5,.07);k<0?slam('TIME UP','#ff6b5e'):slam('LOCKED IN','#fff');shakeApp();flash('#fff');
+ if(k>=0){B[k].classList.add('lock');spark(B[k],'#fff');s(900,.08,'triangle',.06)}
+ $('py').innerHTML='<div class="meter" id="mt">THE BOARD VOTES...</div>';
+ setTimeout(()=>{riser(2.4);votes(diff,own,reveal)},400);
+ function reveal(u,dn){const c0=chips;chips=Math.max(0,chips+(out=='w'?gain:out=='l'?-ls:0));
+  if(out=='w')streak++;else if(out=='l')streak=0;best=Math.max(best,streak);lost=out=='l'?lost+1:out=='w'?0:lost;res.push({d:q.d,r,diff,pct,out,qi:idx,ins:insOn,mc:!!q.m,st,c0,c1:chips,dl:out=='w'?gain:out=='l'?-ls:0,u,dn,tk,hl,sk:streak,ev:(EV&&EV.n)||''});bust=chips<=0;
+  document.body.classList.remove('lockin');$('sl').classList.remove('on');$('vg').classList.remove('on');
+  tween(c0,chips,v=>{$('chips').textContent=v;$('pv').textContent='$'+v});setTimeout(()=>piles(1),out=='w'?900:300);
+  const m=$('mt');m.className='meter '+(out=='w'?'g':out=='l'?'b':'');m.textContent=out=='w'?'+$'+gain:out=='l'?'-$'+ls:'PUSH';
+  setTimeout(()=>{if(out!='p'){$('pv').classList.add(out=='w'?'hit':'hurt');setTimeout(()=>$('pv').classList.remove('hit','hurt'),900)}},700);
+  if(out=='w'){win();burst(streak>=3?60:30);flash('#f2c14e');fly2($('pv'),$('chips'),10);if(streak>=2)applause(2.2);if(streak>=3||gain>=300)rain(streak>=3?70:34);if(streak==3||streak==6)setTimeout(()=>{banner(streak==3?'ON FIRE!':'UNSTOPPABLE!',(streak==3?'1.5x':'2x')+' returns unlocked');whoosh()},900);react(q.o,['😎','🔥','🤝','😮'][Math.random()*4|0])}
+  else if(out=='l'){lose();gasp();flash('#ff3b30');fly2($('bp'),$('seats').children[lead()],8);$('table').classList.add('shake');setTimeout(()=>$('table').classList.remove('shake'),500);react(q.o,k<0?'⏰':['😬','🫢','🤨','😮'][Math.random()*4|0])}
+  else{s(330,.2,'triangle',.07);s(330,.2,'triangle',.07,.22);flash('#6fb7ff');fly2($('bp'),$('pv'),5);react(q.o,'🤔')}
+  if(q.m){B[q.c].classList.add('right');if(k>=0&&k!=q.c)B[k].classList.add('wrong')}const ch=trust(own,diff);board();const be=$('bm'+own);if(be){be.classList.add('bounce');const e=document.createElement('i');e.className='dl '+(ch>0?'up':'dn');e.textContent=(ch>0?'+':'')+ch;be.appendChild(e)}
+  VD=k<0?'TIME RAN OUT':['SPOT ON','BOARD NODS','BOARD UNSURE','BOARD FROWNS','RED FLAG'][diff];hud();
+  setTimeout(()=>{const e=document.createElement('div');e.className='vd';e.style.color=out=='w'?'#5fe39a':out=='l'?'#ff6b5e':'#f2c14e';e.innerHTML=VD+'<small>'+u+' for · '+dn+' against</small>';$('fx').appendChild(e);s(80,.2,'sine',.22);noise(.2,800,.1,0,'lowpass');setTimeout(()=>e.remove(),2000)},500);
+  setTimeout(()=>say2(0,out=='w'?'😎':out=='l'?'😤':'🤔',out=='w'?'Good answer.':out=='l'?'Not great.':'Hmm.'),800);
+  const qp=out=='w'?QC[Math.random()*4|0]:out=='l'?QW[Math.random()*4|0]:QP[0],last=idx>=Q.length-1||bust,gt=(k<0?'indecision under pressure':(r<q.i?q.lo:q.hi))||q.lo||q.hi,sig=q.m?'<b>Why:</b> '+q.ex+' <span class="note">('+q.src+')</span>':diff<=1?'The Board reads this as '+q.ok+'.':"The Board's concern: "+gt+'.',rl=pct>=100?'All in: a high-risk bet':pct>=75?'Aggressive stake':pct>=50?'Bold stake':pct>=25?'Measured stake':'Cautious stake';
+  const sh=document.createElement('div');sh.className='sheet '+(out=='w'?'ok':out=='l'?'miss':'push');
+  sh.innerHTML=`<div class="big disp">${VD}${out=='w'?' +$'+gain:out=='l'?' -$'+ls:' · PUSH'}</div><p class="qt">${SEATS[q.o][0]}: “${qp}”</p><p>You answered <b>${k<0?'nothing':q.m?'ABCD'[k]+' · '+q.m[k]:r+' · '+L[k]}</b>; ${u} of 5 board members backed it. ${sig}</p><p class="rs">Stake $${st} (${pct}% of pot): ${rl}.${bust?' You are out of chips.':''}</p><button class="go" onclick="nxt()">${last?'Reveal my verdict':'Next hand'}</button>`;
+  if(out=='w'&&streak%3==0&&streak<=6&&!bust)setTimeout(()=>luckyBonus(Math.max(st,100),()=>setTimeout(()=>document.body.appendChild(sh),400)),1500);else setTimeout(()=>document.body.appendChild(sh),1500)}}
+const TIERS=[10,50,100,150,200,300,400],TW=[30,24,18,13,9,4,2],SY=['🍒','🔔','🍀','💎','⭐','👑','7'];
+function luckyBonus(base,cb){const bp=Math.round(BT.reduce((a,b)=>a+b,0)/50),sp=Math.min(streak,6)*5,pre=Math.round(base*(bp+sp)/100),sy=v=>v=='7'?'<i class="s7">7</i>':'<i>'+v+'</i>',rnd=()=>SY[Math.random()*7|0];
+ let spun=false,fin=false,tier=0,tot=0;const el=document.createElement('div');el.className='lb';
+ el.innerHTML=`<div class="slotm"><div class="slt disp">LUCKY BONUS</div><div class="sgn"><div class="bulbs"></div><b class="disp">STREAK BONUS</b><div class="bulbs b2"></div></div>
+ <div class="smain"><div class="reels">${[0,1,2].map(i=>`<div class="reel"><div class="strip" id="lbs${i}">${sy(rnd())}${sy('7')}${sy(rnd())}</div></div>`).join('')}</div>
+ <div class="spanel"><div class="cw"><small>CURRENT WIN</small><b id="lbw">$${pre}</b></div><div class="ln"><p><u>+</u> ${bp}% BOARD BONUS</p><p><u>+</u> ${sp}% STREAK BONUS</p></div><button class="go" id="lbgo">SPIN</button></div>
+ <div class="lev" id="lblev"><i></i></div></div>
+ <div class="ladder"><div class="tiers">${TIERS.slice(0,6).map((t,i)=>`<b id="lbt${i}"><small>${i+1}</small>${t}%</b>`).join('')}</div><div class="jp" id="lbt6">STREAK<br>BONUS<br>400%</div></div><div class="coin" id="lbc"></div></div>`;
+ document.body.appendChild(el);[392,523,659,784,1047].forEach((f,i)=>s(f,.2,'square',.04,i*.08));
+ const spinIt=()=>{if(spun)return;spun=true;$('lbgo').disabled=true;$('lblev').classList.add('pull');glide(320,110,.3,'sawtooth',.06);for(let i=0;i<5;i++)noise(.02,3000,.05,i*.05);
+  let r=Math.random()*100;for(let i=0;i<7;i++){if((r-=TW[i])<0){tier=i;break}}tot=Math.round(base*(TIERS[tier]+bp+sp)/100);const F=20;
+  [0,1,2].forEach(i=>{const st=$('lbs'+i);st.innerHTML=Array.from({length:22},(_,j)=>sy(j==F?SY[tier]:rnd())).join('');st.style.transition='none';st.style.transform='translateY(0)';st.classList.add('spin');void st.offsetWidth;const dur=2+i*.6;st.style.transition='transform '+dur+'s cubic-bezier(.12,.7,.2,1)';st.style.transform='translateY(-'+((F-1)*56)+'px)';
+   const iv=setInterval(()=>s(360+Math.random()*120,.025,'square',.025),70);setTimeout(()=>{clearInterval(iv);st.classList.remove('spin');s(140,.12,'sine',.22);noise(.06,1800,.09)},dur*1000)});
+  let n=0;const steps=15+tier,lad=()=>{for(let k=0;k<7;k++)$('lbt'+k).classList.remove('on');$('lbt'+(n%7)).classList.add('on');s(500+(n%7)*60,.03,'triangle',.04);n++;if(n<steps)setTimeout(lad,60+n*5)};setTimeout(lad,900);
+  setTimeout(()=>{el.classList.add('won');win();burst(tier>=4?90:50);flash('#f2c14e');if(tier==6)for(let i=0;i<8;i++)s(i%2?800:600,.18,'square',.05,i*.18);
+   const t0=performance.now();let lc=-1;(function f(t){const p=Math.min(1,(t-t0)/1400);$('lbw').textContent='$'+Math.round(pre+(tot-pre)*p);const c=Math.floor(p*30);if(c!=lc){lc=c;coinPing(0)}if(p<1)requestAnimationFrame(f)})(t0);
+   rain(tier>=4?110:60,$('lbc'));$('lbgo').textContent='COLLECT';$('lbgo').disabled=false;fin=true},3700)},
+ collect=()=>{if(!fin)return;fin=false;const c0=chips;chips+=tot;bonusTotal+=tot;tween(c0,chips,v=>{$('chips').textContent=v;$('pv').textContent='$'+v});setTimeout(()=>piles(1),300);fly2($('pv'),$('chips'),12);s(1568,.2,'triangle',.08);s(2093,.3,'triangle',.08,.12);el.remove();hud();cb()};
+ $('lbgo').onclick=()=>fin?collect():spinIt();$('lblev').onclick=spinIt}
+function nxt(){document.querySelectorAll('.sheet').forEach(e=>e.remove());idx++;rivals();idx>=Q.length||bust?end():deal();setTimeout(rivalFly,500)}
+function kitHTML(){const u=used,t=u.ins+u.time+u.ask,L2=[];if(u.ins)L2.push('Insurance: hedges the downside');if(u.time)L2.push('Extra time: buys time under pressure');if(u.ask)L2.push('Ask the Board: seeks a steer when unsure');return `<div class="box"><b>Lifelines:</b> ${t?L2.join('; ')+'. Used well, that is risk management and humility; used early, it can mean low conviction.':'None used. You played without a safety net: high confidence, or a blind spot for risk.'}</div>`}
+function end(){const OP=(m,i)=>'Card '+(i+1)+' ('+'ABCD'[i]+'): '+m[i],PD=x=>({type:'cfo-game',game:'poker',chips:chips,x:Object.assign({best:best,used:used,bonus:bonusTotal,bust:bust?1:0},x||{}),data:res.map(r=>{const q=Q[r.qi]||{},m=q.m;return{hand:r.qi+1,dim:r.d,dimn:SH[r.d]||r.d,type:m?(r.d=='IQ'?'IQ puzzle':'Dilemma'):'Statement',q:q.q||'',ans:r.r||'',ansTxt:r.r?(m?OP(m,r.r-1):L[r.r-1]+' ('+r.r+')'):'No answer (timed out)',opts:m?m.map((t,i)=>OP(m,i)).join(' | '):'',bestA:m&&q.c!=null?OP(m,q.c):'',part:m&&q.p!=null?OP(m,q.p):'',target:m?'':q.i,diff:r.diff,timeout:r.r?0:1,stake:r.pct,out:r.out,ins:r.ins?1:0,mini:r.mc?1:0,st:r.st,c0:r.c0,c1:r.c1,dl:r.dl,u:r.u,dn:r.dn,tk:r.tk,hl:r.hl||'',sk:r.sk,ev:r.ev||''}})});try{parent.postMessage(PD(),'*')}catch(e){};clearInterval(tm);clearInterval(thT);clearInterval(aiT);aiT=0;document.body.classList.remove('tense','hot','inf','allin','gold','cold','final','lockin');$('sl').classList.remove('on');$('sw').style.display='none';seats(-1);hud();$('say').innerHTML='';$('dock').style.display='none';
+ const sc=Object.fromEntries(DIMS.map(d=>[d,Math.round(res.filter(r=>r.d==d).reduce((t,r)=>t+(1-r.diff/4),0)/Math.max(1,res.filter(r=>r.d==d).length)*100)])),ov=Math.round(DIMS.reduce((t,d)=>t+sc[d],0)/DIMS.length),mn=Math.min(...DIMS.map(d=>sc[d]));
+ const prs={};res.forEach(r=>{const q=Q[r.qi];if(q.pr)(prs[q.pr]=prs[q.pr]||[]).push([q.rv?6-r.r:r.r,r.r])});const pk=Object.values(prs).filter(a=>a.length==2&&a.every(x=>x[1]>0)),cn=pk.filter(a=>Math.abs(a[0][0]-a[1][0])<=1).length,sdn=res.filter(r=>Q[r.qi].d=='SD'&&r.r>=4).length;let fi=ov>=85?4:ov>=72?3:ov>=60?2:ov>=45?1:0;if(mn<55)fi=Math.min(fi,2);if(sc.INT<60||sc.ETH<50)fi=Math.min(fi,1);if(sdn>=2||(pk.length>=3&&cn<pk.length-1))fi=Math.min(fi,2);try{parent.postMessage(PD({lvl:R[fi],ov:ov,sc:sc}),'*')}catch(e){};
+ const o=document.createElement('div');o.className='fin';o.innerHTML='<small>Scoring your leadership profile...</small><div class="num disp" id="fn">0%</div><div class="rk disp" id="fr">&nbsp;</div>';document.body.appendChild(o);
+ const t0=performance.now(),D=3400;let last=-1;
+ (function f(t){const p=Math.min(1,(t-t0)/D),v=Math.round(ov*(1-Math.pow(1-p,3)));$('fn').textContent=v+'%';if(v!=last){last=v;s(180+v*7,.03,'square',.03)}p<1?requestAnimationFrame(f):setTimeout(ladder,500)})(t0);
+ function ladder(){o.querySelector('small').textContent='Your level is...';let j=0;(function step(){$('fr').textContent=R[j];s(300+j*140,.18,'triangle',.08);if(j<fi){j++;setTimeout(step,550+j*250)}else setTimeout(()=>{$('fr').classList.add('stamp');fi>=3?(win(),burst(80),rain(80,$('fr')),flash('#f2c14e'),applause(3)):s(200,.3,'triangle',.07);setTimeout(()=>{o.remove();show()},2000)},800)})()}
+ function show(){const srt=[...DIMS].sort((a,b)=>sc[b]-sc[a]),bs=srt[0],wk=srt[srt.length-1],avg=Math.round(res.reduce((t,r)=>t+r.pct,0)/Math.max(1,res.length)),ai=res.filter(r=>r.pct>=100).length,ar=res.filter(r=>r.out=='w'),aw=res.filter(r=>r.out=='l'),m=a=>a.length?a.reduce((t,r)=>t+r.pct,0)/a.length:0,
+  rk=avg>=65?'High risk-taker. You back your calls heavily: bold moves, but also big unhedged bets.':avg>=40?'Bold. You stake meaningfully when sure, which suits capital allocation if the confidence is earned.':avg>=20?'Measured. You size bets sensibly and protect the downside.':'Cautious. You guard capital closely but may under-back sound judgement.',
+  pat=[...new Set(res.filter(r=>r.diff>=2).map(r=>{const q=Q[r.qi];return SH[r.d]+': '+((r.r<q.i?q.lo:q.hi)||q.lo||q.hi)}))].slice(0,4),
+  arch=Object.keys(AR).sort((a,b)=>(sc[AR[b][0]]+sc[AR[b][1]])-(sc[AR[a][0]]+sc[AR[a][1]]))[0],fives=res.filter(r=>r.r==5).length,ones=res.filter(r=>!r.mc&&r.r==1).length,btA=Math.round(BT.reduce((a,b)=>a+b,0)/5),tg=[];
+  if(sc.INT>=80)tg.push('🧭 Ethical compass');if(sc.PEO>=80)tg.push('🤝 People leader');if(sc.VIS>=80)tg.push('🔭 Big-picture thinker');if(sc.RIG>=80)tg.push('🔬 Evidence-driven');if(sc.RSK>=80)tg.push('🧊 Cool under fire');if(sc.IQ>=80)tg.push('🧠 Sharp mind');if(sc.ETH>=80)tg.push('⚖️ Sound judgement');if(best>=3)tg.push('🔥 Hot streak x'+best);if(ai)tg.push('🎲 High roller');if(avg<25)tg.push('🛡 Steady hand');if(btA>=70)tg.push('👔 Board favourite');if(chips>=2000)tg.push('💰 Chip leader');if(bonusTotal)tg.push('🎰 Bonus $'+bonusTotal);if(!tg.length)tg.push('🌱 Room to grow');
+  const pt=(i,v,rr=62)=>{const a=(-90+360/DIMS.length*i)*Math.PI/180;return[(100+Math.cos(a)*rr*v/100).toFixed(1),(96+Math.sin(a)*rr*v/100).toFixed(1)]},ring=v=>DIMS.map((_,i)=>pt(i,v).join(',')).join(' '),
+  fit=fi==4?['y','FIT FOR THE CFO SEAT']:fi==3?['m','CLOSE: VP-LEVEL, NOT YET CFO']:['n','NOT CFO-READY YET'];
+  const ih=`<div class="box ${(pk.length>=3&&cn<pk.length-1)||sdn>=2?'bd':''}"><b>Truthfulness check: ${cn} of ${pk.length} paired statements matched; ${sdn} near-perfect claim${sdn==1?'':'s'}.</b> ${(pk.length>=3&&cn<pk.length-1)||sdn>=2?'Some answers contradicted themselves or claimed implausible perfection, so this profile is capped and should be treated with caution.':'Your answers agreed with themselves when the same trait was asked another way, and your self-view was believable.'}</div>`;$('hero').style.display='block';$('hero').textContent=R[fi];$('mid').style.display='none';
+  $('panel').className='panel rep';
+  $('panel').innerHTML=`<div class="fit ${fit[0]}">${fit[1]} · ${ov}% overall</div><div class="tags">${tg.map(x=>`<span>${x}</span>`).join('')}</div>
+  <svg viewBox="-10 0 220 195" style="display:block;margin:0 auto;width:min(300px,86%)"><polygon points="${ring(100)}" fill="none" stroke="#4a3a43"/><polygon points="${ring(50)}" fill="none" stroke="#3a2c33"/>${DIMS.map((_,i)=>`<line x1="100" y1="96" x2="${pt(i,100)[0]}" y2="${pt(i,100)[1]}" stroke="#3a2c33"/>`).join('')}<polygon points="${DIMS.map((d,i)=>pt(i,sc[d]).join(',')).join(' ')}" fill="#f2c14e55" stroke="#f2c14e" stroke-width="2"/>${DIMS.map((d,i)=>{const p=pt(i,100,80);return `<text x="${p[0]}" y="${p[1]}" text-anchor="middle" font-size="9" style="fill:${sc[d]<55?'#ff6b5e':'#f4ead8'}">${SH[d]} ${sc[d]}%</text>`}).join('')}</svg>
+  <div class="box"><b>Your CFO style: the ${arch}.</b> ${AR[arch][2]} <span class="note">(Based on Deloitte's four faces of the CFO.)</span></div>
+  <div class="box ${mn<55?'bd':''}"><b>${mn>=80?'No real gap. Strong across all five.':'Where you lacked: '+DN[wk]+' ('+sc[wk]+'%).'}</b> Strongest: ${DN[bs]} (${sc[bs]}%). ${mn>=80?'':GAPT[wk]}</div>
+  <div class="h4">Risk appetite: ${avg}% of pot on average${ai?', all in '+ai+'x':''}</div><div class="gauge"><i style="left:calc(${Math.min(avg,100)}% - 2px)"></i></div><div class="gl"><span>Cautious</span><span>Measured</span><span>Bold</span><span>High risk</span></div>
+  <p class="note" style="color:var(--ink)">${rk}${ar.length&&aw.length?(m(aw)>m(ar)+5?' You staked more on answers the Board rejected than on those it backed: a sign of overconfidence.':m(ar)>m(aw)+5?' You staked bigger when the Board backed you: good calibration.':''):''}</p>
+  <div class="h4">Board trust: ${btA}/100</div>${BD.map((n,i)=>`<div class="row sm"><span>${face(BT[i])} ${n}</span><div class="bar"><i data-w="${BT[i]}"></i></div><b>${BT[i]}</b></div>`).join('')}
+  <p class="note">Each board member watches one quality: Chair (integrity), HR (people), Investor (vision), Audit (rigor), Risk (resilience). Toughest critic: ${BD[BT.indexOf(Math.min(...BT))]}.</p>
+  <div class="box"><b>Response pattern:</b> ${fives} Strongly agree, ${ones} Strongly disagree. ${fives>=6?'A very favourable self-view. Real CFOs mix in moderate answers, so treat this profile with caution.':'A mixed, credible pattern.'}</div>
+  ${ih}${kitHTML()}${tableHTML()}${pat.length?`<div class="box bd"><b>Patterns your answers point to:</b><ul>${pat.map(x=>`<li>${x}</li>`).join('')}</ul></div>`:''}
+  <p class="note">Built on research: Bass &amp; Avolio (transformational leadership), Brown, Trevi&ntilde;o &amp; Harrison 2005 (ethical leadership), Walumbwa et al. 2008 (authentic leadership), Goleman 1998 (emotional intelligence), Edmondson 1999 (psychological safety), Ben-David, Graham &amp; Harvey 2013 (CFO overconfidence), Deloitte's Four Faces of the CFO. IQ items: Frederick 2005 (Cognitive Reflection Test), Berlin Numeracy Test (Cokely et al. 2012) and ICAR (Condon &amp; Revelle 2014). Candour checks adapt Marlowe-Crowne social-desirability items (Crowne &amp; Marlowe 1960). Dilemmas are keyed to COSO ERM, SEC Reg FD, IMA, Sarbanes-Oxley and NPV theory. With 30 items, paired-item and candour checks it is more reliable than a quick quiz, but it has not been normed on real CFOs, so it is indicative, not a statistically validated test. Use the result to start a conversation, not to pass or fail someone.</p><button class="go" onclick="location.reload()">Play again</button>`;
+  setTimeout(()=>document.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%'),150)}}
+$('mu').onclick=()=>{snd_on=!snd_on;$('mu').textContent=snd_on?'🔊':'🔇';ambSet()};$('mm').onclick=()=>{mus=!mus;$('mm').textContent=mus?'🎵':'🚫';ambSet()};
+$('fsb').onclick=()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen).call(document);else goFs()}catch(x){}};$('how').onclick=()=>inst(true);$('cl').onclick=()=>inst(false);$('ov').onclick=e=>{if(e.target.id=='ov')inst(false)};document.onkeydown=e=>{if(e.key=='Escape')inst(false)};
+$('rg').oninput=e=>{const was=pctSel;pctSel=+e.target.value;clink();s(300+pctSel*5,.03,'triangle',.03);if(pctSel==100){if(was!=100){slam('⚠ ALL IN ⚠','#ff3b30');shakeApp()}s(50,.5,'sawtooth',.08);noise(.4,300,.08,0,'lowpass');$('table').classList.add('shake');setTimeout(()=>$('table').classList.remove('shake'),450)}stakes();navigator.vibrate&&navigator.vibrate(8);setTimeout(trail,70)};bindRail();
+document.querySelectorAll('.pwb').forEach(b=>b.onclick=()=>usePw(b.dataset.w));
+$('ops').addEventListener('pointerover',e=>{const c=e.target.closest&&e.target.closest('.act');if(c&&!c.disabled)s(700+Math.random()*200,.02,'triangle',.03)});
+$('panel').addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('.act');if(!c||c.disabled)return;const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;c.style.transform=`perspective(500px) rotateY(${x*10}deg) rotateX(${-y*8}deg) translateY(-2px)`});
+$('panel').addEventListener('pointerout',e=>{const c=e.target.closest&&e.target.closest('.act');if(c)c.style.transform=''});
+(()=>{const b=$('bg'),bm=document.createElement('div');bm.className='beam';b.appendChild(bm);for(let i=0;i<36;i++){const e=document.createElement('i');if(i>=22)e.className='gd';else if(i%3==0){e.className='su';e.textContent='♠♥♦♣'[i%4];e.style.fontSize=(20+Math.random()*26)+'px';e.style.setProperty('--o',.08)}e.style.left=Math.random()*100+'%';e.style.setProperty('--x',(Math.random()*80-40)+'px');e.style.animationDuration=(9+Math.random()*10)+'s';e.style.animationDelay=-Math.random()*14+'s';b.appendChild(e)}})();
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('button'))click()});
+const RMo=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches);
+{const _se=seats;seats=function(on){const o=document.querySelector('.dbtn'),r0=o?o.getBoundingClientRect():null;_se(on);const n=document.querySelector('.dbtn');if(!n||!r0||RMo)return;const r1=n.getBoundingClientRect(),dx=r1.left-r0.left,dy=r1.top-r0.top;if(Math.abs(dx)+Math.abs(dy)<2)return;
+const c=document.createElement('span');c.className='dbtn dfly';c.textContent='D';c.style.left=r0.left+'px';c.style.top=r0.top+'px';$('fx').appendChild(c);n.style.visibility='hidden';
+const a=c.animate([{transform:'translate(0,0) rotate(0)'},{transform:`translate(${dx*.5}px,${dy*.5-16}px) rotate(180deg)`,offset:.5},{transform:`translate(${dx}px,${dy}px) rotate(360deg)`}],{duration:650,easing:'cubic-bezier(.4,.1,.3,1)',fill:'forwards'});a.onfinish=a.oncancel=()=>{c.remove();n.style.visibility=''}}}
+{const _f=fly2;fly2=function(a,b,n){_f(a,b,n);if(RMo||!a||!b||a.id!='pv'||b.id!='chips')return;const A=a.getBoundingClientRect(),B=b.getBoundingClientRect(),ax=A.left+A.width/2,ay=A.top+A.height/2,dx=B.left+B.width/2-ax,dy=B.top+B.height/2-ay;
+for(let i=0;i<26;i++){const e=document.createElement('i'),ox=(Math.random()-.5)*150,oy=(Math.random()-.5)*90;e.className='pf';e.style.left=ax+'px';e.style.top=ay+'px';$('fx').appendChild(e);
+const an=e.animate([{transform:'translate(0,0) scale(.3)',opacity:0},{transform:`translate(${ox}px,${oy}px) scale(1.1)`,opacity:1,offset:.3},{transform:`translate(${dx}px,${dy}px) scale(.35)`,opacity:.9}],{duration:850+Math.random()*350,delay:i*30,easing:'cubic-bezier(.5,0,.2,1)',fill:'both'});
+an.onfinish=()=>{e.remove();if(i==25)b.animate([{transform:'scale(1)'},{transform:'scale(1.35)',textShadow:'0 0 18px #f2c14e'},{transform:'scale(1)'}],{duration:450})}}}}
+{const _rf=railFx,mx=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t)),G1=[95,227,154],A1=[242,193,78],R1=[255,59,48];
+railFx=function(){_rf();const t=(pctSel-10)/90,c=t<.5?mx(G1,A1,t/.5):mx(A1,R1,(t-.5)/.5);$('rail').style.setProperty('--c','rgb('+c+')')}}
+{let last='';setInterval(()=>{const c=(document.body.classList.contains('allin')||pctSel>=100)?'#ff3b30':streak>=3?'#f2c14e':'#4a8dff';if(c!==last){last=c;$('table').style.setProperty('--aura',c)}},250)}
+flash=function(){};
+intro();
+</script></body></html>

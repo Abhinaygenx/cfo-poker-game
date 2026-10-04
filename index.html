@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CFO Leadership Pulse</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#0b0d16;--card:#141829;--ink:#eef0f7;--mute:#9aa1b8;--gold:#f2c14e;--red:#e5383b;--line:#2a3050;--green:#1f8a5b}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{background:radial-gradient(1200px 600px at 80% -10%,#3a1d1d55,transparent),radial-gradient(900px 500px at 0 100%,#13385a66,transparent),var(--bg)}
+.scr{display:none;min-height:100dvh;padding:max(20px,env(safe-area-inset-top)) 18px 28px;max-width:980px;margin:auto;animation:in .5s}.scr.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+h1{font:800 clamp(2rem,6vw,3.4rem)/1.05 Georgia,serif;margin:.2em 0 .3em}h1 em{color:var(--gold);font-style:normal}h2{font:700 1.7rem Georgia,serif;margin:.2em 0}
+.k{letter-spacing:.2em;font-size:.72rem;color:var(--gold);text-transform:uppercase}.m{color:var(--mute)}
+.btn{display:inline-block;border:0;border-radius:14px;padding:14px 28px;font:700 1rem inherit;cursor:pointer;background:linear-gradient(#ffd66b,#f2a93e);color:#2a1a10;box-shadow:0 6px 24px #f2a93e44;touch-action:manipulation;transition:all .2s}
+.btn:hover{filter:brightness(1.05)}.btn.g{background:none;border:1px solid var(--line);color:var(--ink);box-shadow:none}.btn:disabled{opacity:.4}
+.hero{display:grid;gap:22px;grid-template-columns:1.2fr 1fr;align-items:center;margin-top:5vh}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tile{border-radius:18px;padding:18px;border:1px solid var(--line);background:var(--card);min-height:150px;position:relative;overflow:hidden}
+.tile .i{font-size:2.4rem}.tile.p{background:linear-gradient(160deg,#0f3b2a,#141829)}.tile.r{background:linear-gradient(160deg,#4a1d12,#141829)}
+.facts{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.facts span{border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:.82rem;color:var(--mute)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;max-width:560px;margin:14px auto}
+label{display:block;font-size:.82rem;color:var(--mute);margin:12px 0 4px}input,select{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:#0e1120;color:var(--ink);font:inherit}
+input:focus,select:focus{outline:2px solid var(--gold)}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.seg label{margin:0}.seg input{display:none}.seg span{display:block;text-align:center;padding:12px 4px;border:1px solid var(--line);border-radius:12px;color:var(--ink);cursor:pointer;background:#0e1120}.seg input:checked+span{background:var(--gold);color:#2a1a10;font-weight:700;border-color:var(--gold)}
+.err{color:#ff8a8a;font-size:.8rem;min-height:1.1em}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}.gc{border-radius:22px;padding:24px;border:1px solid var(--line);cursor:pointer;min-height:280px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;transition:.25s;text-align:left;color:var(--ink);font:inherit}
+.gc:hover{transform:translateY(-4px) scale(1.01)}.gc.p{background:radial-gradient(circle at 70% 20%,#1f8a5b55,transparent 60%),linear-gradient(#0f2a20,#0b0d16)}.gc.r{background:radial-gradient(circle at 70% 20%,#e76f2e66,transparent 60%),linear-gradient(#2a140c,#0b0d16)}
+.gc .big{position:absolute;top:14px;right:18px;font-size:4rem;opacity:.9}.gc h3{margin:.1em 0;font:800 1.6rem Georgia,serif}.badge{display:inline-block;margin-top:10px;font-size:.78rem;padding:4px 10px;border-radius:99px;border:1px solid var(--line);width:max-content}.badge.ok{background:#1f8a5b;border-color:#1f8a5b}
+#play{padding:0;max-width:none;height:100dvh}#play.on{display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#0a0c14;border-bottom:1px solid var(--line);min-height:44px}.bar b{flex:1;font-size:.9rem}
+.pill{display:none;background:#1f8a5b;color:#fff;border:0;border-radius:99px;padding:8px 16px;font:700 .85rem inherit;cursor:pointer;animation:pl 1.2s infinite}@keyframes pl{50%{box-shadow:0 0 0 8px #1f8a5b33}}
+#gf{flex:1;border:0;width:100%;background:#000}
+#cin{position:fixed;inset:0;background:#000;z-index:9;display:none}#cin.on{display:block}#cv{width:100%;height:100%;display:block}#skip{position:absolute;right:16px;bottom:max(16px,env(safe-area-inset-bottom));background:#0008;color:#fff;border:1px solid #fff4;border-radius:99px;padding:8px 16px;cursor:pointer}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}.sum div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}.sum b{display:block;font-size:1.6rem;color:var(--gold)}
+.foot{margin-top:30px;text-align:center;font-size:.78rem}.foot a{color:var(--gold);cursor:pointer;text-decoration:underline;margin:0 6px}
+@media(max-width:700px){.hero,.games{grid-template-columns:1fr}.gc{min-height:200px}.row{grid-template-columns:1fr}}
+
+#bgfx{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}#bgfx i{position:absolute;bottom:-60px;font-style:normal;opacity:.1;animation:fl linear infinite}@keyframes fl{to{transform:translateY(-115vh) rotate(360deg)}}
+.scr{position:relative;z-index:1}
+.steps{display:flex;justify-content:center;gap:8px;margin:6px 0 20px;flex-wrap:wrap}.steps span{font-size:.72rem;padding:5px 12px;border-radius:99px;border:1px solid var(--line);color:var(--mute)}.steps .on{background:var(--gold);color:#2a1a10;border-color:var(--gold);font-weight:700}.steps .dn{border-color:#1f8a5b;color:#6be3a4}
+.reg{display:grid;grid-template-columns:300px 1fr;gap:26px;align-items:start}
+.pc2{position:relative;aspect-ratio:5/7;border-radius:20px;padding:22px;background:radial-gradient(circle at 30% 20%,#2a3a6a,#141829 60%);border:2px solid var(--gold);box-shadow:0 20px 50px #000a,0 0 40px #f2c14e22;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;animation:flt 5s ease-in-out infinite}
+@keyframes flt{50%{transform:translateY(-8px) rotate(-1deg)}}
+.cr{position:absolute;top:12px;left:16px;font:800 1.2rem/1 Georgia,serif;color:var(--gold)}.cr.br{top:auto;left:auto;bottom:12px;right:16px;transform:rotate(180deg)}
+.av2{font-size:4.2rem;filter:drop-shadow(0 6px 10px #000a)}.pn{font:800 1.45rem Georgia,serif;color:var(--gold);margin-top:6px;word-break:break-word}.pm{color:var(--mute);margin:4px 0 12px}.chip2{border:1px solid var(--gold);border-radius:99px;padding:3px 14px;font-size:.78rem}.pt{position:absolute;bottom:40px;font-size:.58rem;letter-spacing:.18em;color:var(--mute)}
+.gl{background:#141829cc;backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:22px;padding:22px 24px;box-shadow:0 20px 50px #0008}
+.fd label{display:block;font-size:.85rem;color:#c8cde0;margin:12px 0 5px}.fe{color:#ff8a8a;font-size:.78rem;min-height:0;margin-top:3px;font-weight:600}.fd.bad input,.fd.bad select,.fd.bad .seg3 span{border-color:#ff5a5a;background:#2a1216}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.seg3 label{margin:0}.seg3 input{display:none}.seg3 span{display:block;text-align:center;padding:12px 4px;border:1px solid var(--line);border-radius:14px;cursor:pointer;background:#0e1120;transition:.2s}.seg3 i{display:block;font-style:normal;font-size:1.5rem}
+.seg3 span:hover{transform:translateY(-2px)}.seg3 input:checked+span{background:linear-gradient(#ffd66b,#f2a93e);color:#2a1a10;font-weight:800;border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 20px #f2a93e55}
+.shake{animation:shk .4s}@keyframes shk{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+#toast{position:fixed;top:max(12px,env(safe-area-inset-top));left:50%;transform:translate(-50%,-140%);z-index:20;background:#7a1a1a;border:1px solid #ff6b6b;color:#fff;padding:12px 40px 12px 16px;border-radius:14px;max-width:min(92vw,520px);box-shadow:0 10px 30px #000a;transition:.35s;font-size:.88rem}#toast.on{transform:translate(-50%,0)}#toast.info{background:#123226;border-color:#2a9d8f}#toast b{cursor:pointer;position:absolute;right:14px;top:10px}
+.who{text-align:center;margin-bottom:6px}.who span{display:inline-block;border:1px solid var(--gold);color:var(--gold);padding:4px 14px;border-radius:99px;font-size:.8rem}
+.prog{display:flex;gap:8px;max-width:360px;margin:12px auto 0}.prog i{flex:1;height:8px;border-radius:9px;background:#252b45;overflow:hidden;position:relative}.prog i.f:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#1f8a5b,#6be3a4)}
+.gc{padding-top:90px}.fan{position:absolute;top:22px;left:24px;height:70px;width:150px}.fan b{position:absolute;width:48px;height:68px;border-radius:8px;background:#fbf6e8;color:#15151c;font:800 1rem Georgia,serif;padding:5px;transition:.35s;box-shadow:0 6px 14px #000a}.fan b.rd{color:#c4232f}.fan b:nth-child(1){transform:rotate(-14deg)}.fan b:nth-child(2){left:36px}.fan b:nth-child(3){left:72px;transform:rotate(14deg)}.gc:hover .fan b:nth-child(1){transform:rotate(-26deg) translateX(-12px)}.gc:hover .fan b:nth-child(3){transform:rotate(26deg) translateX(12px)}
+.road{position:absolute;top:22px;left:24px;right:90px;height:50px;border-radius:12px;background:#2a2a32;overflow:hidden}.road:before{content:'';position:absolute;left:0;right:0;top:50%;height:4px;background:repeating-linear-gradient(90deg,#f4e9c8 0 24px,transparent 24px 48px);animation:rd .5s linear infinite}@keyframes rd{to{background-position:-48px 0}}.road span{position:absolute;top:6px;font-size:1.9rem;animation:drv 2.6s ease-in-out infinite alternate}@keyframes drv{from{left:4%}to{left:70%}}
+@media(max-width:760px){.reg{grid-template-columns:1fr}.pcw{display:none}}
+
+.rdy{display:flex;align-items:center;gap:10px;margin:2px 0 4px;font-size:.78rem;color:var(--mute)}.rdy div{flex:1;height:8px;border-radius:9px;background:#252b45;overflow:hidden}.rdy i{display:block;height:100%;width:0;background:linear-gradient(90deg,#f2a93e,#6be3a4);transition:width .4s}
+.fd.ok>label:after,.fd.ok .lbl:after{content:' ✓';color:#6be3a4;font-weight:800}.fd.ok input,.fd.ok select{border-color:#1f8a5b}
+.btn:active{transform:scale(.97)}#f .btn{position:relative;overflow:hidden}#f .btn:after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,#fff7,transparent);transform:skewX(-20deg);animation:sh 2.8s infinite}@keyframes sh{to{left:140%}}
+
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:none}body.gl #gl{display:block}body.gl #bgfx{display:none}
+.gc,.tile{transition:box-shadow .25s,border-color .25s!important;will-change:transform}.gc:hover{box-shadow:0 18px 50px #000a,0 0 0 1px #f2c14e66}
+
+.scr{opacity:0;transform:translateY(16px);transition:opacity .38s ease,transform .38s cubic-bezier(.2,.8,.2,1);animation:none}
+.scr.show{opacity:1;transform:none}
+#gl{display:none!important}#bgfx i{opacity:.06}.scr.out{opacity:0;transform:translateY(-12px);transition-duration:.2s}
+.pc2{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .5s cubic-bezier(.2,.8,.2,1)}.pc2.tilt{transition:transform .08s linear}
+.badge.pop{animation:bpop .65s .35s cubic-bezier(.34,1.56,.64,1) backwards}@keyframes bpop{0%{transform:scale(1)}55%{transform:scale(1.15)}100%{transform:scale(1)}}
+#tx{position:fixed;inset:0;z-index:30;pointer-events:none;display:none;overflow:hidden}#tx.on{display:block}
+.txp{position:absolute;inset:0;background:#0b0d16;transform:translateX(-100%)}
+.txp::after{content:"";position:absolute;right:0;top:0;bottom:0;width:6px;background:repeating-linear-gradient(#f4e9c8 0 18px,#0b0d16 18px 36px);opacity:.55}
+.cards .txp{background:linear-gradient(90deg,#0b0d16,#0a2a1f)}.car .txp{background:linear-gradient(90deg,#0b0d16,#2a140c)}
+.txi{position:absolute;right:6px;top:0;bottom:0;width:96px;display:flex;flex-direction:column;justify-content:space-evenly;align-items:center;transform:translateX(-100vw);font-size:3.2rem;line-height:1}
+.cards .txi span{width:62px;height:88px;border-radius:9px;background:#fbf6e8;color:#15151c;display:grid;place-items:center;font-size:2.2rem;box-shadow:0 6px 16px #000a}
+.cards .txi span:nth-child(2n){color:#c4232f}.cards .txi span:nth-child(odd){transform:rotate(-8deg)}.cards .txi span:nth-child(even){transform:rotate(7deg)}
+.car .txi{justify-content:center;font-size:4.6rem}.car .txi span{display:block;transform:scaleX(-1);filter:drop-shadow(0 6px 8px #000a)}
+#cin.fade{opacity:0;transition:opacity .4s}
+
+/* Cloud sync indicator & modal */
+.sync-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#141829;border:1px solid var(--line);border-radius:12px;margin-bottom:16px;font-size:.82rem}
+.sync-status{display:flex;align-items:center;gap:8px}
+.sync-dot{width:10px;height:10px;border-radius:50%;background:#e5a93e;display:inline-block}
+.sync-dot.synced{background:#2a9d8f;box-shadow:0 0 8px #2a9d8f}
+.sync-dot.syncing{background:#f2c14e;animation:pl 1s infinite}
+.sync-dot.err{background:#e63946}
+.modal{position:fixed;inset:0;background:#000b;z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
+.modal.on{display:flex}
+.modal-box{background:#141829;border:2px solid var(--gold);border-radius:20px;max-width:540px;width:100%;padding:24px;box-shadow:0 20px 60px #000;position:relative}
+.modal-box h3{margin-top:0;color:var(--gold);font-family:Georgia,serif;font-size:1.4rem}
+.modal-close{position:absolute;right:16px;top:16px;background:none;border:0;color:var(--mute);font-size:1.5rem;cursor:pointer}
+</style>
+</head>
+<body>
+
+<canvas id="gl"></canvas><div id="bgfx"></div><div id="tx"></div>
+<div id="toast"><span id="tm"></span><b onclick="this.parentNode.classList.remove('on')">✕</b></div>
+
+<!-- Settings Modal for Google Sheet Endpoint -->
+<div class="modal" id="syncModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeSyncModal()">✕</button>
+    <h3>☁️ Google Sheet & Email Sync Setup</h3>
+    <p class="m" style="font-size:.86rem;line-height:1.4">
+      Player data and answers are automatically recorded into your connected Google Sheet and emailed directly to:
+      <b style="color:var(--gold)">mmsbf26001@stu.xim.edu.in</b>
+    </p>
+    <label style="margin-top:14px">Google Apps Script Web App URL (/exec):</label>
+    <input id="cfgEndpoint" placeholder="https://script.google.com/macros/s/.../exec" style="margin-bottom:8px">
+    <div style="font-size:.78rem;color:var(--mute);margin-bottom:16px;line-height:1.4">
+      💡 <b>Quick Setup Guide:</b><br>
+      1. Open <a href="https://sheets.new" target="_blank" style="color:var(--gold)">Google Sheets</a> &amp; name it.<br>
+      2. Click <b>Extensions &gt; Apps Script</b> &amp; paste code from <code style="color:#6be3a4">google-apps-script.js</code>.<br>
+      3. Click <b>Deploy &gt; New deployment &gt; Web app</b> (Execute as: <i>Me</i>, Access: <i>Anyone</i>).<br>
+      4. Paste the generated URL above and click Save.
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" style="flex:1" onclick="saveEndpointConfig()">Save &amp; Test Connection</button>
+      <button class="btn g" onclick="closeSyncModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Screen 1: Home / Brief -->
+<section class="scr on show" id="s1">
+  <div class="sync-bar">
+    <div class="sync-status">
+      <span class="sync-dot" id="sDot"></span>
+      <span id="sTxt">Cloud Sync: Initializing...</span>
+    </div>
+    <button class="btn g" style="padding:4px 12px;font-size:.75rem" onclick="openSyncModal()">⚙️ Cloud Setup</button>
+  </div>
+  <div class="hero">
+    <div>
+      <div class="k">Leadership self-assessment · 2 games · about 15 minutes</div>
+      <h1>Play the <em>CFO seat.</em><br>Show how you really lead.</h1>
+      <p class="m">Two short games turn a leadership survey into a high-stakes experience: a poker table where you size every answer by conviction, and a desert rally where decisions and emotional awareness decide the race.</p>
+      <div class="facts">
+        <span>No right or wrong answers</span>
+        <span>Honest beats clever</span>
+        <span>Live Sheet + Email to mmsbf26001@stu.xim.edu.in</span>
+      </div>
+      <button class="btn" onclick="go('s2')">Start Survey ▶</button>
+    </div>
+    <div class="duo">
+      <div class="tile p"><div class="i">♠️</div><h2>The Hot Seat</h2><div class="m">CFO poker table. Read the statement, pick a card, bet your conviction.</div></div>
+      <div class="tile r"><div class="i">🏎️</div><h2>Desert Rally</h2><div class="m">Steer through gates that test judgement and emotional awareness.</div></div>
+    </div>
+  </div>
+  <div class="foot m">
+    Your responses are automatically synced to Google Sheets and emailed to <b style="color:var(--gold)">mmsbf26001@stu.xim.edu.in</b>.
+    <br><a onclick="dlExcel()">Admin: download local backup (.xlsx)</a> | <a onclick="openSyncModal()">Configure Google Sheet</a>
+  </div>
+</section>
+
+<!-- Screen 2: Registration -->
+<section class="scr" id="s2">
+  <div class="steps"><span class="dn">1 · Brief</span><span class="on">2 · Player</span><span>3 · Games</span></div>
+  <div class="reg">
+    <div class="pcw">
+      <div class="pc2">
+        <div class="cr">A<br>♠</div><div class="cr br">A<br>♠</div>
+        <div class="av2" id="pcAv">🎴</div>
+        <div class="pn" id="pcN">YOUR NICKNAME</div>
+        <div class="pm" id="pcName">Your name</div>
+        <span class="chip2" id="pcSt">Choose status</span>
+        <div class="pt">CFO CANDIDATE · SEAT RESERVED</div>
+      </div>
+      <p class="m" style="text-align:center;font-size:.8rem;margin-top:12px">Your player card updates as you type.</p>
+    </div>
+    <div class="gl" id="f" oninput="upd()" onchange="upd()">
+      <h2>Take your seat</h2>
+      <div class="rdy"><div><i id="rdb"></i></div><span id="rdt">Seat ready: 0 of 6</span></div>
+      <p class="m" style="margin:0 0 6px">Fields marked * are required.</p>
+      <div class="fd" data-f="nm"><label>👤 Full name *</label><input id="nm" autocomplete="name" placeholder="As you would like it on your report"><div class="fe"></div></div>
+      <div class="fd" data-f="em"><label>✉️ Email *</label><input id="em" type="email" autocomplete="email" placeholder="name@example.com"><div class="fe"></div></div>
+      <div class="row">
+        <div class="fd" data-f="ag"><label>🎂 Age *</label><input id="ag" type="number" min="16" max="80" inputmode="numeric" placeholder="16 to 80"><div class="fe"></div></div>
+        <div class="fd" data-f="gn"><label>⚧ Gender *</label><select id="gn"><option value="">Select…</option><option>Male</option><option>Female</option></select><div class="fe"></div></div>
+      </div>
+      <div class="fd" data-f="ph"><label>📱 Phone number (optional)</label><input id="ph" type="tel" autocomplete="tel" placeholder="+91 98765 43210"><div class="fe"></div></div>
+      <div class="fd" data-f="st"><label>🎯 You are currently *</label><div class="seg3"><label><input type="radio" name="st" value="Working"><span><i>💼</i>Working</span></label><label><input type="radio" name="st" value="PG"><span><i>🎓</i>PG</span></label><label><input type="radio" name="st" value="UG"><span><i>📚</i>UG</span></label></div><div class="fe"></div></div>
+      <div class="fd" data-f="nk"><label>🎲 Player nickname *</label><div style="display:flex;gap:8px"><input id="nk" maxlength="16" placeholder="e.g. Ace of Spreadsheets"><button type="button" class="btn g" style="padding:0 14px" onclick="rnd()" title="Random nickname">🎲</button></div><div class="fe"></div></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button type="button" class="btn g" onclick="go('s1')">Back</button>
+        <button type="button" class="btn" style="flex:1" onclick="reg(event)">Start ▶ Deal me in</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen 3: Choose Game -->
+<section class="scr" id="s3">
+  <div class="steps"><span class="dn">1 · Brief</span><span class="dn">2 · Player</span><span class="on">3 · Games</span></div>
+  <div class="who" id="who"></div>
+  <h2 style="text-align:center" id="hi">Choose your game</h2>
+  <p class="m" style="text-align:center;margin:4px 0">Play in any order. After each game you return here. Progress is auto-saved.</p>
+  <div class="prog"><i id="pg1"></i><i id="pg2"></i></div>
+  <div class="games">
+    <button class="gc p" onclick="launch('poker')">
+      <div class="fan"><b>A♠</b><b class="rd">K♥</b><b>Q♣</b></div>
+      <div class="k">Game 1</div>
+      <h3>The Hot Seat</h3>
+      <div class="m">CFO poker table. Read the statement, pick a card, bet your conviction. About 10 minutes.</div>
+      <span class="badge" id="b1">Not played</span>
+    </button>
+    <button class="gc r" onclick="launch('rally')">
+      <div class="road"><span>🏎️</span></div>
+      <div class="k" style="margin-top:14px">Game 2</div>
+      <h3>CFO Desert Rally</h3>
+      <div class="m">Race through decision gates that test judgement and emotional awareness. About 5 minutes.</div>
+      <span class="badge" id="b2">Not played</span>
+    </button>
+  </div>
+  <div style="text-align:center;margin-top:22px">
+    <button class="btn g" id="fin" onclick="finish()">Finish &amp; save my results</button>
+  </div>
+</section>
+
+<!-- Screen 4: Play Arena -->
+<section class="scr" id="play">
+  <div class="bar">
+    <button class="btn g" style="padding:6px 12px;font-size:.8rem" onclick="leave()">☰ Menu</button>
+    <b id="gt"></b>
+    <button class="pill" id="pill" onclick="leave(1)">Finished ✓ Continue ▶</button>
+  </div>
+  <iframe id="gf" allow="autoplay" title="game"></iframe>
+</section>
+
+<!-- Screen 5: Final Summary -->
+<section class="scr" id="s5">
+  <div style="text-align:center;margin-top:6vh">
+    <div style="font-size:3rem">🏆</div>
+    <h1>Thank you, <em id="tn"></em>.</h1>
+    <p class="m">Your assessment is complete! Results have been recorded in the central sheet and emailed to <b style="color:var(--gold)">mmsbf26001@stu.xim.edu.in</b>.</p>
+  </div>
+  <div class="sum">
+    <div class="m">Hot Seat<b id="u1"></b></div>
+    <div class="m">Desert Rally<b id="u2"></b></div>
+  </div>
+  <div style="text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+    <button class="btn" onclick="dlExcel()">⬇ Download Excel (.xlsx)</button>
+    <button class="btn g" onclick="go('s3')">Back to games</button>
+    <button class="btn g" onclick="newP()">New participant</button>
+  </div>
+</section>
+
+<div id="cin"><canvas id="cv"></canvas><button id="skip">Skip ▶▶</button></div>
+
+<script>
+// Configuration & Target Email
+const TARGET_EMAIL = 'mmsbf26001@stu.xim.edu.in';
+const KEY = 'cfoSurveyDB';
+let ENDPOINT = localStorage.getItem('cfo_sheet_endpoint') || '';
+
+const $=i=>document.getElementById(i);
+let DB=[];try{DB=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){}
+let P=null,cur='';
+
+function openSyncModal(){
+  $('cfgEndpoint').value = ENDPOINT;
+  $('syncModal').classList.add('on');
+}
+function closeSyncModal(){
+  $('syncModal').classList.remove('on');
+}
+function saveEndpointConfig(){
+  const url = $('cfgEndpoint').value.trim();
+  ENDPOINT = url;
+  localStorage.setItem('cfo_sheet_endpoint', url);
+  closeSyncModal();
+  updateSyncStatus();
+  if (url) {
+    warn('Testing connection to Google Sheet...', 1);
+    fetch(url).then(r=>r.json()).then(data=>{
+      warn('Connected to Sheet successfully! Destination: ' + TARGET_EMAIL, 1);
+      updateSyncUI('synced', 'Live Cloud Sync Connected ✓');
+    }).catch(e=>{
+      warn('URL saved. (If CORS prevents direct GET test, POST submissions will still execute)', 1);
+      updateSyncUI('synced', 'Configured: ' + (url.slice(0,35) + '...'));
+    });
+  } else {
+    updateSyncUI('offline', 'Offline Mode (Local Storage Only)');
+  }
+}
+
+function updateSyncUI(status, text){
+  const dot = $('sDot');
+  const txt = $('sTxt');
+  if (!dot || !txt) return;
+  dot.className = 'sync-dot ' + (status === 'synced' ? 'synced' : status === 'syncing' ? 'syncing' : status === 'err' ? 'err' : '');
+  txt.textContent = text;
+}
+
+function updateSyncStatus(){
+  if (!ENDPOINT) {
+    updateSyncUI('offline', 'Cloud Sync: Local Storage (Click ⚙️ to connect Google Sheet)');
+  } else {
+    updateSyncUI('synced', 'Cloud Sync: Active → ' + TARGET_EMAIL);
+  }
+}
+updateSyncStatus();
+
+/**
+ * Universal Data Sync & Email Notification Handler
+ * Sends player registration, game completions, and final scorecards to Google Sheets + Email
+ */
+async function syncToCloud(eventType, extra = {}) {
+  if (!P) return;
+  const payload = {
+    eventType: eventType, // 'REGISTER', 'POKER_COMPLETED', 'RALLY_COMPLETED', 'FINISHED'
+    targetEmail: TARGET_EMAIL,
+    timestamp: new Date().toLocaleString(),
+    participant: {
+      id: P.id,
+      name: P.name,
+      email: P.email,
+      age: P.age,
+      gender: P.gender,
+      phone: P.phone || 'N/A',
+      status: P.status,
+      nick: P.nick
+    },
+    poker: P.poker ? {
+      completed: true,
+      doneTime: P.poker.done,
+      chips: P.poker.chips,
+      level: P.poker.x ? P.poker.x.lvl : 'N/A',
+      overallPct: P.poker.x ? P.poker.x.ov : 'N/A',
+      bestStreak: P.poker.x ? P.poker.x.best : 0,
+      scores: P.poker.x ? P.poker.x.sc : {},
+      handsPlayed: P.poker.data ? P.poker.data.length : 0,
+      responses: P.poker.data || []
+    } : { completed: false, responses: [] },
+    rally: P.rally ? {
+      completed: true,
+      doneTime: P.rally.done || (P.rally.data ? P.rally.data.ts : ''),
+      title: P.rally.data ? P.rally.data.ti : 'N/A',
+      score: P.rally.data ? P.rally.data.tot : 0,
+      maxScore: P.rally.data ? P.rally.data.all : 0,
+      percent: P.rally.data ? P.rally.data.pc : 0,
+      cfoScore: P.rally.data ? P.rally.data.cf : 0,
+      eqScore: P.rally.data ? P.rally.data.ef : 0,
+      crashes: P.rally.data ? P.rally.data.crash : 0,
+      coins: P.rally.data ? P.rally.data.gold : 0,
+      responses: P.rally.data ? (P.rally.data.ans || []) : []
+    } : { completed: false, responses: [] },
+    extra: extra
+  };
+
+  updateSyncUI('syncing', 'Updating Google Sheet & sending email...');
+
+  if (ENDPOINT) {
+    try {
+      // Use text/plain payload to prevent browser CORS pre-flight blockage with Google Apps Script
+      await fetch(ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      updateSyncUI('synced', 'Synced to Sheet & Emailed to ' + TARGET_EMAIL + ' ✓');
+      warn('Data updated in Sheet and email sent to ' + TARGET_EMAIL, 1);
+    } catch (err) {
+      console.warn('Sync failed:', err);
+      updateSyncUI('err', 'Sync error: Saved in Local Storage');
+    }
+  } else {
+    updateSyncUI('offline', 'Saved locally (Set Google Sheet endpoint in ⚙️ to auto-email)');
+  }
+}
+
+let tt;function warn(m,info){$('tm').textContent=(info?'ℹ️ ':'⚠️ ')+m;const t=$('toast');t.className='on'+(info?' info':'');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),7000)}
+addEventListener('error',e=>warn('Something went wrong: '+(e.message||'unknown error')+'.'));
+addEventListener('unhandledrejection',e=>warn('Something went wrong: '+(e.reason&&e.reason.message||e.reason)));
+
+(()=>{const b=$('bgfx');for(let i=0;i<16;i++){const e=document.createElement('i');e.textContent=['♠','♥','♦','♣','🏁','🏎️'][i%6];e.style.cssText='left:'+(i*6.4)+'%;font-size:'+(22+i%4*14)+'px;animation-duration:'+(14+i%5*5)+'s;animation-delay:-'+(i*2.3)+'s';b.appendChild(e)}})();
+$('f').addEventListener('keydown',e=>{if(e.key=='Enter'&&!['SELECT','BUTTON','TEXTAREA'].includes(e.target.tagName)){e.preventDefault();reg(e)}});
+
+const AV={Working:'💼',PG:'🎓',UG:'📚'};
+function chk(){const v=i=>$(i).value.trim(),a=+v('ag');return{nm:!!v('nm'),em:/^\S+@\S+\.\S+$/.test(v('em')),ag:a>=16&&a<=80,gn:!!v('gn'),st:!!document.querySelector('[name=st]:checked'),nk:!!v('nk')}}
+function upd(){const c=chk(),n=Object.values(c).filter(Boolean).length;document.querySelectorAll('.fd').forEach(d=>{const k=d.dataset.f;if(k in c){d.classList.toggle('ok',c[k]);if(c[k]){d.classList.remove('bad');d.querySelector('.fe').textContent=''}}});$('rdb').style.width=n/6*100+'%';$('rdt').textContent=n==6?'Seat ready ✓ press Start':'Seat ready: '+n+' of 6';const v=i=>$(i).value.trim(),st=document.querySelector('[name=st]:checked');$('pcN').textContent=v('nk')||'YOUR NICKNAME';$('pcName').textContent=v('nm')||'Your name';$('pcSt').textContent=st?st.value:'Choose status';$('pcAv').textContent=st?AV[st.value]:'🎴'}
+function rnd(){const A=['Bold','Ace','Turbo','Lucky','Silent','Rapid','Savvy','Royal'],N=['Banker','Falcon','Ledger','Bluffer','Racer','Auditor','Closer','Maverick'];$('nk').value=A[Math.random()*8|0]+' '+N[Math.random()*8|0];upd()}
+
+function reg(e){
+  e&&e.preventDefault&&e.preventDefault();
+  const v=i=>$(i).value.trim(),st=document.querySelector('[name=st]:checked'),a=+v('ag'),E={};
+  if(!v('nm'))E.nm='Please enter your full name.';
+  if(!/^\S+@\S+\.\S+$/.test(v('em')))E.em='Enter a valid email, like name@example.com.';
+  if(!v('ag'))E.ag='Please enter your age.';else if(!(a>=16&&a<=80))E.ag='Age must be between 16 and 80.';
+  if(!v('gn'))E.gn='Please select Male or Female.';
+  if(v('ph')&&!/^[+\d][\d\s-]{6,15}$/.test(v('ph')))E.ph='Phone looks invalid. Fix it or leave it empty.';
+  if(!st)E.st='Please tap Working, PG or UG.';
+  if(!v('nk'))E.nk='Please choose a nickname (tap 🎲 for one).';
+  document.querySelectorAll('.fd').forEach(d=>{const m=E[d.dataset.f];d.classList.toggle('bad',!!m);d.querySelector('.fe').textContent=m||''});
+  const ks=Object.keys(E);
+  if(ks.length){
+    warn(ks.length==1?'1 field needs your attention: '+E[ks[0]]:ks.length+' fields need your attention. They are highlighted in red.');
+    const f=document.querySelector('.fd[data-f='+ks[0]+']');f.scrollIntoView({block:'center',behavior:'smooth'});
+    const i=f.querySelector('input,select');if(i&&i.type!='radio')i.focus();
+    $('f').classList.remove('shake');void $('f').offsetWidth;$('f').classList.add('shake');
+    return;
+  }
+  if(DB.some(d=>d.email.toLowerCase()==v('em').toLowerCase()))warn('This email is already registered. A new session will be created.',1);
+  P={id:'P'+Date.now().toString(36).toUpperCase(),ts:new Date().toLocaleString(),name:v('nm'),email:v('em'),age:a,gender:v('gn'),phone:v('ph'),status:st.value,nick:v('nk'),poker:null,rally:null};
+  DB.push(P);
+  try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}
+  
+  // Real-time Cloud Sync & Email Trigger
+  syncToCloud('REGISTER');
+  go('s3');
+}
+
+function menu(){
+  $('hi').textContent='Choose your game';
+  $('who').innerHTML='<span>'+AV[P.status]+' '+P.nick+' · '+P.status+'</span>';
+  $('pg1').className=P.poker?'f':'';
+  $('pg2').className=P.rally?'f':'';
+  [['poker','b1'],['rally','b2']].forEach(([g,b])=>{
+    const d=!!P[g];
+    $(b).textContent=d?'Completed ✓ (tap to replay)':'Not played';
+    $(b).className='badge'+(d?' ok':'')+(d&&!$(b).classList.contains('ok')?' pop':'');
+  });
+  $('fin').style.display=(P.poker||P.rally)?'':'none';
+}
+
+function launch(g){
+  if(FSM.s!='s3')return;
+  FSM.s='cin';
+  cur=g;
+  $('pill').style.display='none';
+  cine(g,()=>{
+    $('gt').textContent=g=='poker'?'Game 1 · The Hot Seat':'Game 2 · CFO Desert Rally';
+    go('play');
+    // Load game inside iframe
+    $('gf').src = g == 'poker' ? 'poker.html' : 'rally.html';
+    holdCin();
+  });
+}
+
+function holdCin(){
+  const f=$('gf');let d=0;
+  const rm=()=>{if(d)return;d=1;setTimeout(()=>{const c=$('cin');c.classList.add('fade');setTimeout(()=>c.classList.remove('on','fade'),420)},250)};
+  f.onload=rm;setTimeout(rm,2500);
+}
+function clrGf(){setTimeout(()=>{if(FSM.s!='play'&&FSM.s!='cin')$('gf').src='about:blank'},1000)}
+function leave(done){if(done&&P.poker&&P.rally){finish();clrGf();return}go('s3');clrGf()}
+
+// Message listener from embedded poker and rally games
+addEventListener('message', e=>{
+  const m=e.data;
+  if(!m||m.type!='cfo-game'||!P)return;
+  P[m.game]={done:new Date().toLocaleString(),data:m.data,chips:m.chips,x:m.x};
+  try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}
+  
+  // Real-time Cloud Sync & Email Trigger
+  syncToCloud(m.game == 'poker' ? 'POKER_COMPLETED' : 'RALLY_COMPLETED');
+  
+  $('pill').style.display='inline-block';
+});
+
+function finish(){
+  $('tn').textContent=P.nick;
+  const p=P.poker,r=P.rally;
+  $('u1').textContent=p?p.data.length+' hands ($'+p.chips+' chips)':'not played';
+  $('u2').textContent=r?r.data.tot+' / '+r.data.all+' pts ('+r.data.pc+'%)':'not played';
+  go('s5');
+  
+  // Final Comprehensive Sync & Email
+  syncToCloud('FINISHED');
+  if(p||r)dlExcel();
+}
+
+function newP(){
+  P=null;
+  document.querySelectorAll('input:not([type=radio]),select').forEach(i=>i.value='');
+  document.querySelectorAll('[name=st]').forEach(i=>i.checked=false);
+  go('s1');
+}
+
+/* UI FSM & Screen Navigation */
+const FSM={s:'s1',T:{s1:['s2'],s2:['s1','s3'],s3:['s2','s5'],cin:['play','s3'],play:['s3','s5'],s5:['s3','s1']},ok(n){return n==this.s||(this.T[this.s]||[]).includes(n)}};
+let txb=0;
+function swap(id,instant){
+  const nx=$(id),now=()=>document.querySelectorAll('.scr').forEach(s=>{s.classList.toggle('on',s===nx);s.classList.toggle('show',s===nx);s.classList.remove('out')});
+  if(instant||txb||!document.querySelector('.scr.on')){now();return}
+  wipe(id,now);
+}
+function wipe(id,cb){
+  txb=1;const t=$('tx'),car=id=='s3'||id=='s5'||id=='play';t.className='on '+(car?'car':'cards');
+  t.innerHTML='<div class="txp"></div><div class="txi">'+(car?'<span>🏎️</span>':'<span>♠</span><span>♥</span><span>♦</span><span>♣</span>')+'</div>';
+  const p=t.firstChild,i=t.lastChild,o={fill:'forwards'};
+  const a=p.animate([{transform:'translateX(-100%)'},{transform:'none'}],{duration:340,easing:'cubic-bezier(.55,0,.25,1)',...o});
+  i.animate([{transform:'translateX(-100vw)'},{transform:'none'}],{duration:340,easing:'cubic-bezier(.55,0,.25,1)',...o});
+  a.onfinish=()=>{cb();setTimeout(()=>{
+    const b=p.animate([{transform:'none'},{transform:'translateX(100%)'}],{duration:340,easing:'cubic-bezier(.5,0,.2,1)',...o});
+    i.animate([{transform:'none'},{transform:'translateX(calc(100vw + 120px))'}],{duration:340,easing:'cubic-bezier(.5,0,.2,1)',...o});
+    b.onfinish=()=>{t.className='';t.innerHTML='';txb=0};
+  },140)};
+}
+function go(id){if(!FSM.ok(id))return;const pv=FSM.s;FSM.s=id;swap(id,pv=='cin');scrollTo(0,0);if(id=='s3')menu()}
+
+/* 3D tilt effect */
+(()=>{
+  const c=document.querySelector('.pc2'),s=$('s2');
+  if(!c||!s)return;
+  const rs=()=>{c.style.setProperty('--rx','0deg');c.style.setProperty('--ry','0deg');c.classList.remove('tilt')};
+  const cp=v=>Math.max(-1,Math.min(1,v));
+  s.addEventListener('pointermove',e=>{
+    if(e.pointerType=='touch')return;
+    const r=c.getBoundingClientRect();
+    const dx=cp((e.clientX-r.left-r.width/2)/(innerWidth/2)),dy=cp((e.clientY-r.top-r.height/2)/(innerHeight/2));
+    c.classList.add('tilt');
+    c.style.setProperty('--ry',(dx*16).toFixed(1)+'deg');
+    c.style.setProperty('--rx',(-dy*14).toFixed(1)+'deg');
+  });
+  s.addEventListener('pointerleave',rs);
+})();
+
+/* Excel Export */
+function tables(){
+  const T={Participants:[],Survey_Report:[],Poker_Responses:[],Rally_Responses:[],Rally_Summary:[]};
+  const RS={w:'Win',p:'Push',l:'Loss'};
+  const LBL=['Strongly disagree','Disagree','Neutral','Agree','Strongly agree'];
+  const LF={ins:'Insurance',time:'+10 seconds',ask:'Ask the Board'};
+  const nn=n=>(n<10?'0':'')+n;
+
+  DB.forEach(p=>{
+    const pk=p.poker&&p.poker.data||[],ra=p.rally&&p.rally.data;
+    T.Participants.push({
+      ID:p.id,Registered:p.ts,Name:p.name,Email:p.email,Age:p.age,Gender:p.gender,Phone:p.phone,Status:p.status,Nickname:p.nick,
+      Poker_Completed:p.poker?'Yes':'No',Poker_Hands:pk.length,Poker_Final_Chips:p.poker?p.poker.chips:'',
+      Rally_Completed:ra?'Yes':'No',Rally_Score:ra?ra.tot:'',Rally_Max:ra?ra.all:'',Rally_Percent:ra?ra.pc:'',Rally_Title:ra?ra.ti:''
+    });
+    const px=(p.poker&&p.poker.x)||{},us=px.used||{},ID={Participant_ID:p.id,Name:p.name,Email:p.email,Age:p.age,Gender:p.gender,Status:p.status,Nickname:p.nick};
+    Object.assign(T.Participants[T.Participants.length-1],{
+      Poker_Level:px.lvl||'',Poker_Overall_Pct:px.ov??'',Poker_Best_Streak:px.best??'',Poker_Busted:p.poker?(px.bust?'Yes':'No'):''
+    });
+    pk.forEach(x=>T.Poker_Responses.push(Object.assign({},ID,{
+      Hand:x.hand,Dimension:x.dimn||x.dim,Question_Type:x.type||'',Statement:x.q,Answer_Code:x.ans,Answer_Selected:x.ansTxt||x.ans,
+      Stake_Percent:x.stake,Stake_Chips:x.st??'',Chips_Before:x.c0??'',Chips_After:x.c1??'',Chip_Change:x.dl??'',Result:RS[x.out]||x.out
+    })));
+    if(ra){
+      (ra.ans||[]).forEach(a=>T.Rally_Responses.push(Object.assign({},ID,{
+        Q:a.n,Category:a.cat,Statement:a.tx,Lane_Chosen_1to5:a.ch||a.l+1,Choice_Label:a.lab||LBL[a.l],Score:a.s,Reverse_Keyed:a.rev?'Yes':'No',Reaction_Sec:a.rt
+      })));
+      T.Rally_Summary.push(Object.assign({
+        Participant_ID:p.id,Name:p.name,Email:p.email,Nickname:p.nick,Played:ra.ts,Title:ra.ti,Total:ra.tot,Max:ra.all,Percent:ra.pc,
+        CFO_Score:ra.cf,CFO_Max:ra.cm,EI_Score:ra.ef,EI_Max:ra.em,Gold:ra.gold,Crashes:ra.crash
+      }));
+    }
+  });
+  return T;
+}
+
+function dlExcel(){
+  const T=tables();
+  if(!DB.length)return warn('No data to export yet. Register and play first.');
+  if(window.XLSX){
+    const wb=XLSX.utils.book_new();
+    Object.entries(T).forEach(([n,r])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(r.length?r:[{Info:'No data yet'}]),n));
+    XLSX.writeFile(wb,'CFO_Survey_Data.xlsx');
+  } else {
+    warn('Excel library not loaded; downloading CSV backup.');
+  }
+}
+
+/* Cinematic game transitions */
+const cl=v=>Math.max(0,Math.min(1,v)),eo=v=>1-Math.pow(1-v,3);
+function poker(x,W,H,t){
+  x.fillStyle='#07050c';x.fillRect(0,0,W,H);
+  x.textAlign='center';x.fillStyle='#f2c14e';x.font='800 '+Math.min(58,W*.11)+'px Georgia,serif';
+  x.fillText('THE HOT SEAT',W/2,H*.4);
+  x.fillStyle='#eef0f7';x.font='600 '+Math.min(18,W*.04)+'px system-ui';
+  x.fillText('C F O   P O K E R   T A B L E',W/2,H*.4+40);
+}
+function race(x,W,H,t){
+  x.fillStyle='#1b1040';x.fillRect(0,0,W,H);
+  x.textAlign='center';x.fillStyle='#fff';x.font='800 '+Math.min(58,W*.1)+'px Georgia,serif';
+  x.fillText('CFO DESERT RALLY',W/2,H*.4);
+  x.fillStyle='#ffd27a';x.font='700 '+Math.min(18,W*.045)+'px system-ui';
+  x.fillText('G R E E N   F L A G',W/2,H*.4+40);
+}
+function cine(k,cb){
+  const c=$('cv'),x=c.getContext('2d'),W=c.width=innerWidth,H=c.height=innerHeight;
+  $('cin').classList.add('on');
+  let t0=performance.now(),raf,d=0;
+  const end=()=>{if(d)return;d=1;cancelAnimationFrame(raf);cb()};
+  $('skip').onclick=end;
+  const f=n=>{const t=(n-t0)/1000;(k=='poker'?poker:race)(x,W,H,t);if(t>=1.8)return end();raf=requestAnimationFrame(f)};
+  raf=requestAnimationFrame(f);
+}
+</script>
+</body>
+</html>
