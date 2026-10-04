@@ -350,7 +350,7 @@ async function syncToCloud(eventType, extra = {}) {
     extra: extra
   };
 
-  updateSyncUI('syncing', 'Updating Google Sheet & sending email...');
+  updateSyncUI('syncing', 'Syncing player data to Google Sheet...');
 
   if (ENDPOINT) {
     try {
@@ -361,14 +361,14 @@ async function syncToCloud(eventType, extra = {}) {
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       });
-      updateSyncUI('synced', 'Synced to Sheet & Emailed to ' + TARGET_EMAIL + ' ✓');
-      warn('Data updated in Sheet and email sent to ' + TARGET_EMAIL, 1);
+      updateSyncUI('synced', 'Synced to Sheet ✓ (Daily digest sent to ' + TARGET_EMAIL + ')');
+      warn('Data recorded in Sheet. Daily summary sent to ' + TARGET_EMAIL, 1);
     } catch (err) {
       console.warn('Sync failed:', err);
       updateSyncUI('err', 'Sync error: Saved in Local Storage');
     }
   } else {
-    updateSyncUI('offline', 'Saved locally (Set Google Sheet endpoint in ⚙️ to auto-email)');
+    updateSyncUI('offline', 'Saved locally (Set Google Sheet endpoint in ⚙️)');
   }
 }
 
@@ -406,9 +406,12 @@ function reg(e){
   if(DB.some(d=>d.email.toLowerCase()==v('em').toLowerCase()))warn('This email is already registered. A new session will be created.',1);
   P={id:'P'+Date.now().toString(36).toUpperCase(),ts:new Date().toLocaleString(),name:v('nm'),email:v('em'),age:a,gender:v('gn'),phone:v('ph'),status:st.value,nick:v('nk'),poker:null,rally:null};
   DB.push(P);
-  try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}
+  try{
+    localStorage.setItem(KEY,JSON.stringify(DB));
+    localStorage.setItem('cfo_active_player', JSON.stringify(P));
+  }catch(e){}
   
-  // Real-time Cloud Sync & Email Trigger
+  // Real-time Cloud Sync (stores data, daily digest sent at end of day)
   syncToCloud('REGISTER');
   go('s3');
 }
@@ -427,14 +430,14 @@ function menu(){
 }
 
 function launch(g){
-  if(FSM.s!='s3')return;
+  if(FSM.s!='s3'&&FSM.s!='play')return;
   FSM.s='cin';
   cur=g;
   $('pill').style.display='none';
   cine(g,()=>{
     $('gt').textContent=g=='poker'?'Game 1 · The Hot Seat':'Game 2 · CFO Desert Rally';
     go('play');
-    // Load game inside iframe
+    // Load game inside iframe with query context
     $('gf').src = g == 'poker' ? 'poker.html' : 'rally.html';
     holdCin();
   });
@@ -451,14 +454,35 @@ function leave(done){if(done&&P.poker&&P.rally){finish();clrGf();return}go('s3')
 // Message listener from embedded poker and rally games
 addEventListener('message', e=>{
   const m=e.data;
-  if(!m||m.type!='cfo-game'||!P)return;
+  if(!m)return;
+
+  // Handle direct game-to-game navigation requests
+  if(m.type=='cfo-nav'){
+    if(m.to=='finish' || (P && P.poker && P.rally && m.to!='poker' && m.to!='rally')){
+      finish();
+      clrGf();
+    } else if(m.to=='poker' || m.to=='rally'){
+      launch(m.to);
+    }
+    return;
+  }
+
+  if(m.type!='cfo-game'||!P)return;
   P[m.game]={done:new Date().toLocaleString(),data:m.data,chips:m.chips,x:m.x};
-  try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}
+  try{
+    localStorage.setItem(KEY,JSON.stringify(DB));
+    localStorage.setItem('cfo_active_player', JSON.stringify(P));
+  }catch(e){}
   
-  // Real-time Cloud Sync & Email Trigger
+  // Real-time Cloud Sync
   syncToCloud(m.game == 'poker' ? 'POKER_COMPLETED' : 'RALLY_COMPLETED');
   
   $('pill').style.display='inline-block';
+  if(P.poker && P.rally){
+    $('pill').textContent='Both Games Done 🏆 View Summary ▶';
+  } else {
+    $('pill').textContent=(m.game=='poker'?'Play Game 2: Desert Rally ▶':'Play Game 1: The Hot Seat ▶');
+  }
 });
 
 function finish(){

@@ -48,27 +48,97 @@ button:active{transform:translateY(3px);box-shadow:0 2px 0 #a8480f}
 .ring .n{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#c2410c}
 .pg{stroke-dasharray:390;stroke-dashoffset:390;transition:stroke-dashoffset 2s cubic-bezier(.2,.8,.2,1)}
 .bg{display:inline-block;background:#fff;border-radius:20px;padding:6px 12px;margin:4px;font-weight:700;font-size:12px;box-shadow:0 2px 0 #ecd9b0;animation:pop .5s both}
+#how{position:fixed;right:0;top:46%;z-index:45;writing-mode:vertical-rl;padding:14px 7px;background:linear-gradient(#ff9f4a,#e76f2e);color:#fff;border:0;border-radius:10px 0 0 10px;font:inherit;font-weight:700;font-size:.82rem;cursor:pointer;box-shadow:-3px 3px 12px rgba(0,0,0,.4);transition:.2s}
+#how:hover{filter:brightness(1.1);transform:translateX(-2px)}
+.ov2{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);display:none;place-items:center;padding:16px}
+.ov2.on{display:grid}
+.ovc2{background:#fff9f0;border:3px solid #e76f2e;border-radius:20px;padding:22px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;font-size:.88rem;box-shadow:0 12px 40px rgba(0,0,0,.6);color:#2b2118;text-align:left}
+.ovc2 h2{margin:0;font-size:1.45rem;color:#c2410c;display:flex;align-items:center;gap:8px}
+.ovc2 .sec-title{font-size:.76rem;color:#a8480f;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:12px 0 4px}
+.ovc2 .two{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:6px 0;align-items:baseline}
+.ovc2 .two b{color:#c2410c;font-size:.88rem}
+.ovc2 .two span{font-size:.84rem;color:#554433;line-height:1.4}
+.ovc2 .sc-row{display:flex;gap:4px;margin:8px 0}
+.ovc2 .sc-row span{flex:1;text-align:center;padding:6px 2px;border-radius:8px;font-size:10px;color:#fff;font-weight:700}
+.ovc2 .note{font-size:.78rem;color:#7a6650;margin:10px 0 8px;line-height:1.4}
+.ovc2 .go{background:linear-gradient(#ff9f4a,#e76f2e);color:#fff;border:0;border-radius:12px;padding:12px 24px;font-size:.95rem;font-weight:800;cursor:pointer;width:100%;box-shadow:0 4px 14px rgba(231,111,46,.4);margin-top:14px}
 @media(prefers-reduced-motion:reduce){.rv,.rcar,.rp,.tro,.bg{animation:none}#cf{display:none}.pg{transition:none}}
 </style></head><body>
+
+<button id="how" aria-label="How to play" onclick="openHowModal()">How to play</button>
+
+<div class="ov2" id="howModal">
+  <div class="ovc2">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h2>🏎️ How to Play</h2>
+      <button onclick="closeHowModal()" style="background:none;border:0;color:#7a6650;font-size:22px;cursor:pointer;line-height:1;padding:4px">✕</button>
+    </div>
+    <div style="font-size:13px;line-height:1.45;color:#4a3b30;margin-bottom:10px">
+      <b>Goal:</b> Drive through 15 high-stakes decision gates, balancing CFO financial judgements and emotional intelligence (EQ) in high-speed rally conditions.
+    </div>
+
+    <div class="sec-title">🎮 Controls &amp; Steering</div>
+    <div class="two">
+      <b>Steering:</b>
+      <span>Use <b>← / →</b> or <b>A / D</b> on keyboard, or <b>drag / tap lanes</b> on touch.</span>
+      <b>🔥 Turbo:</b>
+      <span>Hold <b>SPACE</b> (or tap <b>TURBO</b>) to accelerate towards the gate.</span>
+      <b>⚡ Nitro:</b>
+      <span>Press <b>N</b>, <b>Shift</b>, or tap <b>NITRO</b> for a 2.2-second boost surge.</span>
+      <b>⏸️ Pause:</b>
+      <span>Press <b>P</b> or <b>ESC</b> to pause; press <b>M</b> to mute audio.</span>
+    </div>
+
+    <div class="sec-title">🛣️ The 5 Decision Lanes</div>
+    <div class="sc-row">
+      <span style="background:#e63946"><b>1</b><br>Strongly disagree</span>
+      <span style="background:#f4a261"><b>2</b><br>Disagree</span>
+      <span style="background:#d4a017"><b>3</b><br>Neutral</span>
+      <span style="background:#6aa312"><b>4</b><br>Agree</span>
+      <span style="background:#2a9d8f"><b>5</b><br>Strongly agree</span>
+    </div>
+    <p style="margin:4px 0 8px;font-size:12.5px;color:#554433;">
+      The statement appears in the cockpit console directly below your car. Steer into your chosen lane before crossing the gate. You can also tap lane buttons directly!
+    </p>
+
+    <div class="sec-title">🚗 Obstacles &amp; Collectibles</div>
+    <div class="two">
+      <b>Traffic:</b>
+      <span>Dodge civilian cars to prevent crashes and delays (traffic frequency reduced by 25% for easy reading).</span>
+      <b>Canisters:</b>
+      <span>Collect blue nitro canisters to recharge your boosts (holds up to 8).</span>
+      <b>Rival Car:</b>
+      <span>Spot the red competitor? Ram it to win <b>🪙 +5 bonus coins</b>!</span>
+    </div>
+
+    <div class="sec-title">📊 Assessment Integrity</div>
+    <p class="note">
+      15 questions testing capital allocation, risk discipline, ethics, and emotional intelligence. Two statements are reverse-scored to ensure authentic responses. Finish both games to complete your assessment!
+    </p>
+
+    <button class="go" onclick="closeHowModal()">Got it / Race ▶</button>
+  </div>
+</div>
+
 <div id="wrap"><canvas id="c"></canvas>
-<div id="ov"><div id="in"><div id="intro"><h1>🏜️ CFO Desert Rally</h1><p style="margin:0">How to play: slide through the guide</p>
+<div id="ov"><div id="in"><div id="intro"><h1>🏜️ CFO Desert Rally</h1><p style="margin:0">15 High-Speed Executive Decision Gates</p>
 <div id="sl"><div id="st">
-<div class="s"><div class="e">🛣️</div><b>1. Pick your answer lane</b><p>A statement appears at the top. The 5 lanes are the Likert scale. Drive through the matching board on the gate. There are 15 statements, deliberately mixed: cold CFO judgement calls and personal emotional-intelligence (EQ) questions in an unsettling order. Two CFO statements are reverse-scored.</p><div class="sc"><span style="background:#e63946"><b>1</b>Strongly disagree</span><span style="background:#f4a261"><b>2</b>Disagree</span><span style="background:#d4a017"><b>3</b>Neutral</span><span style="background:#6aa312"><b>4</b>Agree</span><span style="background:#2a9d8f"><b>5</b>Strongly agree</span></div></div>
-<div class="s"><div class="e">🎮</div><b>2. Steer</b><p>Use ← → or A / D on a keyboard. On touch, drag your finger across the road to pick a lane.</p></div>
-<div class="s"><div class="e">🔥</div><b>3. Hold SPACE for turbo</b><p>Hold SPACE (or the TURBO button on touch) to speed up. Let go and you slow back down. The gate arrives sooner when you speed up, so decide your answer first!</p></div>
-<div class="s"><div class="e">⚡</div><b>4. Collect nitro</b><p>Drive through blue nitro canisters to fill your tank (max 8). Canisters appear often. Press N or Shift, or tap NITRO, for a 2-second boost. A crash costs 1 nitro. Spot the red RIVAL car? Ram it to win 🪙 coins. Nitro and coins do not change your survey score.</p></div>
-<div class="s"><div class="e">🏁</div><b>5. Dodge, finish, get your report</b><p>Traffic slows you down. Watch the gate timer on the question card. Pause with P, mute with M, or tap ❓ for this guide. Your report appears at the end and every question and answer is saved to an Excel file.</p></div>
+<div class="s"><div class="e">🛣️</div><b>1. Pick your answer lane</b><p>A statement appears directly below your car. The 5 lanes represent the Likert scale (1 to 5). Steer into the lane that reflects your leadership approach before passing through the gate.</p><div class="sc"><span style="background:#e63946"><b>1</b>Strongly disagree</span><span style="background:#f4a261"><b>2</b>Disagree</span><span style="background:#d4a017"><b>3</b>Neutral</span><span style="background:#6aa312"><b>4</b>Agree</span><span style="background:#2a9d8f"><b>5</b>Strongly agree</span></div></div>
+<div class="s"><div class="e">🎮</div><b>2. Controls &amp; Steering</b><p>Use ← → or A / D on keyboard. On touch or mouse, drag across the road or tap the lane cards directly in the bottom console.</p></div>
+<div class="s"><div class="e">🔥</div><b>3. Turbo &amp; Nitro Boosts</b><p>Hold SPACE (or TURBO button) to accelerate. Press N, Shift, or tap NITRO for a 2.2s burst. Collect blue canisters to reload nitro!</p></div>
+<div class="s"><div class="e">🏎️</div><b>4. Dodge Traffic &amp; Hit Rivals</b><p>Civilian cars slow you down if hit. Ram the red rival racer to score 🪙 +5 coins! Focus on your true answers above all.</p></div>
+<div class="s"><div class="e">🏁</div><b>5. Finish &amp; Play Next Game</b><p>When you cross the finish line, your leadership scorecard is saved and you can proceed directly to the next game!</p></div>
 </div></div>
 <input type="range" id="rg" min="0" max="4" value="0" step="1" aria-label="Guide slide">
 <div class="nv"><button id="bk" class="sb">◀ Back</button><span id="ct">1 / 5</span><button id="nx" class="sb">Next ▶</button></div>
-<button id="go">Start Engine</button></div>
+<div style="display:flex;gap:10px;justify-content:center;margin-top:14px;"><button id="go" style="flex:1">Start Engine ▶</button><button type="button" class="sb" style="padding:13px 18px;background:#fff;color:#c2410c;border:2px solid #e76f2e;font-weight:bold;box-shadow:none;cursor:pointer;" onclick="openHowModal()">📖 How to Play</button></div></div>
 <div id="res" style="display:none"></div></div></div></div>
 <script>
 if(typeof CanvasRenderingContext2D!=='undefined'&&!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=Math.min(r,w/2,h/2);this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath()};
 const cv=document.getElementById('c'),g=cv.getContext('2d'),ov=document.getElementById('ov');
 const RMo=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches);
-const DPR=Math.min(1.5,window.devicePixelRatio||1);let W=360,H=600,CX=180,HOR=175,PY=470,LW=68,SC=1,OX=0,QW=332,XK=1;const K=.12;
-function setSize(){const wd=innerWidth/innerHeight>1.15&&innerWidth>=640;W=wd?960:360;H=wd?540:600;CX=W/2;HOR=wd?150:175;PY=wd?H-95:470;LW=wd?104:68;SC=LW/68;OX=W-360;QW=wd?720:332;XK=wd?1.9:1;cv.width=W*DPR;cv.height=H*DPR;cv.style.aspectRatio=W+'/'+H;document.getElementById('wrap').classList.toggle('wide',wd)}
+const DPR=Math.min(1.5,window.devicePixelRatio||1);let W=360,H=600,CX=180,HOR=160,PY=380,LW=68,SC=1,OX=0,QW=332,XK=1;const K=.12;
+function setSize(){const wd=innerWidth/innerHeight>1.15&&innerWidth>=640;W=wd?960:360;H=wd?540:600;CX=W/2;HOR=wd?140:160;PY=wd?340:380;LW=wd?104:68;SC=LW/68;OX=W-360;QW=wd?720:332;XK=wd?1.9:1;cv.width=W*DPR;cv.height=H*DPR;cv.style.aspectRatio=W+'/'+H;document.getElementById('wrap').classList.toggle('wide',wd)}
 setSize();addEventListener('resize',setSize);
 const P=d=>1/(1+d*K),Y=d=>HOR+(PY-HOR)*P(d);
 const LC=['#e63946','#f4a261','#e0a800','#6aa312','#2a9d8f'];
@@ -108,9 +178,36 @@ function setLane(l){if(S&&S.run&&!S.pause)S.tgt=Math.max(0,Math.min(4,l))}
 addEventListener('keydown',e=>{if(!S)return;if(e.key==' '){S.hold=1;e.preventDefault()}if(e.key=='p'||e.key=='P'||e.key=='Escape')tp();if(e.key=='m'||e.key=='M')SND=!SND;if(e.key=='n'||e.key=='N'||e.key=='Shift')useN();if(['ArrowLeft','a','A'].includes(e.key))setLane(S.tgt-1);if(['ArrowRight','d','D'].includes(e.key))setLane(S.tgt+1)});
 addEventListener('keyup',e=>{if(e.key==' '&&S)S.hold=0});
 let down=0,tid=-1;const pl=e=>{const r=cv.getBoundingClientRect();setLane(Math.round(((e.clientX-r.left)/r.width*W-CX)/LW)+2)};
-cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W,y=(e.clientY-r.top)/r.height*H;
-if(y<40&&x>288+OX){if(x>329+OX)tp();else if(x>307+OX)SND=!SND;else help();return}if(S.pause){S.pause=0;return}
-if(Math.hypot(x-38,y-(H-62))<32){useN();return}if(Math.hypot(x-(W-38),y-(H-62))<32){S.hold=1;tid=e.pointerId+1;return}down=e.pointerId+1;pl(e)});
+cv.addEventListener('pointerdown',e=>{
+  const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W,y=(e.clientY-r.top)/r.height*H;
+  if(y<40&&x>288+OX){
+    if(x>329+OX)tp();
+    else if(x>307+OX)SND=!SND;
+    else openHowModal();
+    return;
+  }
+  if(S.pause){S.pause=0;return}
+  const isWide = W > 600;
+  const nx = 34, bx = W - 34, by = isWide ? 290 : 330;
+  if(Math.hypot(x-nx,y-by)<32){useN();return}
+  if(Math.hypot(x-bx,y-by)<32){S.hold=1;tid=e.pointerId+1;return}
+
+  // Direct tap on answer lane cards in the bottom question console
+  const pX = isWide ? CX - 440 : 8, pY = isWide ? 375 : 420, pW = isWide ? 880 : W - 16, pH = isWide ? 155 : 172;
+  const laneBarY = pY + pH - (isWide ? 44 : 52);
+  if(S.q < NQ && S.run && y >= laneBarY && y <= pY + pH && x >= pX + 8 && x <= pX + pW - 8){
+    const laneW = (pW - 24) / 5;
+    const l = Math.floor((x - (pX + 12)) / laneW);
+    if(l >= 0 && l < 5){
+      setLane(l);
+      snd(450 + l * 100, .15, 'triangle');
+      return;
+    }
+  }
+
+  down=e.pointerId+1;
+  pl(e);
+});
 cv.addEventListener('pointermove',e=>{if(down&&e.pointerId+1==down)pl(e)});
 const pu=e=>{if(e.pointerId+1==tid){S.hold=0;tid=-1}if(e.pointerId+1==down)down=0};addEventListener('pointerup',pu);addEventListener('pointercancel',pu);
 function burst(x,y,c,n,sp){for(let i=0;i<n;i++){const a=Math.random()*6.28,v=(.3+Math.random())*sp;S.pt.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,l:.8,c})}}
@@ -130,7 +227,7 @@ if(Math.abs(tx-S.px)>6&&Math.random()<.6)S.pt.push({x:S.px+(Math.random()-.5)*50
 S.slow=Math.max(0,S.slow-dt*.8);S.tb=Math.max(0,Math.min(1,S.tb+((S.hold&&S.cd<=0&&S.run)?1.4:-1.8)*dt));S.nt=Math.max(0,S.nt-dt);const v=((S.cd>0?8:11+S.q*.55)+S.boost)*(1-S.slow*.45)*(1+.8*S.tb)*(S.nt>0?1.9:1);S.dist+=v*dt;S.v=v;S.topv=Math.max(S.topv,v);if(S.tb>.5)S.tbt+=dt;
 if(S.cd>0){S.cd-=dt;if(S.cd<=0)mkGate()}
 else if(S.gate){S.gt+=dt;S.gate.d-=v*dt;if(S.gate.d<=0)pass()}
-S.ct-=dt;if(S.cd<=0&&S.run&&S.ct<=0){S.ct=.35+Math.random()*.45;const l=Math.floor(Math.random()*5),rear=Math.random()<.3,cc=CC[Math.floor(Math.random()*CC.length)],t=Math.random()<.3?1:0;
+S.ct-=dt;if(S.cd<=0&&S.run&&S.ct<=0){S.ct=.47+Math.random()*.60;const l=Math.floor(Math.random()*5),rear=Math.random()<.3,cc=CC[Math.floor(Math.random()*CC.length)],t=Math.random()<.3?1:0;
 if(rear){if(Math.abs(CX+(l-2)*LW-S.px)>60*SC)S.cars.push({l,d:-2.9,sp:v+8+Math.random()*6,c:cc,t,x:0,hit:0,near:1})}
 else if(!S.cars.some(c=>c.l==l&&c.d>50)&&(!S.gate||Math.abs(S.gate.d-62)>5))S.cars.push({l,d:62,sp:4+Math.random()*5,c:cc,t,x:0,hit:0})}
 for(const c of S.cars){c.d-=(v-c.sp)*dt;const lx=CX+(c.l-2)*LW;
@@ -232,25 +329,152 @@ g.strokeStyle='#8a6a40';g.lineWidth=4;g.setLineDash([8,6]);g.beginPath();g.moveT
 g.strokeStyle='#e76f2e';g.lineWidth=4;g.beginPath();g.moveTo(12,26);g.lineTo(12+(270+OX)*S.q/NQ,26);g.stroke();
 g.font='15px serif';g.fillText('🚙',12+(270+OX)*Math.min(1,S.riv/(NQ*5)),12);g.fillText('🏎️',12+(270+OX)*Math.min(1,S.tot/(NQ*5)),12);
 g.font='700 11px system-ui';g.textAlign='left';g.fillStyle='#7a6650';g.fillText('Q'+Math.min(NQ,S.q+1)+'/'+NQ,12,34);
+// Top race bar & icons
 g.textAlign='right';g.fillText(Math.round((S.v||0)*6)+' km/h  🏁',350+OX,34);g.font='14px serif';g.textAlign='center';g.fillText('❓',299+OX,12);g.fillText(SND?'🔊':'🔇',318+OX,12);g.fillText(S.pause?'▶️':'⏸️',340+OX,12);
-if(S.q<NQ&&S.run){const qq=Q[S.q],QX=CX-QW/2;g.fillStyle='rgba(60,30,0,.18)';g.beginPath();g.roundRect(QX+2,53,QW,68,14);g.fill();g.fillStyle='#fffaf0';g.beginPath();g.roundRect(QX,48,QW,68,14);g.fill();g.fillStyle='#e76f2e';g.beginPath();g.roundRect(QX,48,8,68,[14,0,0,14]);g.fill();
-g.textAlign='left';g.fillStyle='#c2410c';g.font='800 10px system-ui';g.fillText((DN[qq[0]]||qq[0]).toUpperCase(),QX+18,62);
-g.fillStyle='#2b2118';const ln=qq[1].length>80;g.font=(XK>1?'600 15px':ln?'600 12px':'600 13.5px')+' system-ui';g.textBaseline='alphabetic';wrap(qq[1],QX+18,ln?79:81,QW-26,ln?15:17);g.textBaseline='middle';const G2=S.gate;
-if(G2){const fr=Math.max(0,Math.min(1,G2.d/G2.d0));g.fillStyle='#f0dcb4';g.fillRect(QX+18,107,QW-32,4);g.fillStyle=fr<.25?'#e63946':'#e76f2e';g.fillRect(QX+18,107,(QW-32)*fr,4);g.textAlign='right';g.fillStyle='#7a6650';g.font='700 10px system-ui';g.fillText('⏱ gate in '+Math.max(0,Math.ceil(G2.d/Math.max(S.v,1)))+'s',QX+QW-10,62)}
-const lt='Your answer: '+LB[S.tgt]+' ('+(S.tgt+1)+')';g.font='800 11px system-ui';const pw=g.measureText(lt).width+24;rr(CX-pw/2,122,pw,20,10,LC[S.tgt]);g.fillStyle='#fff';g.textAlign='center';g.fillText(lt,CX,132)}
-g.textAlign='center';g.font='700 9px system-ui';
-for(let l=0;l<5;l++){const x=CX+(l-2)*LW,on=l==S.tgt;rr(x-34,H-21,68,16,8,on?LC[l]:'rgba(0,0,0,.4)');g.fillStyle='#fff';g.fillText(SB[l],x,H-13)}
+
 g.textBaseline='middle';
-if(S.run){rr(14,148,150,20,10,'#d6efff');rr(14,172,112,20,10,'#fff0b8');g.fillStyle='#8a6500';g.font='800 11px system-ui';g.textAlign='left';g.fillText('🪙 COINS  '+S.gold,22,182);g.fillStyle='#0d5fa8';g.font='800 11px system-ui';g.textAlign='left';g.fillText('⚡ NITRO',22,158);for(let i=0;i<8;i++)rr(80+i*8,153,6,10,2,i<S.nitro?'#1b8fe8':'#a9cbe3');
-if(S.nitro>=8){const k=RMo?.7:.5+.5*Math.sin(S.t*7);g.save();g.shadowColor='#4ac8ff';g.shadowBlur=8+14*k;g.strokeStyle='rgba(120,220,255,'+(.6+.4*k)+')';g.lineWidth=2.5;g.beginPath();g.roundRect(14,148,150,20,10);g.stroke();g.restore()}if(S.nt>0){rr(250+OX,148,96,20,10,'#1b8fe8');g.fillStyle='#fff';g.fillText('⚡ BOOSTING!',258+OX,158)}
-const bx=W-38,by=H-62;g.fillStyle='rgba(60,30,0,.25)';g.beginPath();g.arc(bx,by+3,27,0,7);g.fill();const gr=g.createLinearGradient(0,by-27,0,by+27);gr.addColorStop(0,S.hold?'#ffd33d':'#ff9f4a');gr.addColorStop(1,S.hold?'#ff8a00':'#e76f2e');g.fillStyle=gr;g.beginPath();g.arc(bx,by,27,0,7);g.fill();
-g.strokeStyle='#fff';g.lineWidth=3.5;g.beginPath();g.arc(bx,by,23,-1.5708,-1.5708+6.283*S.tb);g.stroke();g.fillStyle='#fff';g.font='900 10px system-ui';g.textAlign='center';g.fillText('🔥',bx,by-7);g.fillText('TURBO',bx,by+8);
-const nx=38,rd=S.nitro>0&&S.nt<=0;
-if(S.nitro>=8){const k=RMo?.7:.5+.5*Math.sin(S.t*7);g.save();g.shadowColor='#4ac8ff';g.shadowBlur=14+16*k;g.fillStyle='#1b8fe8';g.beginPath();g.arc(nx,by,27,0,7);g.fill();g.restore()}g.fillStyle='rgba(60,30,0,.25)';g.beginPath();g.arc(nx,by+3,27,0,7);g.fill();g.fillStyle=rd?'#1b8fe8':'#7a9bb5';g.beginPath();g.arc(nx,by,27,0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=3.5;g.beginPath();g.arc(nx,by,23,-1.5708,-1.5708+6.283*S.nt/2.2);g.stroke();g.fillStyle='#fff';g.font='900 10px system-ui';g.textAlign='center';g.fillText('⚡',nx,by-7);g.fillText('NITRO x'+S.nitro,nx,by+8)}
+if(S.run){
+  // Nitro and Coins HUD in upper scenic area
+  rr(14,148,150,20,10,'#d6efff');rr(14,172,112,20,10,'#fff0b8');
+  g.fillStyle='#8a6500';g.font='800 11px system-ui';g.textAlign='left';g.fillText('🪙 COINS  '+S.gold,22,182);
+  g.fillStyle='#0d5fa8';g.font='800 11px system-ui';g.textAlign='left';g.fillText('⚡ NITRO',22,158);
+  for(let i=0;i<8;i++)rr(80+i*8,153,6,10,2,i<S.nitro?'#1b8fe8':'#a9cbe3');
+  if(S.nitro>=8){const k=RMo?.7:.5+.5*Math.sin(S.t*7);g.save();g.shadowColor='#4ac8ff';g.shadowBlur=8+14*k;g.strokeStyle='rgba(120,220,255,'+(.6+.4*k)+')';g.lineWidth=2.5;g.beginPath();g.roundRect(14,148,150,20,10);g.stroke();g.restore()}
+  if(S.nt>0){rr(250+OX,148,96,20,10,'#1b8fe8');g.fillStyle='#fff';g.fillText('⚡ BOOSTING!',258+OX,158)}
+
+  // Side touch controls for Turbo & Nitro (comfortably aligned with thumbs, clear of car and console)
+  const isWide = W > 600;
+  const by = isWide ? 290 : 330, bx = W - 34, nx = 34;
+
+  // Turbo button (Right side)
+  g.fillStyle='rgba(60,30,0,.25)';g.beginPath();g.arc(bx,by+3,27,0,7);g.fill();
+  const gr=g.createLinearGradient(0,by-27,0,by+27);gr.addColorStop(0,S.hold?'#ffd33d':'#ff9f4a');gr.addColorStop(1,S.hold?'#ff8a00':'#e76f2e');
+  g.fillStyle=gr;g.beginPath();g.arc(bx,by,27,0,7);g.fill();
+  g.strokeStyle='#fff';g.lineWidth=3.5;g.beginPath();g.arc(bx,by,23,-1.5708,-1.5708+6.283*S.tb);g.stroke();
+  g.fillStyle='#fff';g.font='900 10px system-ui';g.textAlign='center';g.fillText('🔥',bx,by-7);g.fillText('TURBO',bx,by+8);
+
+  // Nitro button (Left side)
+  const rd=S.nitro>0&&S.nt<=0;
+  if(S.nitro>=8){const k=RMo?.7:.5+.5*Math.sin(S.t*7);g.save();g.shadowColor='#4ac8ff';g.shadowBlur=14+16*k;g.fillStyle='#1b8fe8';g.beginPath();g.arc(nx,by,27,0,7);g.fill();g.restore()}
+  g.fillStyle='rgba(60,30,0,.25)';g.beginPath();g.arc(nx,by+3,27,0,7);g.fill();
+  g.fillStyle=rd?'#1b8fe8':'#7a9bb5';g.beginPath();g.arc(nx,by,27,0,7);g.fill();
+  g.strokeStyle='#fff';g.lineWidth=3.5;g.beginPath();g.arc(nx,by,23,-1.5708,-1.5708+6.283*S.nt/2.2);g.stroke();
+  g.fillStyle='#fff';g.font='900 10px system-ui';g.textAlign='center';g.fillText('⚡',nx,by-7);g.fillText('NITRO x'+S.nitro,nx,by+8);
+
+  // --- HIGH-VISIBILITY QUESTION CONSOLE AT BOTTOM ---
+  if(S.q < NQ){
+    const qq = Q[S.q];
+    const pX = isWide ? CX - 440 : 8;
+    const pY = isWide ? 375 : 420;
+    const pW = isWide ? 880 : W - 16;
+    const pH = isWide ? 155 : 172;
+
+    // Background luxury card
+    g.save();
+    g.fillStyle = 'rgba(18, 14, 28, 0.96)';
+    g.beginPath();
+    g.roundRect(pX, pY, pW, pH, 16);
+    g.fill();
+
+    // Border
+    g.strokeStyle = '#e76f2e';
+    g.lineWidth = 2.5;
+    g.beginPath();
+    g.roundRect(pX, pY, pW, pH, 16);
+    g.stroke();
+
+    // Left indicator of selected lane
+    g.fillStyle = LC[S.tgt];
+    g.beginPath();
+    g.roundRect(pX, pY, 7, pH, [16, 0, 0, 16]);
+    g.fill();
+
+    // Category Tag
+    g.textAlign = 'left';
+    g.textBaseline = 'middle';
+    g.font = '800 11px system-ui';
+    g.fillStyle = '#ffd66b';
+    g.fillText('🎯 ' + (DN[qq[0]] || qq[0]).toUpperCase(), pX + 18, pY + 18);
+
+    // Gate Countdown & Progress Bar
+    const G2 = S.gate;
+    if(G2){
+      const sRem = Math.max(0, Math.ceil(G2.d / Math.max(S.v, 1)));
+      const fr = Math.max(0, Math.min(1, G2.d / G2.d0));
+      g.textAlign = 'right';
+      g.font = '700 11px system-ui';
+      g.fillStyle = fr < 0.25 ? '#ff6b5e' : '#ffd27a';
+      g.fillText('⏱ Gate in ' + sRem + 's', pX + pW - 16, pY + 18);
+
+      const barW = isWide ? 160 : 80;
+      const barX = pX + pW - barW - 16;
+      g.fillStyle = 'rgba(255,255,255,0.18)';
+      g.fillRect(barX, pY + 28, barW, 4);
+      g.fillStyle = fr < 0.25 ? '#e63946' : '#e76f2e';
+      g.fillRect(barX, pY + 28, barW * fr, 4);
+    }
+
+    // Question Statement: Crisp, High-Contrast White Text
+    g.textAlign = 'left';
+    g.textBaseline = 'top';
+    g.fillStyle = '#ffffff';
+    const qFont = isWide ? '700 16px system-ui' : (qq[1].length > 70 ? '700 13px system-ui' : '700 14px system-ui');
+    g.font = qFont;
+    wrap(qq[1], pX + 18, pY + 36, pW - 36, isWide ? 22 : 18);
+
+    // 5 Likert Answer Lanes
+    const laneBarY = pY + pH - (isWide ? 44 : 52);
+    const laneW = (pW - 24) / 5;
+
+    for(let l = 0; l < 5; l++){
+      const lx = pX + 12 + l * laneW;
+      const isSel = l === S.tgt;
+      const col = LC[l];
+
+      g.fillStyle = isSel ? col : 'rgba(255,255,255,0.1)';
+      g.beginPath();
+      g.roundRect(lx + 2, laneBarY, laneW - 4, isWide ? 36 : 44, 8);
+      g.fill();
+
+      if(isSel){
+        g.strokeStyle = '#ffffff';
+        g.lineWidth = 2.5;
+        g.beginPath();
+        g.roundRect(lx + 2, laneBarY, laneW - 4, isWide ? 36 : 44, 8);
+        g.stroke();
+      }
+
+      // Lane number
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.font = isSel ? '900 14px system-ui' : '800 12px system-ui';
+      g.fillStyle = isSel ? '#ffffff' : col;
+      g.fillText(l + 1, lx + laneW / 2, laneBarY + (isWide ? 13 : 15));
+
+      // Lane label
+      g.font = isSel ? '800 9px system-ui' : '600 8.5px system-ui';
+      g.fillStyle = isSel ? '#ffffff' : '#b0b8d0';
+      g.fillText(isWide ? LB[l] : SB[l], lx + laneW / 2, laneBarY + (isWide ? 26 : 30));
+    }
+    g.restore();
+  }
+}
 if(S.cd>0){const n=Math.ceil(S.cd-.2),f=S.cd%1;g.fillStyle='rgba(255,255,255,.25)';g.fillRect(0,120,W,H-120);g.fillStyle='#e76f2e';g.strokeStyle='#fff';g.lineWidth=8;g.font='900 '+(80+f*30)+'px system-ui';g.globalAlpha=.5+f*.5;const tt=n>0?n:'GO!';g.strokeText(tt,CX,H/2-10);g.fillText(tt,CX,H/2-10);g.globalAlpha=1;g.fillStyle='#fff';g.strokeStyle='#2b2118';g.lineWidth=4;g.font='700 14px system-ui';g.strokeText('Pick the lane that matches your answer',CX,H/2+50);g.fillText('Pick the lane that matches your answer',CX,H/2+50)}
-if(!S.run&&S.q>=NQ){rr(CX-150,H/2-70,300,90,18,'rgba(255,250,235,.96)');g.fillStyle='#c2410c';g.textAlign='center';g.textBaseline='middle';g.font='900 30px system-ui';g.fillText('🏁 FINISH!',CX,H/2-37);g.font='600 13px system-ui';g.fillStyle='#7a6650';g.fillText('Preparing your survey report…',CX,H/2-2)}
 if(S.pause){g.fillStyle='rgba(255,250,235,.82)';g.fillRect(0,40,W,H-40);g.fillStyle='#c2410c';g.textAlign='center';g.textBaseline='middle';g.font='900 34px system-ui';g.fillText('Paused',CX,H/2-30);g.fillStyle='#2b2118';g.font='600 14px system-ui';g.fillText('Tap anywhere or press P to resume',CX,H/2+10)}}
-function loop(ts){requestAnimationFrame(loop);const dt=Math.min(.05,(ts-last)/1000||0);last=ts;try{if(S){if(!S.pause&&!S.stop&&(S.run||S.pt.length||S.q>=NQ))step(S.run?dt:dt*.4);draw()}}catch(e){console.error(e);document.title='Error: '+e.message}}
+
+
+function loop(ts){
+  requestAnimationFrame(loop);
+  const dt=Math.min(.05,(ts-last)/1000||0);
+  last=ts;
+  try{
+    if(S){
+      if(!S.pause&&!S.stop&&(S.run||S.pt.length||S.q>=NQ))step(S.run?dt:dt*.4);
+      draw();
+    }
+  }catch(e){console.error(e);document.title='Error: '+e.message}
+}
+
 const TIPS={Strategy:['You connect everyday finance to long-term goals. Keep testing plans against strategy.','Link each budget line to a company goal and practise capital-allocation cases.'],
 Risk:['You weigh uncertainty well and plan for the downside. Keep balancing caution with opportunity.','Use scenario planning and a risk register before committing resources.'],
 Analysis:['You want evidence and double-check numbers. Keep documenting assumptions.','Ask "what are the assumptions?" every time and verify figures independently.'],
@@ -260,38 +484,76 @@ Perception:['You notice your own emotions and read other people well. Keep readi
 Regulation:['You manage your emotions and lift others up. Keep it up under pressure.','Build a reset routine (breathing, a short break) and check in on teammates.'],
 Utilization:['You turn good moods into motivation and problem-solving.','Picture a good outcome before tough tasks and use positive energy to start hard work.']};
 const CFOK=['Strategy','Risk','Analysis','Leadership','Ethics'],EIK=['Perception','Regulation','Utilization'],EIN={Perception:'Perception of emotions',Regulation:'Regulation of emotions',Utilization:'Utilization of emotions'};
-function finish(){S.stop=1;const $$=k=>S.dim[k]||0,sm=ks=>ks.reduce((a,k)=>a+$$(k),0),mxs=ks=>ks.reduce((a,k)=>a+MX[k],0);
-const cf=sm(CFOK),ef=sm(EIK),cm=mxs(CFOK),em=mxs(EIK),tot=S.tot,all=NQ*5,win=tot>S.riv,pc=Math.round(tot/all*100);let ti,d;
-if(pc>=84){ti='🏆 Rally Champion';d='Outstanding: sharp financial judgement and strong emotional awareness.'}
-else if(pc>=68){ti='🥈 Podium Finisher';d='A strong all-rounder with a few areas to sharpen.'}
-else if(pc>=52){ti='🥉 Midfield Contender';d='Solid base. Build the lowest skills below to move up the grid.'}
-else{ti='🔧 Back to the Garage';d='Plenty of room to grow. Focus on the shortest bars below.'}
-const lv=p=>p>=.8?'Strong':p>=.6?'Solid':'Developing';
-const radar=ks=>{const N=ks.length,R=74,cx=130,cy=100,pt=(i,r)=>[cx+r*Math.sin(2*Math.PI*i/N),cy-r*Math.cos(2*Math.PI*i/N)];let w='';[.33,.66,1].forEach(f=>w+='<polygon points="'+ks.map((_,i)=>pt(i,R*f).join(',')).join(' ')+'" fill="none" stroke="#e5cf9f"/>');
-return'<svg viewBox="0 0 260 205" width="240">'+w+'<polygon class="rp" points="'+ks.map((k,i)=>pt(i,R*$$(k)/MX[k]).join(',')).join(' ')+'" fill="rgba(231,111,46,.35)" stroke="#e76f2e" stroke-width="2.5"/>'+ks.map((k,i)=>{const[x,y]=pt(i,R+16);return'<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="11" fill="#2b2118">'+k+'</text>'}).join('')+'</svg>'};
-let n=0;const rv=h=>'<div class="rv" style="animation-delay:'+(.3+n++*.13)+'s">'+h+'</div>';
-const dims=ks=>ks.map(k=>{const p=$$(k)/MX[k];return rv('<div class="ct"><div class="bar" style="margin:0"><div class="h"><span><b>'+(EIN[k]||k)+'</b> · '+lv(p)+'</span><b>'+$$(k)+'/'+MX[k]+'</b></div><div class="tk"><div class="fl" style="transition-delay:'+(.4+n*.12)+'s" data-w="'+Math.round(p*100)+'"></div></div></div><div class="sm" style="margin-top:6px">'+TIPS[k][p>=.8?0:1]+'</div></div>')}).join('');
-const all8=[...CFOK,...EIK],so=[...all8].sort((a,b)=>$$(b)/MX[b]-$$(a)/MX[a]),avg=(S.ans.reduce((a,x)=>a+x.rt,0)/S.ans.length).toFixed(1);
-const B=[[S.crash==0,'🛡️ Clean Driver'],[S.coins>=15,'⚡ Nitro Hunter'],[S.rhit>=3,'🥊 Rival Basher'],[S.tbt>=10,'🔥 Turbo Time'],[S.close>=5,'🎯 Close-Call Pro'],[cf/cm>=.8,'💼 CFO Material'],[ef/em>=.8,'🧠 EQ Star'],[win,'🏆 Beat the Rival']].filter(b=>b[0]);
-const cd=(l,v)=>'<div class="ct"><span class="sm">'+l+'</span><b>'+v+'</b></div>';
-const r=document.getElementById('res');saveAttempt({ts:new Date().toLocaleString(),ti:ti,tot:tot,all:all,pc:pc,cf:cf,cm:cm,ef:ef,em:em,dim:Object.assign({},S.dim),gold:S.gold,rhit:S.rhit,crash:S.crash,nitro:S.coins,nu:S.nu,close:S.close,tbt:+S.tbt.toFixed(1),topv:Math.round(S.topv*6),riv:+S.riv.toFixed(1),beat:win?1:0,ans:S.ans.map((a,i)=>({n:i+1,tx:a.tx,cat:a.cat,l:a.l,ch:a.l+1,lab:LB[a.l],s:a.s,rev:a.rev,rt:+a.rt.toFixed(1)}))});
-r.innerHTML='<div class="rd"><div class="rcar">🏎️</div><div class="rfl">🏁</div></div><div class="tro">🏆</div><h2>Your Survey Report</h2>'+
-'<div class="ring"><svg viewBox="0 0 150 150" width="150" height="150"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e63946"/><stop offset="1" stop-color="#f4a261"/></linearGradient></defs><circle cx="75" cy="75" r="62" fill="none" stroke="#f0dcb4" stroke-width="14"/><circle id="pg" class="pg" cx="75" cy="75" r="62" fill="none" stroke="url(#gg)" stroke-width="14" stroke-linecap="round"/></svg><div class="n"><span id="cnt">0</span><span style="font-size:12px;color:#7a6650;font-weight:700">% overall</span></div></div>'+
-rv('<p style="font-size:20px;color:#c2410c;font-weight:800;margin:2px 0">'+ti+'</p><p style="margin:0">'+d+'</p>')+
-rv('<div class="g2">'+cd('CFO skills','💼 '+cf+' / '+cm)+cd('Emotional intelligence','🧠 '+ef+' / '+em)+'</div>')+
-rv('<h3>💼 CFO skills</h3><div>'+radar(CFOK)+'</div>')+dims(CFOK)+
-rv('<h3>🧠 Emotional intelligence</h3><div>'+radar(EIK)+'</div>')+dims(EIK)+
-rv('<h3>Highlights</h3><div class="g2">'+cd('Top strength',EIN[so[0]]||so[0])+cd('Growth area',EIN[so[7]]||so[7])+cd('Avg decision time',avg+'s')+cd('Race result',win?'P1 🏆':'P2 🥈')+cd('Crashes',S.crash)+cd('Close calls',S.close)+cd('Nitro collected','⚡ '+S.coins)+cd('Nitro used',S.nu)+cd('Coins','🪙 '+S.gold)+cd('Rival hits','💥 '+S.rhit)+'</div>')+
-rv('<h3>Badges earned</h3>'+(B.length?B.map((b,i)=>'<span class="bg" style="animation-delay:'+(1.4+i*.18)+'s">'+b[1]+'</span>').join(''):'<p class="sm">Race again to unlock badges!</p>'))+
-rv('<h3>Your answers</h3><div class="ct" style="padding:4px 12px">'+S.ans.map((a,i)=>'<div class="rw" style="'+(i?'':'border:0')+'"><div class="dot" style="background:'+LC[a.l]+'">'+(a.l+1)+'</div><div><div>'+a.tx+'</div><div class="sm">'+(DN[a.cat]||a.cat)+' · '+LB[a.l]+(a.rev?' · reverse-scored → '+a.s+' pts':' → '+a.s+' pts')+'</div></div></div>').join('')+'</div>')+
-rv('<p class="sm">This is a self-reflection game, not a clinical or hiring assessment.</p><button id="again">Race again</button>');
-document.getElementById('intro').style.display='none';r.style.display='block';ov.style.display='flex';ov.scrollTop=0;
-let cf2=document.getElementById('cf');if(!cf2){cf2=document.createElement('div');cf2.id='cf';document.getElementById('wrap').appendChild(cf2)}
-cf2.innerHTML=Array.from({length:46},(_,i)=>'<i style="left:'+Math.random()*100+'%;background:'+LC[i%5]+';animation-duration:'+(2.4+Math.random()*2.2)+'s;animation-delay:'+Math.random()*1.4+'s;border-radius:'+(i%3?'2px':'50%')+'"></i>').join('');
-setTimeout(()=>{cf2.innerHTML=''},7500);
-setTimeout(()=>{document.getElementById('pg').style.strokeDashoffset=390*(1-pc/100);r.querySelectorAll('.fl').forEach(f=>f.style.width=f.dataset.w+'%')},150);
-const cnt=document.getElementById('cnt'),t0=performance.now();(function f(now){const k=Math.min(1,(now-t0)/2000);cnt.textContent=Math.round(pc*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(f)})(t0);
-document.getElementById('again').onclick=start}
+
+function finish(){
+  S.stop=1;
+  const $$=k=>S.dim[k]||0,sm=ks=>ks.reduce((a,k)=>a+$$(k),0),mxs=ks=>ks.reduce((a,k)=>a+MX[k],0);
+  const cf=sm(CFOK),ef=sm(EIK),cm=mxs(CFOK),em=mxs(EIK),tot=S.tot,all=NQ*5,win=tot>S.riv,pc=Math.round(tot/all*100);let ti,d;
+  if(pc>=84){ti='🏆 Rally Champion';d='Outstanding: sharp financial judgement and strong emotional awareness.'}
+  else if(pc>=68){ti='🥈 Podium Finisher';d='A strong all-rounder with a few areas to sharpen.'}
+  else if(pc>=52){ti='🥉 Midfield Contender';d='Solid base. Build the lowest skills below to move up the grid.'}
+  else{ti='🔧 Back to the Garage';d='Plenty of room to grow. Focus on the shortest bars below.'}
+  const lv=p=>p>=.8?'Strong':p>=.6?'Solid':'Developing';
+  const radar=ks=>{const N=ks.length,R=74,cx=130,cy=100,pt=(i,r)=>[cx+r*Math.sin(2*Math.PI*i/N),cy-r*Math.cos(2*Math.PI*i/N)];let w='';[.33,.66,1].forEach(f=>w+='<polygon points="'+ks.map((_,i)=>pt(i,R*f).join(',')).join(' ')+'" fill="none" stroke="#e5cf9f"/>');
+  return'<svg viewBox="0 0 260 205" width="240">'+w+'<polygon class="rp" points="'+ks.map((k,i)=>pt(i,R*$$(k)/MX[k]).join(',')).join(' ')+'" fill="rgba(231,111,46,.35)" stroke="#e76f2e" stroke-width="2.5"/>'+ks.map((k,i)=>{const[x,y]=pt(i,R+16);return'<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="11" fill="#2b2118">'+k+'</text>'}).join('')+'</svg>'};
+  let n=0;const rv=h=>'<div class="rv" style="animation-delay:'+(.3+n++*.13)+'s">'+h+'</div>';
+  const dims=ks=>ks.map(k=>{const p=$$(k)/MX[k];return rv('<div class="ct"><div class="bar" style="margin:0"><div class="h"><span><b>'+(EIN[k]||k)+'</b> · '+lv(p)+'</span><b>'+$$(k)+'/'+MX[k]+'</b></div><div class="tk"><div class="fl" style="transition-delay:'+(.4+n*.12)+'s" data-w="'+Math.round(p*100)+'"></div></div></div><div class="sm" style="margin-top:6px">'+TIPS[k][p>=.8?0:1]+'</div></div>')}).join('');
+  const all8=[...CFOK,...EIK],so=[...all8].sort((a,b)=>$$(b)/MX[b]-$$(a)/MX[a]),avg=(S.ans.reduce((a,x)=>a+x.rt,0)/S.ans.length).toFixed(1);
+  const B=[[S.crash==0,'🛡️ Clean Driver'],[S.coins>=15,'⚡ Nitro Hunter'],[S.rhit>=3,'🥊 Rival Basher'],[S.tbt>=10,'🔥 Turbo Time'],[S.close>=5,'🎯 Close-Call Pro'],[cf/cm>=.8,'💼 CFO Material'],[ef/em>=.8,'🧠 EQ Star'],[win,'🏆 Beat the Rival']].filter(b=>b[0]);
+  const cd=(l,v)=>'<div class="ct"><span class="sm">'+l+'</span><b>'+v+'</b></div>';
+  const r=document.getElementById('res');
+  saveAttempt({ts:new Date().toLocaleString(),ti:ti,tot:tot,all:all,pc:pc,cf:cf,cm:cm,ef:ef,em:em,dim:Object.assign({},S.dim),gold:S.gold,rhit:S.rhit,crash:S.crash,nitro:S.coins,nu:S.nu,close:S.close,tbt:+S.tbt.toFixed(1),topv:Math.round(S.topv*6),riv:+S.riv.toFixed(1),beat:win?1:0,ans:S.ans.map((a,i)=>({n:i+1,tx:a.tx,cat:a.cat,l:a.l,ch:a.l+1,lab:LB[a.l],s:a.s,rev:a.rev,rt:+a.rt.toFixed(1)}))});
+  const pokerDone = checkPokerDone();
+  const navBtnText = pokerDone ? '🏆 Both Games Completed! View Final Summary ▶' : '♠️ Play Next Game: The Hot Seat (Poker) ▶';
+  const navTarget = pokerDone ? 'finish' : 'poker';
+
+  r.innerHTML='<div class="rd"><div class="rcar">🏎️</div><div class="rfl">🏁</div></div><div class="tro">🏆</div><h2>Your Survey Report</h2>'+
+  '<div class="ring"><svg viewBox="0 0 150 150" width="150" height="150"><defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e63946"/><stop offset="1" stop-color="#f4a261"/></linearGradient></defs><circle cx="75" cy="75" r="62" fill="none" stroke="#f0dcb4" stroke-width="14"/><circle id="pg" class="pg" cx="75" cy="75" r="62" fill="none" stroke="url(#gg)" stroke-width="14" stroke-linecap="round"/></svg><div class="n"><span id="cnt">0</span><span style="font-size:12px;color:#7a6650;font-weight:700">% overall</span></div></div>'+
+  rv('<p style="font-size:20px;color:#c2410c;font-weight:800;margin:2px 0">'+ti+'</p><p style="margin:0">'+d+'</p>')+
+  rv('<div class="g2">'+cd('CFO skills','💼 '+cf+' / '+cm)+cd('Emotional intelligence','🧠 '+ef+' / '+em)+'</div>')+
+  rv('<h3>💼 CFO skills</h3><div>'+radar(CFOK)+'</div>')+dims(CFOK)+
+  rv('<h3>🧠 Emotional intelligence</h3><div>'+radar(EIK)+'</div>')+dims(EIK)+
+  rv('<h3>Highlights</h3><div class="g2">'+cd('Top strength',EIN[so[0]]||so[0])+cd('Growth area',EIN[so[7]]||so[7])+cd('Avg decision time',avg+'s')+cd('Race result',win?'P1 🏆':'P2 🥈')+cd('Crashes',S.crash)+cd('Close calls',S.close)+cd('Nitro collected','⚡ '+S.coins)+cd('Nitro used',S.nu)+cd('Coins','🪙 '+S.gold)+cd('Rival hits','💥 '+S.rhit)+'</div>')+
+  rv('<h3>Badges earned</h3>'+(B.length?B.map((b,i)=>'<span class="bg" style="animation-delay:'+(1.4+i*.18)+'s">'+b[1]+'</span>').join(''):'<p class="sm">Race again to unlock badges!</p>'))+
+  rv('<h3>Your answers</h3><div class="ct" style="padding:4px 12px">'+S.ans.map((a,i)=>'<div class="rw" style="'+(i?'':'border:0')+'"><div class="dot" style="background:'+LC[a.l]+'">'+(a.l+1)+'</div><div><div>'+a.tx+'</div><div class="sm">'+(DN[a.cat]||a.cat)+' · '+LB[a.l]+(a.rev?' · reverse-scored → '+a.s+' pts':' → '+a.s+' pts')+'</div></div></div>').join('')+'</div>')+
+  rv('<p class="sm">This is a self-reflection game, not a clinical or hiring assessment.</p>' +
+    '<div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;align-items:center;">' +
+      '<button id="btnNextGame" style="width:100%;max-width:380px;background:linear-gradient(#ff9f4a,#e76f2e);color:#fff;border:0;border-radius:14px;padding:15px 24px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 6px 18px rgba(231,111,46,.4);" onclick="goNextGame(\'' + navTarget + '\')">' + navBtnText + '</button>' +
+      '<button id="again" style="background:transparent;border:1px solid #c2410c;color:#c2410c;border-radius:10px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:none;">↺ Re-race this track</button>' +
+    '</div>');
+  document.getElementById('intro').style.display='none';r.style.display='block';ov.style.display='flex';ov.scrollTop=0;
+  let cf2=document.getElementById('cf');if(!cf2){cf2=document.createElement('div');cf2.id='cf';document.getElementById('wrap').appendChild(cf2)}
+  cf2.innerHTML=Array.from({length:46},(_,i)=>'<i style="left:'+Math.random()*100+'%;background:'+LC[i%5]+';animation-duration:'+(2.4+Math.random()*2.2)+'s;animation-delay:'+Math.random()*1.4+'s;border-radius:'+(i%3?'2px':'50%')+'"></i>').join('');
+  setTimeout(()=>{cf2.innerHTML=''},7500);
+  setTimeout(()=>{document.getElementById('pg').style.strokeDashoffset=390*(1-pc/100);r.querySelectorAll('.fl').forEach(f=>f.style.width=f.dataset.w+'%')},150);
+  const cnt=document.getElementById('cnt'),t0=performance.now();(function f(now){const k=Math.min(1,(now-t0)/2000);cnt.textContent=Math.round(pc*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(f)})(t0);
+  document.getElementById('again').onclick=start;
+}
+function checkPokerDone(){
+  try {
+    const act = JSON.parse(localStorage.getItem('cfo_active_player') || 'null');
+    if (act && act.poker) return true;
+    const db = JSON.parse(localStorage.getItem('cfoSurveyDB') || '[]');
+    if (db.length && db[db.length - 1].poker) return true;
+  } catch(e) {}
+  return false;
+}
+window.goNextGame = function(to){
+  try { parent.postMessage({type:'cfo-nav', to:to}, '*'); } catch(e){}
+  setTimeout(() => {
+    if (window.parent === window) {
+      window.location.href = (to === 'finish' ? 'index.html' : 'poker.html');
+    }
+  }, 120);
+};
+function openHowModal(){
+  if(S && S.run) S.pause = 1;
+  document.getElementById('howModal').classList.add('on');
+}
+function closeHowModal(){
+  document.getElementById('howModal').classList.remove('on');
+  if(S && S.pause && S.run) S.pause = 0;
+}
 
 let MEM=[];try{MEM=JSON.parse(localStorage.getItem('cfoRallyAttempts')||'[]')}catch(e){}
 function saveAttempt(r){

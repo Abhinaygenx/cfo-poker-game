@@ -1,33 +1,25 @@
-# CFO Leadership Pulse - Live Google Sheets & Email Integration
+# CFO Leadership Pulse - Live Google Sheets & Daily Summary Email Integration
 
-This system automatically records players who participate in the **CFO Leadership Pulse** assessment (**The Hot Seat / CFO Poker Table** and **CFO Desert Rally**) into a Google Spreadsheet, keeps their progress updated in real time, and sends instant email reports to **`mmsbf26001@stu.xim.edu.in`**.
+This system automatically records players who participate in the **CFO Leadership Pulse** assessment (**The Hot Seat / CFO Poker Table** and **CFO Desert Rally**) into a Google Spreadsheet, keeps their progress updated in real time across 4 dedicated tabs, and sends **one consolidated daily summary email at the end of the day** to **`mmsbf26001@stu.xim.edu.in`** (no annoying per-signup spam).
 
 ---
 
 ## 🚀 How It Works
 
-1. **Player Registration (`REGISTER` event):**
-   - When a participant enters their name, email, phone, age, gender, status (Working / PG / UG), and nickname, their record is instantly appended to the Google Sheet.
-   - An email alert is automatically dispatched to `mmsbf26001@stu.xim.edu.in` with the player's profile.
+1. **Player Registration & Real-Time Sheet Storage (`REGISTER` event):**
+   - When a participant enters their name, email, phone, age, gender, status (Working / PG / UG), and nickname, their record is instantly appended to the Google Sheet (`Players_Summary`).
+   - Individual emails are **not** sent per signup to avoid inbox clutter.
 
-2. **Game 1 Completion (`POKER_COMPLETED` event):**
-   - As soon as the player finishes the 30 hands in the Poker game, the script **finds that player's row** in the Google Sheet and updates it with:
-     - Final Chip count
-     - CFO Leadership level (e.g., *Chief Financial Officer, VP Finance*)
-     - Overall Score percentage
-     - Best streak & hands played
-   - An updated scorecard email is sent to `mmsbf26001@stu.xim.edu.in`.
+2. **Game 1 Completion (`POKER_COMPLETED` or `RALLY_COMPLETED`):**
+   - When the player finishes the first game, their detailed stats and question responses are saved to the Google Sheet.
+   - The end screen prompts **"Play Next Game ▶"** and automatically launches the unplayed game.
 
-3. **Game 2 Completion (`RALLY_COMPLETED` event):**
-   - When the player completes the Desert Rally, the script updates their row with:
-     - Rally title (e.g., *Rally Champion, Podium Finisher*)
-     - Overall Score (points & percentage)
-     - CFO Skills score vs EQ score breakdown
-     - Crashes & coins collected
-   - An updated scorecard email is sent to `mmsbf26001@stu.xim.edu.in`.
+3. **Game 2 Completion & Final Summary:**
+   - When the player completes the second game, their profile shows **"🏆 Both Games Completed! View Final Summary ▶"**.
+   - Clicking redirects to the combined executive scorecard showing cross-game competencies, CFO readiness tier, and radar analysis.
 
-4. **Final Assessment (`FINISHED` event):**
-   - When the user reviews their final scorecard, their status is marked as *Completed* and a comprehensive final report is emailed to `mmsbf26001@stu.xim.edu.in`.
+4. **One Consolidated Daily Email (End of Day):**
+   - Every night (between 11 PM and midnight, or trigger time), the script compiles all participants who played during the day, their scores, completion status, and a direct link to the Google Sheet, sending **one single executive summary email** to `mmsbf26001@stu.xim.edu.in`.
 
 ---
 
@@ -61,6 +53,14 @@ You do **not** need any paid database or third-party service. This uses Google's
 2. Click the **⚙️ Cloud Setup** button at the top right of the screen (or in the footer).
 3. Paste your Web App URL into the input field and click **Save & Test Connection**.
 4. That's it! Your game is now live and connected.
+
+### Step 5: Activate the End-of-Day Daily Summary Email Trigger (One-Time)
+1. Go back to your **Apps Script editor**.
+2. In the toolbar function dropdown (next to "Debug" / "Run"), select **`setupDailyTrigger`**.
+3. Click **Run**.
+4. That's all! Google Apps Script will now automatically run every night (between 11 PM and midnight) to send one single summary email to `mmsbf26001@stu.xim.edu.in`.
+5. *(Optional test)*: Select **`testDailySummaryEmail`** and click **Run** anytime to send an instant test summary email to your inbox.
+
 
 ---
 
@@ -126,10 +126,26 @@ Records every single raw event payload with timestamp for auditability.
 
 ---
 
-## 📧 Email Alerts Format
+## 📧 Consolidated Daily Summary Email Format
 
-Emails sent to `mmsbf26001@stu.xim.edu.in` include:
-- A colored status badge (`New Player Registered`, `Hot Seat Completed`, `Desert Rally Completed`, or `Fully Completed`).
-- Complete player profile details.
-- Real-time performance breakdown for both games.
-- A direct button link to open the live Google Spreadsheet with one click.
+Sent once daily at the end of the day to **`mmsbf26001@stu.xim.edu.in`**:
+- **Date & Assessment Headline**: Executive digest of the day's testing cohort.
+- **Key Metrics**: Total participants today, fully completed both games, and average performance.
+- **Roster Table**: Name, Email, Status, Hot Seat level & chips, Desert Rally title & score, and final completion status.
+- **One-Click Sheet Access**: Direct button linking to the live Google Spreadsheet.
+
+---
+
+## 🎮 Gameplay & User Experience Enhancements
+
+1. **Seamless Progression Between Games:**
+   - Finishing Game 1 displays a prominent **"Play Next Game ▶"** button and seamlessly loads Game 2.
+   - When both games are complete, it shows **"🏆 Both Games Completed! View Final Summary ▶"** to inspect overall executive calibration.
+2. **Desert Rally Cockpit Question Console:**
+   - Moved from the top edge to the lower console below the racing car so the driver never has to look away from oncoming traffic.
+   - Highlights the 5 Likert lanes with real-time feedback on your current lane.
+3. **Optimized Traffic Density:**
+   - Civilian car frequency reduced by 25% for a smoother, balanced challenge that keeps the focus on decision-making without cheap collisions.
+4. **How to Play Guide in Desert Rally:**
+   - Added a vertical "How to Play" tab matching the Poker style, providing complete controls, gate mechanics, scoring, and tips.
+

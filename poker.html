@@ -600,8 +600,31 @@ function end(){const OP=(m,i)=>'Card '+(i+1)+' ('+'ABCD'[i]+'): '+m[i],PD=x=>({t
   <p class="note">Each board member watches one quality: Chair (integrity), HR (people), Investor (vision), Audit (rigor), Risk (resilience). Toughest critic: ${BD[BT.indexOf(Math.min(...BT))]}.</p>
   <div class="box"><b>Response pattern:</b> ${fives} Strongly agree, ${ones} Strongly disagree. ${fives>=6?'A very favourable self-view. Real CFOs mix in moderate answers, so treat this profile with caution.':'A mixed, credible pattern.'}</div>
   ${ih}${kitHTML()}${tableHTML()}${pat.length?`<div class="box bd"><b>Patterns your answers point to:</b><ul>${pat.map(x=>`<li>${x}</li>`).join('')}</ul></div>`:''}
-  <p class="note">Built on research: Bass &amp; Avolio (transformational leadership), Brown, Trevi&ntilde;o &amp; Harrison 2005 (ethical leadership), Walumbwa et al. 2008 (authentic leadership), Goleman 1998 (emotional intelligence), Edmondson 1999 (psychological safety), Ben-David, Graham &amp; Harvey 2013 (CFO overconfidence), Deloitte's Four Faces of the CFO. IQ items: Frederick 2005 (Cognitive Reflection Test), Berlin Numeracy Test (Cokely et al. 2012) and ICAR (Condon &amp; Revelle 2014). Candour checks adapt Marlowe-Crowne social-desirability items (Crowne &amp; Marlowe 1960). Dilemmas are keyed to COSO ERM, SEC Reg FD, IMA, Sarbanes-Oxley and NPV theory. With 30 items, paired-item and candour checks it is more reliable than a quick quiz, but it has not been normed on real CFOs, so it is indicative, not a statistically validated test. Use the result to start a conversation, not to pass or fail someone.</p><button class="go" onclick="location.reload()">Play again</button>`;
+  <p class="note">Built on research: Bass &amp; Avolio (transformational leadership), Brown, Trevi&ntilde;o &amp; Harrison 2005 (ethical leadership), Walumbwa et al. 2008 (authentic leadership), Goleman 1998 (emotional intelligence), Edmondson 1999 (psychological safety), Ben-David, Graham &amp; Harvey 2013 (CFO overconfidence), Deloitte's Four Faces of the CFO. IQ items: Frederick 2005 (Cognitive Reflection Test), Berlin Numeracy Test (Cokely et al. 2012) and ICAR (Condon &amp; Revelle 2014). Candour checks adapt Marlowe-Crowne social-desirability items (Crowne &amp; Marlowe 1960). Dilemmas are keyed to COSO ERM, SEC Reg FD, IMA, Sarbanes-Oxley and NPV theory. With 30 items, paired-item and candour checks it is more reliable than a quick quiz, but it has not been normed on real CFOs, so it is indicative, not a statistically validated test. Use the result to start a conversation, not to pass or fail someone.</p>${getNextNavHTML()}`;
   setTimeout(()=>document.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%'),150)}}
+function getNextNavHTML(){
+  let rallyDone = false;
+  try {
+    const act = JSON.parse(localStorage.getItem('cfo_active_player') || 'null');
+    if (act && act.rally) rallyDone = true;
+    const db = JSON.parse(localStorage.getItem('cfoSurveyDB') || '[]');
+    if (db.length && db[db.length - 1].rally) rallyDone = true;
+  } catch(e) {}
+  const navBtnText = rallyDone ? '🏆 Both Games Completed! View Final Summary ▶' : '🏎️ Play Next Game: CFO Desert Rally ▶';
+  const navTarget = rallyDone ? 'finish' : 'rally';
+  return '<div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;align-items:center;">' +
+    '<button class="go" id="btnNextGame" style="width:100%;max-width:440px;background:linear-gradient(#ffd66b,#f2a93e);color:#2a1a10;font-size:1.05rem;font-weight:800;padding:16px 24px;border-radius:14px;border:0;box-shadow:0 8px 24px rgba(242,169,62,0.4);cursor:pointer;" onclick="goNextGame(\'' + navTarget + '\')">' + navBtnText + '</button>' +
+    '<button class="go" style="background:transparent;border:1px solid #4a3a43;color:#9aa1b8;padding:8px 18px;font-size:.82rem;border-radius:10px;cursor:pointer;box-shadow:none;" onclick="location.reload()">↺ Replay The Hot Seat</button>' +
+  '</div>';
+}
+window.goNextGame = function(to) {
+  try { parent.postMessage({type: 'cfo-nav', to: to}, '*'); } catch(e) {}
+  setTimeout(() => {
+    if (window.parent === window) {
+      window.location.href = (to === 'finish' ? 'index.html' : 'rally.html');
+    }
+  }, 120);
+};
 $('mu').onclick=()=>{snd_on=!snd_on;$('mu').textContent=snd_on?'🔊':'🔇';ambSet()};$('mm').onclick=()=>{mus=!mus;$('mm').textContent=mus?'🎵':'🚫';ambSet()};
 $('fsb').onclick=()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen).call(document);else goFs()}catch(x){}};$('how').onclick=()=>inst(true);$('cl').onclick=()=>inst(false);$('ov').onclick=e=>{if(e.target.id=='ov')inst(false)};document.onkeydown=e=>{if(e.key=='Escape')inst(false)};
 $('rg').oninput=e=>{const was=pctSel;pctSel=+e.target.value;clink();s(300+pctSel*5,.03,'triangle',.03);if(pctSel==100){if(was!=100){slam('⚠ ALL IN ⚠','#ff3b30');shakeApp()}s(50,.5,'sawtooth',.08);noise(.4,300,.08,0,'lowpass');$('table').classList.add('shake');setTimeout(()=>$('table').classList.remove('shake'),450)}stakes();navigator.vibrate&&navigator.vibrate(8);setTimeout(trail,70)};bindRail();
