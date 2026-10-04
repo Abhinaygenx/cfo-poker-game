@@ -2,12 +2,12 @@
  * ==============================================================================
  * CFO Leadership Pulse - Google Sheets & Email Automation Script
  * ==============================================================================
- * Automatically updates Google Spreadsheet with:
- * 1. "Players_Summary": Main dashboard with player profiles and overall scores.
- * 2. "Poker_Responses": Individual sheet logging all 30 Poker questions & user scores.
- * 3. "Rally_Responses": Individual sheet logging all 15 Rally questions & user scores.
- * 4. "Event_Log": Chronological audit trail of all activity.
- * 5. Sends automatic email scorecard notifications to: mmsbf26001@stu.xim.edu.in
+ * Automatically organizes and updates Google Spreadsheet with:
+ * 1. "Players_Summary": Overview dashboard (1 row per player with total scores).
+ * 2. "Poker_Responses": Organised wide-table (1 row per player with Hand 1 to 30 columns).
+ * 3. "Rally_Responses": Organised wide-table (1 row per player with Q1 to Q15 columns).
+ * 4. "Event_Log": Chronological audit trail.
+ * 5. Sends automatic scorecard email notifications to: mmsbf26001@stu.xim.edu.in
  * ==============================================================================
  */
 
@@ -23,6 +23,7 @@ function doGet(e) {
     message: "CFO Leadership Pulse Webhook is online and active!",
     recipient: NOTIFICATION_EMAIL,
     sheets: ["Players_Summary", "Poker_Responses", "Rally_Responses", "Event_Log"],
+    format: "One row per player with individual question columns",
     timestamp: new Date().toISOString()
   })).setMimeType(ContentService.MimeType.JSON);
 }
@@ -42,23 +43,23 @@ function doPost(e) {
     const data = JSON.parse(e.postData.contents);
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    // 1. Update/Insert player record in Players_Summary
+    // 1. Update/Insert in "Players_Summary"
     const summarySheet = getOrCreateSheet(ss, "Players_Summary", getSummaryHeaders(), "#141829", "#f2c14e");
     updatePlayerRow(summarySheet, data);
 
-    // 2. Record detailed question responses for Game 1 (Poker) if available
+    // 2. Update/Insert in "Poker_Responses" (One row per player, Hand 1 to 30 as columns)
     if (data.poker && data.poker.responses && data.poker.responses.length > 0) {
-      const pokerSheet = getOrCreateSheet(ss, "Poker_Responses", getPokerHeaders(), "#0f3b2a", "#6be3a4");
-      recordPokerResponses(pokerSheet, data);
+      const pokerSheet = getOrCreateSheet(ss, "Poker_Responses", getPokerWideHeaders(), "#0f3b2a", "#6be3a4");
+      updatePokerWideRow(pokerSheet, data);
     }
 
-    // 3. Record detailed question responses for Game 2 (Rally) if available
+    // 3. Update/Insert in "Rally_Responses" (One row per player, Q1 to Q15 as columns)
     if (data.rally && data.rally.responses && data.rally.responses.length > 0) {
-      const rallySheet = getOrCreateSheet(ss, "Rally_Responses", getRallyHeaders(), "#4a1d12", "#ff9f4a");
-      recordRallyResponses(rallySheet, data);
+      const rallySheet = getOrCreateSheet(ss, "Rally_Responses", getRallyWideHeaders(), "#4a1d12", "#ff9f4a");
+      updateRallyWideRow(rallySheet, data);
     }
 
-    // 4. Append event to Event_Log
+    // 4. Append to "Event_Log"
     const logSheet = getOrCreateSheet(ss, "Event_Log", getLogHeaders(), "#2a3050", "#eef0f7");
     appendLog(logSheet, data);
 
@@ -67,7 +68,7 @@ function doPost(e) {
 
     return ContentService.createTextOutput(JSON.stringify({
       status: "success",
-      message: "Player summary and individual question responses saved successfully.",
+      message: "Player data successfully organized into columns and updated.",
       recipient: NOTIFICATION_EMAIL
     })).setMimeType(ContentService.MimeType.JSON);
 
@@ -113,50 +114,54 @@ function getSummaryHeaders() {
 }
 
 /**
- * Headers for Poker_Responses sheet
+ * Headers for Poker_Responses sheet (Wide table: 1 row per player)
  */
-function getPokerHeaders() {
-  return [
-    "Recorded At",
+function getPokerWideHeaders() {
+  const headers = [
+    "Last Updated",
     "Participant ID",
-    "Player Name",
-    "Player Email",
-    "Hand #",
-    "Question Type",
-    "Dimension",
-    "Question / Statement",
-    "User Answer Code",
-    "User Answer Text",
-    "Target / Key",
-    "Distance / Diff",
-    "Hand Result",
-    "Stake %",
-    "Stake Chips",
-    "Chips Won / Lost",
-    "Chips After Hand",
-    "Time Taken (s)",
-    "Streak After"
+    "Full Name",
+    "Email",
+    "Nickname",
+    "Final Chips",
+    "CFO Level",
+    "Overall %",
+    "Best Streak"
   ];
+
+  for (let h = 1; h <= 30; h++) {
+    const num = h < 10 ? "0" + h : "" + h;
+    headers.push(`H${num}_Answer`);
+    headers.push(`H${num}_Result`);
+    headers.push(`H${num}_Stake`);
+  }
+  return headers;
 }
 
 /**
- * Headers for Rally_Responses sheet
+ * Headers for Rally_Responses sheet (Wide table: 1 row per player)
  */
-function getRallyHeaders() {
-  return [
-    "Recorded At",
+function getRallyWideHeaders() {
+  const headers = [
+    "Last Updated",
     "Participant ID",
-    "Player Name",
-    "Player Email",
-    "Question #",
-    "Section / Category",
-    "Question / Statement",
-    "User Choice (1-5)",
-    "User Answer Label",
-    "User Score Awarded (1-5)",
-    "Reverse Scored?",
-    "Reaction Time (s)"
+    "Full Name",
+    "Email",
+    "Nickname",
+    "Total Score",
+    "Max Score",
+    "Percent (%)",
+    "Rally Title",
+    "CFO Score",
+    "EQ Score"
   ];
+
+  for (let q = 1; q <= 15; q++) {
+    const num = q < 10 ? "0" + q : "" + q;
+    headers.push(`Q${num}_Choice`);
+    headers.push(`Q${num}_Score`);
+  }
+  return headers;
 }
 
 /**
@@ -259,98 +264,118 @@ function updatePlayerRow(sheet, data) {
 }
 
 /**
- * Record individual Poker question responses
+ * Update or Insert player record in Poker_Responses (1 row per player, Hand 1-30 in columns)
  */
-function recordPokerResponses(sheet, data) {
+function updatePokerWideRow(sheet, data) {
   const p = data.participant || {};
+  const poker = data.poker || {};
   const pId = p.id || "";
-  const responses = data.poker.responses || [];
-  if (responses.length === 0) return;
+  const responses = poker.responses || [];
 
-  // Remove existing entries for this participant if already present to avoid duplicates
-  deleteExistingParticipantRows(sheet, 2, pId);
+  const rowValues = [
+    new Date().toLocaleString(),
+    pId,
+    p.name || "",
+    p.email || "",
+    p.nick || "",
+    poker.chips !== undefined ? poker.chips : "",
+    poker.level || "",
+    poker.overallPct !== undefined ? poker.overallPct + "%" : "",
+    poker.bestStreak !== undefined ? poker.bestStreak : ""
+  ];
 
   const RS = { w: "Win", p: "Push", l: "Loss" };
-  const rows = [];
-  const now = new Date().toLocaleString();
-
-  responses.forEach(r => {
-    rows.push([
-      now,
-      pId,
-      p.name || "",
-      p.email || "",
-      r.hand || "",
-      r.type || "",
-      r.dimn || r.dim || "",
-      r.q || "",
-      r.ans || "",
-      r.ansTxt || r.ans || "",
-      r.target !== undefined ? r.target : (r.bestA || ""),
-      r.diff !== undefined ? r.diff : "",
-      RS[r.out] || r.out || "",
-      r.stake !== undefined ? r.stake + "%" : "",
-      r.st !== undefined ? r.st : "",
-      r.dl !== undefined ? r.dl : "",
-      r.c1 !== undefined ? r.c1 : "",
-      r.tk !== undefined ? r.tk : "",
-      r.sk !== undefined ? r.sk : ""
-    ]);
-  });
-
-  if (rows.length > 0) {
-    sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
-  }
-}
-
-/**
- * Record individual Rally question responses
- */
-function recordRallyResponses(sheet, data) {
-  const p = data.participant || {};
-  const pId = p.id || "";
-  const responses = data.rally.responses || [];
-  if (responses.length === 0) return;
-
-  // Remove existing entries for this participant if already present to avoid duplicates
-  deleteExistingParticipantRows(sheet, 2, pId);
-
-  const rows = [];
-  const now = new Date().toLocaleString();
-
-  responses.forEach(a => {
-    rows.push([
-      now,
-      pId,
-      p.name || "",
-      p.email || "",
-      a.n || "",
-      a.cat || "",
-      a.tx || "",
-      a.ch !== undefined ? a.ch : (a.l !== undefined ? a.l + 1 : ""),
-      a.lab || "",
-      a.s !== undefined ? a.s : "",
-      a.rev ? "Yes" : "No",
-      a.rt !== undefined ? a.rt : ""
-    ]);
-  });
-
-  if (rows.length > 0) {
-    sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
-  }
-}
-
-/**
- * Helper to delete rows for a participant to keep questions cleanly updated
- */
-function deleteExistingParticipantRows(sheet, idCol, targetId) {
-  const lastRow = sheet.getLastRow();
-  if (lastRow <= 1) return;
-  const values = sheet.getRange(2, idCol, lastRow - 1, 1).getValues();
-  for (let i = values.length - 1; i >= 0; i--) {
-    if (values[i][0] && values[i][0].toString() === targetId.toString()) {
-      sheet.deleteRow(i + 2);
+  for (let h = 1; h <= 30; h++) {
+    const r = responses.find(x => x.hand == h);
+    if (r) {
+      rowValues.push(r.ansTxt || r.ans || "");
+      rowValues.push(RS[r.out] || r.out || "");
+      rowValues.push(r.stake !== undefined ? r.stake + "%" : "");
+    } else {
+      rowValues.push("");
+      rowValues.push("");
+      rowValues.push("");
     }
+  }
+
+  const lastRow = sheet.getLastRow();
+  let foundRow = -1;
+
+  if (lastRow > 1) {
+    const idRange = sheet.getRange(2, 2, lastRow - 1, 1).getValues();
+    for (let i = 0; i < idRange.length; i++) {
+      if (idRange[i][0] && idRange[i][0].toString() === pId.toString()) {
+        foundRow = i + 2;
+        break;
+      }
+    }
+  }
+
+  if (foundRow > 0) {
+    sheet.getRange(foundRow, 1, 1, rowValues.length).setValues([rowValues]);
+    sheet.getRange(foundRow, 1, 1, 1).setBackground("#e8f5e9");
+  } else {
+    sheet.appendRow(rowValues);
+    const newRow = sheet.getLastRow();
+    sheet.getRange(newRow, 1, 1, 1).setBackground("#fff8e1");
+  }
+}
+
+/**
+ * Update or Insert player record in Rally_Responses (1 row per player, Q1-15 in columns)
+ */
+function updateRallyWideRow(sheet, data) {
+  const p = data.participant || {};
+  const rally = data.rally || {};
+  const pId = p.id || "";
+  const responses = rally.responses || [];
+
+  const rowValues = [
+    new Date().toLocaleString(),
+    pId,
+    p.name || "",
+    p.email || "",
+    p.nick || "",
+    rally.score !== undefined ? rally.score : "",
+    rally.maxScore !== undefined ? rally.maxScore : 75,
+    rally.percent !== undefined ? rally.percent + "%" : "",
+    rally.title || "",
+    rally.cfoScore !== undefined ? rally.cfoScore : "",
+    rally.eqScore !== undefined ? rally.eqScore : ""
+  ];
+
+  for (let q = 1; q <= 15; q++) {
+    const a = responses.find(x => x.n == q);
+    if (a) {
+      const choiceStr = a.lab ? `${a.ch || a.l + 1} - ${a.lab}` : (a.ch || a.l + 1 || "");
+      rowValues.push(choiceStr);
+      rowValues.push(a.s !== undefined ? a.s : "");
+    } else {
+      rowValues.push("");
+      rowValues.push("");
+    }
+  }
+
+  const lastRow = sheet.getLastRow();
+  let foundRow = -1;
+
+  if (lastRow > 1) {
+    const idRange = sheet.getRange(2, 2, lastRow - 1, 1).getValues();
+    for (let i = 0; i < idRange.length; i++) {
+      if (idRange[i][0] && idRange[i][0].toString() === pId.toString()) {
+        foundRow = i + 2;
+        break;
+      }
+    }
+  }
+
+  if (foundRow > 0) {
+    sheet.getRange(foundRow, 1, 1, rowValues.length).setValues([rowValues]);
+    sheet.getRange(foundRow, 1, 1, 1).setBackground("#e8f5e9");
+  } else {
+    sheet.appendRow(rowValues);
+    const newRow = sheet.getLastRow();
+    sheet.getRange(newRow, 1, 1, 1).setBackground("#fff8e1");
   }
 }
 
@@ -365,7 +390,7 @@ function appendLog(sheet, data) {
     p.id || "",
     p.name || "",
     p.email || "",
-    `Poker: ${data.poker && data.poker.completed ? "Done (" + (data.poker.responses ? data.poker.responses.length : 0) + " hands)" : "Pending"} | Rally: ${data.rally && data.rally.completed ? "Done (" + (data.rally.responses ? data.rally.responses.length : 0) + " Qs)" : "Pending"}`,
+    `Poker: ${data.poker && data.poker.completed ? "Done" : "Pending"} | Rally: ${data.rally && data.rally.completed ? "Done" : "Pending"}`,
     JSON.stringify(data)
   ]);
 }
@@ -466,8 +491,8 @@ function sendEmailReport(data, sheetUrl) {
               <td style="padding: 4px 0;">${poker.bestStreak || 0} wins in a row</td>
             </tr>
             <tr>
-              <td style="padding: 4px 0; color: #9aa1b8;">Questions Logged:</td>
-              <td style="padding: 4px 0; color: #ffd66b;">${pokerHandsCount} hands recorded in sheet tab 'Poker_Responses'</td>
+              <td style="padding: 4px 0; color: #9aa1b8;">All 30 Hands Logged:</td>
+              <td style="padding: 4px 0; color: #ffd66b;">${pokerHandsCount} columns updated in sheet 'Poker_Responses'</td>
             </tr>
           </table>
         ` : `
@@ -497,8 +522,8 @@ function sendEmailReport(data, sheetUrl) {
               <td style="padding: 4px 0;">CFO: ${rally.cfoScore || 0} pts | EQ: ${rally.eqScore || 0} pts</td>
             </tr>
             <tr>
-              <td style="padding: 4px 0; color: #9aa1b8;">Questions Logged:</td>
-              <td style="padding: 4px 0; color: #ffd66b;">${rallyQsCount} statements recorded in sheet tab 'Rally_Responses'</td>
+              <td style="padding: 4px 0; color: #9aa1b8;">All 15 Qs Logged:</td>
+              <td style="padding: 4px 0; color: #ffd66b;">${rallyQsCount} columns updated in sheet 'Rally_Responses'</td>
             </tr>
           </table>
         ` : `
@@ -512,7 +537,7 @@ function sendEmailReport(data, sheetUrl) {
           📊 Open Google Spreadsheet
         </a>
         <p style="color: #9aa1b8; font-size: 12px; margin-top: 14px;">
-          Tabs available: <b>Players_Summary</b>, <b>Poker_Responses</b>, <b>Rally_Responses</b>, <b>Event_Log</b><br>
+          Clean 1-row-per-player format with question columns.<br>
           Target Recipient: ${NOTIFICATION_EMAIL}
         </p>
       </div>
