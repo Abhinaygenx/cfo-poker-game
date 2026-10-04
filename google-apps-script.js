@@ -2,10 +2,10 @@
  * ==============================================================================
  * CFO Leadership Pulse - Google Sheets & Email Automation Script
  * ==============================================================================
- * Automatically organizes and updates Google Spreadsheet with:
- * 1. "Players_Summary": Overview dashboard (1 row per player with total scores).
- * 2. "Poker_Responses": Organised wide-table (1 row per player with Hand 1 to 30 columns).
- * 3. "Rally_Responses": Organised wide-table (1 row per player with Q1 to Q15 columns).
+ * Automatically organizes Google Spreadsheet into clean 1-ROW-PER-PLAYER tables:
+ * 1. "Players_Summary": Dashboard with player profiles and overall scores.
+ * 2. "Poker_Responses": Exactly 1 row per player with questions as individual columns.
+ * 3. "Rally_Responses": Exactly 1 row per player with all 15 questions as individual columns.
  * 4. "Event_Log": Chronological audit trail.
  * 5. Sends automatic scorecard email notifications to: mmsbf26001@stu.xim.edu.in
  * ==============================================================================
@@ -13,6 +13,59 @@
 
 // Target email where updates will be sent
 const NOTIFICATION_EMAIL = "mmsbf26001@stu.xim.edu.in";
+
+// 15 Exact Rally Questions for Column Headers
+const RALLY_QUESTIONS = [
+  "Q1: I am aware of my emotions as I experience them",
+  "Q2: If a profitable shortcut bends the rules slightly, I'd still take it.",
+  "Q3: I help other people feel better when they are down",
+  "Q4: I double-check figures even when they come from trusted sources.",
+  "Q5: I know why my emotions change",
+  "Q6: I'd rather miss a big opportunity than expose the company to major uncertainty.",
+  "Q7: I use good moods to help myself keep trying in the face of obstacles",
+  "Q8: I have control over my emotions",
+  "Q9: I am aware of the non-verbal messages other people send",
+  "Q10: I stay calm and decisive when the team is under financial pressure.",
+  "Q11: I motivate myself by imagining a good outcome to tasks I take on",
+  "Q12: By looking at their facial expressions, I recognize the emotions people are experiencing",
+  "Q13: I regularly think about where capital would earn the best return.",
+  "Q14: When I experience a positive emotion, I know how to make it last",
+  "Q15: When I am in a positive mood, solving problems is easy for me"
+];
+
+// 30 Poker Questions / Hands for Column Headers
+const POKER_QUESTIONS = [
+  "H01: Soften bad number in first draft so conversation stays constructive",
+  "H02: Direct, critical feedback to people close to me without hesitation",
+  "H03 [IQ]: Bat & ball cost $1.10 together. Bat costs $1.00 more than ball. Ball cost?",
+  "H04: Regularly bring the CEO strategic options nobody asked me for",
+  "H05: When loyalty to team and company policy clash, loyalty wins",
+  "H06 [Dilemma]: Capital for one project only. A: NPV $4.0M IRR 14% vs B: NPV $2.5M IRR 22%",
+  "H07: When forecast misses, first look for what was wrong in my assumptions",
+  "H08: Judge a decision by its process and information, not outcome",
+  "H09: Never felt annoyed when a colleague challenged my numbers",
+  "H10: More comfortable defending numbers than proposing where business goes",
+  "H11 [IQ]: 5 machines take 5 mins for 5 widgets, time for 100 machines for 100 widgets?",
+  "H12 [Dilemma]: Customer 18% revenue hints switch. Call is Thursday. What to do?",
+  "H13: Forecast wrong usually because circumstances changed, not assumptions",
+  "H14: Escalate questionable accounting call even without proof",
+  "H15 [Dilemma]: Board wants 8% cost out. Fastest is laying off 60 people feeding growth",
+  "H16: Decision turning out badly keeps me awake even when process sound",
+  "H17: Never taken credit for work partly someone else's",
+  "H18 [Dilemma]: Analyst says VP Sales booking revenue early on two deals. What to do?",
+  "H19: Disagreement in team usually slows us down more than it helps",
+  "H20 [IQ]: Number series: 2, 6, 12, 20, 30, ?",
+  "H21: Comfortable making major call with 70% information",
+  "H22: Presenting to board, being accurate matters more than persuasive",
+  "H23 [Dilemma]: CEO wants 12% guidance. Base is 9%, 12% has 25% chance. What to do?",
+  "H24 [Dilemma]: Covenant headroom 8% to 3%. Bank offers amendment for 50bp fee now",
+  "H25: Delay decision to get better data even if competitor moves first",
+  "H26 [IQ]: Town 1000, 500 choir (100 men). 500 non-choir (300 men). Choir chance for picked man?",
+  "H27: Judge a decision by process, not by how it turned out",
+  "H28: Never tempted to cut corner when nobody would notice",
+  "H29 [Dilemma]: Close tomorrow. $300k inventory variance unexplained. Board pack in 12h",
+  "H30 [Dilemma]: Treasury analyst says leaves unless promoted over two seniors"
+];
 
 /**
  * Handle GET request (used to verify endpoint is live)
@@ -23,7 +76,7 @@ function doGet(e) {
     message: "CFO Leadership Pulse Webhook is online and active!",
     recipient: NOTIFICATION_EMAIL,
     sheets: ["Players_Summary", "Poker_Responses", "Rally_Responses", "Event_Log"],
-    format: "One row per player with individual question columns",
+    format: "1-Row-Per-Player with individual question columns",
     timestamp: new Date().toISOString()
   })).setMimeType(ContentService.MimeType.JSON);
 }
@@ -43,20 +96,20 @@ function doPost(e) {
     const data = JSON.parse(e.postData.contents);
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    // 1. Update/Insert in "Players_Summary"
+    // 1. Update/Insert in "Players_Summary" (1 row per player)
     const summarySheet = getOrCreateSheet(ss, "Players_Summary", getSummaryHeaders(), "#141829", "#f2c14e");
     updatePlayerRow(summarySheet, data);
 
-    // 2. Update/Insert in "Poker_Responses" (One row per player, Hand 1 to 30 as columns)
+    // 2. Update/Insert in "Poker_Responses" (1 row per player with 30 question columns)
     if (data.poker && data.poker.responses && data.poker.responses.length > 0) {
-      const pokerSheet = getOrCreateSheet(ss, "Poker_Responses", getPokerWideHeaders(), "#0f3b2a", "#6be3a4");
-      updatePokerWideRow(pokerSheet, data);
+      const pokerSheet = getOrCreateSheet(ss, "Poker_Responses", getPokerHeaders(), "#0f3b2a", "#6be3a4");
+      updatePokerRow(pokerSheet, data);
     }
 
-    // 3. Update/Insert in "Rally_Responses" (One row per player, Q1 to Q15 as columns)
+    // 3. Update/Insert in "Rally_Responses" (1 row per player with 15 question columns)
     if (data.rally && data.rally.responses && data.rally.responses.length > 0) {
-      const rallySheet = getOrCreateSheet(ss, "Rally_Responses", getRallyWideHeaders(), "#4a1d12", "#ff9f4a");
-      updateRallyWideRow(rallySheet, data);
+      const rallySheet = getOrCreateSheet(ss, "Rally_Responses", getRallyHeaders(), "#4a1d12", "#ff9f4a");
+      updateRallyRow(rallySheet, data);
     }
 
     // 4. Append to "Event_Log"
@@ -68,7 +121,7 @@ function doPost(e) {
 
     return ContentService.createTextOutput(JSON.stringify({
       status: "success",
-      message: "Player data successfully organized into columns and updated.",
+      message: "Player data successfully organized into single-row question columns and updated.",
       recipient: NOTIFICATION_EMAIL
     })).setMimeType(ContentService.MimeType.JSON);
 
@@ -114,34 +167,27 @@ function getSummaryHeaders() {
 }
 
 /**
- * Headers for Poker_Responses sheet (Wide table: 1 row per player)
+ * Headers for Poker_Responses sheet (1 row per player, 30 question columns)
  */
-function getPokerWideHeaders() {
+function getPokerHeaders() {
   const headers = [
     "Last Updated",
     "Participant ID",
     "Full Name",
     "Email",
     "Nickname",
-    "Final Chips",
-    "CFO Level",
-    "Overall %",
+    "Final Chips ($)",
+    "CFO Fit Level",
+    "Overall Score %",
     "Best Streak"
   ];
-
-  for (let h = 1; h <= 30; h++) {
-    const num = h < 10 ? "0" + h : "" + h;
-    headers.push(`H${num}_Answer`);
-    headers.push(`H${num}_Result`);
-    headers.push(`H${num}_Stake`);
-  }
-  return headers;
+  return headers.concat(POKER_QUESTIONS);
 }
 
 /**
- * Headers for Rally_Responses sheet (Wide table: 1 row per player)
+ * Headers for Rally_Responses sheet (1 row per player, 15 question columns)
  */
-function getRallyWideHeaders() {
+function getRallyHeaders() {
   const headers = [
     "Last Updated",
     "Participant ID",
@@ -151,17 +197,11 @@ function getRallyWideHeaders() {
     "Total Score",
     "Max Score",
     "Percent (%)",
-    "Rally Title",
     "CFO Score",
-    "EQ Score"
+    "EQ Score",
+    "Rally Title"
   ];
-
-  for (let q = 1; q <= 15; q++) {
-    const num = q < 10 ? "0" + q : "" + q;
-    headers.push(`Q${num}_Choice`);
-    headers.push(`Q${num}_Score`);
-  }
-  return headers;
+  return headers.concat(RALLY_QUESTIONS);
 }
 
 /**
@@ -180,32 +220,41 @@ function getLogHeaders() {
 }
 
 /**
- * Helper to get or create sheet with headers and formatting
+ * Helper to get or create sheet with headers and formatting.
+ * If the sheet exists but has outdated column headers, updates headers automatically.
  */
 function getOrCreateSheet(ss, name, headers, bgColor, fontColor) {
   let sheet = ss.getSheetByName(name);
   if (!sheet) {
     sheet = ss.insertSheet(name);
     sheet.appendRow(headers);
-    
-    // Style header row
-    const headerRange = sheet.getRange(1, 1, 1, headers.length);
-    headerRange.setBackground(bgColor || "#141829");
-    headerRange.setFontColor(fontColor || "#f2c14e");
-    headerRange.setFontWeight("bold");
-    headerRange.setFontSize(10.5);
-    sheet.setFrozenRows(1);
-    
-    // Auto-fit column widths
-    for (let c = 1; c <= headers.length; c++) {
-      sheet.setColumnWidth(c, 130);
+    formatHeaderRow(sheet, headers.length, bgColor, fontColor);
+  } else {
+    // Verify header row matches expected count; if not, update header row
+    const curCols = sheet.getLastColumn();
+    if (curCols !== headers.length) {
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      formatHeaderRow(sheet, headers.length, bgColor, fontColor);
     }
   }
   return sheet;
 }
 
+function formatHeaderRow(sheet, colCount, bgColor, fontColor) {
+  const headerRange = sheet.getRange(1, 1, 1, colCount);
+  headerRange.setBackground(bgColor || "#141829");
+  headerRange.setFontColor(fontColor || "#f2c14e");
+  headerRange.setFontWeight("bold");
+  headerRange.setFontSize(10);
+  headerRange.setWrap(true);
+  sheet.setFrozenRows(1);
+  for (let c = 1; c <= colCount; c++) {
+    sheet.setColumnWidth(c, c <= 5 ? 140 : 220);
+  }
+}
+
 /**
- * Update or Insert player record in Players_Summary
+ * Update or Insert player record in Players_Summary (1 row per player)
  */
 function updatePlayerRow(sheet, data) {
   const p = data.participant || {};
@@ -240,33 +289,13 @@ function updatePlayerRow(sheet, data) {
     rally.coins !== undefined ? rally.coins : ""
   ];
 
-  const lastRow = sheet.getLastRow();
-  let foundRow = -1;
-
-  if (lastRow > 1) {
-    const idRange = sheet.getRange(2, 2, lastRow - 1, 1).getValues();
-    for (let i = 0; i < idRange.length; i++) {
-      if (idRange[i][0] && idRange[i][0].toString() === pId.toString()) {
-        foundRow = i + 2;
-        break;
-      }
-    }
-  }
-
-  if (foundRow > 0) {
-    sheet.getRange(foundRow, 1, 1, rowValues.length).setValues([rowValues]);
-    sheet.getRange(foundRow, 1, 1, 1).setBackground("#e8f5e9");
-  } else {
-    sheet.appendRow(rowValues);
-    const newRow = sheet.getLastRow();
-    sheet.getRange(newRow, 1, 1, 1).setBackground("#fff8e1");
-  }
+  upsertRow(sheet, 2, pId, rowValues);
 }
 
 /**
- * Update or Insert player record in Poker_Responses (1 row per player, Hand 1-30 in columns)
+ * Update or Insert player record in Poker_Responses (1 row per player, 30 question columns)
  */
-function updatePokerWideRow(sheet, data) {
+function updatePokerRow(sheet, data) {
   const p = data.participant || {};
   const poker = data.poker || {};
   const pId = p.id || "";
@@ -288,43 +317,22 @@ function updatePokerWideRow(sheet, data) {
   for (let h = 1; h <= 30; h++) {
     const r = responses.find(x => x.hand == h);
     if (r) {
-      rowValues.push(r.ansTxt || r.ans || "");
-      rowValues.push(RS[r.out] || r.out || "");
-      rowValues.push(r.stake !== undefined ? r.stake + "%" : "");
+      const outcome = RS[r.out] || r.out || "";
+      const delta = r.dl !== undefined ? (r.dl > 0 ? "+" + r.dl : "" + r.dl) : "";
+      const ansText = r.ansTxt || (r.ans !== undefined ? "Option " + r.ans : "");
+      rowValues.push(`${ansText} [${outcome} ${delta}]`);
     } else {
       rowValues.push("");
-      rowValues.push("");
-      rowValues.push("");
     }
   }
 
-  const lastRow = sheet.getLastRow();
-  let foundRow = -1;
-
-  if (lastRow > 1) {
-    const idRange = sheet.getRange(2, 2, lastRow - 1, 1).getValues();
-    for (let i = 0; i < idRange.length; i++) {
-      if (idRange[i][0] && idRange[i][0].toString() === pId.toString()) {
-        foundRow = i + 2;
-        break;
-      }
-    }
-  }
-
-  if (foundRow > 0) {
-    sheet.getRange(foundRow, 1, 1, rowValues.length).setValues([rowValues]);
-    sheet.getRange(foundRow, 1, 1, 1).setBackground("#e8f5e9");
-  } else {
-    sheet.appendRow(rowValues);
-    const newRow = sheet.getLastRow();
-    sheet.getRange(newRow, 1, 1, 1).setBackground("#fff8e1");
-  }
+  upsertRow(sheet, 2, pId, rowValues);
 }
 
 /**
- * Update or Insert player record in Rally_Responses (1 row per player, Q1-15 in columns)
+ * Update or Insert player record in Rally_Responses (1 row per player, 15 question columns)
  */
-function updateRallyWideRow(sheet, data) {
+function updateRallyRow(sheet, data) {
   const p = data.participant || {};
   const rally = data.rally || {};
   const pId = p.id || "";
@@ -339,30 +347,36 @@ function updateRallyWideRow(sheet, data) {
     rally.score !== undefined ? rally.score : "",
     rally.maxScore !== undefined ? rally.maxScore : 75,
     rally.percent !== undefined ? rally.percent + "%" : "",
-    rally.title || "",
     rally.cfoScore !== undefined ? rally.cfoScore : "",
-    rally.eqScore !== undefined ? rally.eqScore : ""
+    rally.eqScore !== undefined ? rally.eqScore : "",
+    rally.title || ""
   ];
 
   for (let q = 1; q <= 15; q++) {
     const a = responses.find(x => x.n == q);
     if (a) {
-      const choiceStr = a.lab ? `${a.ch || a.l + 1} - ${a.lab}` : (a.ch || a.l + 1 || "");
-      rowValues.push(choiceStr);
-      rowValues.push(a.s !== undefined ? a.s : "");
+      const label = a.lab || (a.ch !== undefined ? "Choice " + a.ch : "");
+      const score = a.s !== undefined ? a.s + " pts" : "";
+      rowValues.push(`${label} (${score})`);
     } else {
-      rowValues.push("");
       rowValues.push("");
     }
   }
 
+  upsertRow(sheet, 2, pId, rowValues);
+}
+
+/**
+ * Helper to update row if participant ID exists, or append if new (ensuring strictly 1 row per player)
+ */
+function upsertRow(sheet, idColIndex, targetId, rowValues) {
   const lastRow = sheet.getLastRow();
   let foundRow = -1;
 
   if (lastRow > 1) {
-    const idRange = sheet.getRange(2, 2, lastRow - 1, 1).getValues();
+    const idRange = sheet.getRange(2, idColIndex, lastRow - 1, 1).getValues();
     for (let i = 0; i < idRange.length; i++) {
-      if (idRange[i][0] && idRange[i][0].toString() === pId.toString()) {
+      if (idRange[i][0] && idRange[i][0].toString() === targetId.toString()) {
         foundRow = i + 2;
         break;
       }
@@ -422,9 +436,6 @@ function sendEmailReport(data, sheetUrl) {
   }
 
   const subject = `[CFO Leadership Pulse] ${eventTitle}: ${p.name || "Player"} (${p.nick || "No Nickname"})`;
-
-  const pokerHandsCount = poker.responses ? poker.responses.length : (poker.handsPlayed || 0);
-  const rallyQsCount = rally.responses ? rally.responses.length : 0;
 
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; background-color: #0b0d16; color: #eef0f7; padding: 24px; border-radius: 12px; max-width: 650px; margin: auto; border: 1px solid #2a3050;">
@@ -491,8 +502,8 @@ function sendEmailReport(data, sheetUrl) {
               <td style="padding: 4px 0;">${poker.bestStreak || 0} wins in a row</td>
             </tr>
             <tr>
-              <td style="padding: 4px 0; color: #9aa1b8;">All 30 Hands Logged:</td>
-              <td style="padding: 4px 0; color: #ffd66b;">${pokerHandsCount} columns updated in sheet 'Poker_Responses'</td>
+              <td style="padding: 4px 0; color: #9aa1b8;">Responses Layout:</td>
+              <td style="padding: 4px 0; color: #ffd66b;">Saved as 30 question columns in 1 single row</td>
             </tr>
           </table>
         ` : `
@@ -522,8 +533,8 @@ function sendEmailReport(data, sheetUrl) {
               <td style="padding: 4px 0;">CFO: ${rally.cfoScore || 0} pts | EQ: ${rally.eqScore || 0} pts</td>
             </tr>
             <tr>
-              <td style="padding: 4px 0; color: #9aa1b8;">All 15 Qs Logged:</td>
-              <td style="padding: 4px 0; color: #ffd66b;">${rallyQsCount} columns updated in sheet 'Rally_Responses'</td>
+              <td style="padding: 4px 0; color: #9aa1b8;">Responses Layout:</td>
+              <td style="padding: 4px 0; color: #ffd66b;">Saved as 15 question columns in 1 single row</td>
             </tr>
           </table>
         ` : `
@@ -537,7 +548,7 @@ function sendEmailReport(data, sheetUrl) {
           📊 Open Google Spreadsheet
         </a>
         <p style="color: #9aa1b8; font-size: 12px; margin-top: 14px;">
-          Clean 1-row-per-player format with question columns.<br>
+          Clean 1-Row-Per-User layout with questions as columns.<br>
           Target Recipient: ${NOTIFICATION_EMAIL}
         </p>
       </div>
