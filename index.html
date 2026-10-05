@@ -256,7 +256,24 @@ const DEFAULT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw97qit3HKxEda
 let ENDPOINT = localStorage.getItem('cfo_sheet_endpoint') || DEFAULT_ENDPOINT;
 
 const $=i=>document.getElementById(i);
-let DB=[];try{DB=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){}
+let DB=[];
+try{
+  DB=JSON.parse(localStorage.getItem(KEY)||'[]');
+  // Remove any legacy 30-hand poker responses so the sheet/export only holds clean 10-hand data
+  let modified=false;
+  DB.forEach(p=>{
+    if(p.poker&&p.poker.data&&p.poker.data.length>10){
+      p.poker=null;
+      modified=true;
+    }
+  });
+  if(modified)localStorage.setItem(KEY,JSON.stringify(DB));
+  let act=JSON.parse(localStorage.getItem('cfo_active_player')||'null');
+  if(act&&act.poker&&act.poker.data&&act.poker.data.length>10){
+    act.poker=null;
+    localStorage.setItem('cfo_active_player',JSON.stringify(act));
+  }
+}catch(e){}
 let P=null,cur='';
 
 function openSyncModal(){
@@ -545,40 +562,77 @@ function go(id){if(!FSM.ok(id))return;const pv=FSM.s;FSM.s=id;swap(id,pv=='cin')
 
 /* Excel Export */
 function tables(){
-  const T={Participants:[],Survey_Report:[],Poker_Responses:[],Rally_Responses:[],Rally_Summary:[]};
+  const T={Participants:[],Poker_Responses:[],Rally_Responses:[],Rally_Summary:[]};
   const RS={w:'Win',p:'Push',l:'Loss'};
   const LBL=['Strongly disagree','Disagree','Neutral','Agree','Strongly agree'];
-  const LF={ins:'Insurance',time:'+10 seconds',ask:'Ask the Board'};
-  const nn=n=>(n<10?'0':'')+n;
+  const PKQS=[
+    "H01 [Ethical]: $0.2M short of consensus, $0.2M warranty reserve slightly high",
+    "H02 [Ethical]: Manager repaid $2,000 padded expenses, asks not to report",
+    "H03 [Ethical]: Brother-in-law's firm bidding on funded project",
+    "H04 [Ethical]: Unusual contracts with side letter allowing returns",
+    "H05 [Ethical]: 30% chance of covenant breach, CEO wants to hold back at bank meeting",
+    "H06 [IQ]: Invest $8,000, falls 50%, then rises 75%. Worth now?",
+    "H07 [IQ]: 1000 invoices (400 risky, 90 flagged fraud, 60 unflagged fraud). P(flagged|fraud)?",
+    "H08 [IQ]: Bat and ball cost $1.10 total. Bat costs $1.00 more than ball. Ball cost?",
+    "H09 [IQ]: 5 machines 5 min 5 widgets. Time for 100 machines to make 100 widgets?",
+    "H10 [IQ]: Lily pad doubles daily, takes 48 days for entire lake. Days for half lake?"
+  ];
+  const RLQS=["Q01: Aware of my emotions as I experience them", "Q02: Profitable shortcut bends rules I would take it", "Q03: I help other people feel better when down", "Q04: Double-check figures even from trusted sources", "Q05: I know why my emotions change", "Q06: Miss opportunity rather than expose company to uncertainty", "Q07: Use good moods to keep trying facing obstacles", "Q08: I have control over my emotions", "Q09: Aware of non-verbal messages other people send", "Q10: Stay calm and decisive under financial pressure", "Q11: Motivate myself by imagining a good outcome", "Q12: By facial expressions recognize emotions people experience", "Q13: Regularly think about where capital earns best return", "Q14: When positive emotion I know how to make it last", "Q15: When in positive mood solving problems is easy"];
 
   DB.forEach(p=>{
     const pk=p.poker&&p.poker.data||[],ra=p.rally&&p.rally.data;
-    T.Participants.push({
-      ID:p.id,Registered:p.ts,Name:p.name,Email:p.email,Age:p.age,Gender:p.gender,Phone:p.phone,Status:p.status,Nickname:p.nick,
+    const px=(p.poker&&p.poker.x)||{};
+    const ID={Participant_ID:p.id,Name:p.name,Email:p.email,Age:p.age,Gender:p.gender,Status:p.status,Nickname:p.nick};
+
+    T.Participants.push(Object.assign({},ID,{
+      Registered:p.ts,Phone:p.phone,
       Poker_Completed:p.poker?'Yes':'No',Poker_Hands:pk.length,Poker_Final_Chips:p.poker?p.poker.chips:'',
+      Poker_Level:px.lvl||'',Poker_Overall_Pct:px.ov??'',Poker_Best_Streak:px.best??'',Poker_Busted:p.poker?(px.bust?'Yes':'No'):'',
       Rally_Completed:ra?'Yes':'No',Rally_Score:ra?ra.tot:'',Rally_Max:ra?ra.all:'',Rally_Percent:ra?ra.pc:'',Rally_Title:ra?ra.ti:''
-    });
-    const px=(p.poker&&p.poker.x)||{},us=px.used||{},ID={Participant_ID:p.id,Name:p.name,Email:p.email,Age:p.age,Gender:p.gender,Status:p.status,Nickname:p.nick};
-    Object.assign(T.Participants[T.Participants.length-1],{
-      Poker_Level:px.lvl||'',Poker_Overall_Pct:px.ov??'',Poker_Best_Streak:px.best??'',Poker_Busted:p.poker?(px.bust?'Yes':'No'):''
-    });
-    pk.forEach(x=>T.Poker_Responses.push(Object.assign({},ID,{
-      Hand:x.hand,Dimension:x.dimn||x.dim,Question_Type:x.type||'',Statement:x.q,Answer_Code:x.ans,Answer_Selected:x.ansTxt||x.ans,
-      Stake_Percent:x.stake,Stake_Chips:x.st??'',Chips_Before:x.c0??'',Chips_After:x.c1??'',Chip_Change:x.dl??'',Result:RS[x.out]||x.out
-    })));
+    }));
+
+    if(pk.length){
+      const pkRow=Object.assign({},ID,{
+        Final_Chips:p.poker?p.poker.chips:'',CFO_Level:px.lvl||'',Overall_Pct:px.ov??'',Best_Streak:px.best??''
+      });
+      for(let h=1;h<=PKQS.length;h++){
+        const hKey=PKQS[h-1];
+        const x=pk.find(r=>r.hand==h);
+        if(x){
+          const ans=x.ansTxt||x.ans||'';
+          const res=RS[x.out]||x.out||'';
+          const dl=x.dl!==undefined?(x.dl>0?'+'+x.dl:''+x.dl):'';
+          pkRow[hKey]=ans+(res?' ['+res+(dl?' '+dl:'')+']':'');
+        } else {pkRow[hKey]='';}
+      }
+      T.Poker_Responses.push(pkRow);
+    }
+
     if(ra){
-      (ra.ans||[]).forEach(a=>T.Rally_Responses.push(Object.assign({},ID,{
-        Q:a.n,Category:a.cat,Statement:a.tx,Lane_Chosen_1to5:a.ch||a.l+1,Choice_Label:a.lab||LBL[a.l],Score:a.s,Reverse_Keyed:a.rev?'Yes':'No',Reaction_Sec:a.rt
-      })));
-      T.Rally_Summary.push(Object.assign({
-        Participant_ID:p.id,Name:p.name,Email:p.email,Nickname:p.nick,Played:ra.ts,Title:ra.ti,Total:ra.tot,Max:ra.all,Percent:ra.pc,
+      const rlRow=Object.assign({},ID,{
+        Title:ra.ti,Total_Score:ra.tot,Max_Score:ra.all,Percent:ra.pc,
+        CFO_Score:ra.cf,CFO_Max:ra.cm,EI_Score:ra.ef,EI_Max:ra.em,
+        Gold:ra.gold,Crashes:ra.crash
+      });
+      for(let q=1;q<=15;q++){
+        const qKey=RLQS[q-1];
+        const a=(ra.ans||[]).find(x=>x.n==q);
+        if(a){
+          const lbl=a.lab||LBL[a.l]||'';
+          const sc=a.s!==undefined?a.s+' pts':'';
+          rlRow[qKey]=lbl+(sc?' ('+sc+')':'');
+        } else {rlRow[qKey]='';}
+      }
+      T.Rally_Responses.push(rlRow);
+      T.Rally_Summary.push({
+        Participant_ID:p.id,Name:p.name,Email:p.email,Nickname:p.nick,
+        Played:ra.ts,Title:ra.ti,Total:ra.tot,Max:ra.all,Percent:ra.pc,
         CFO_Score:ra.cf,CFO_Max:ra.cm,EI_Score:ra.ef,EI_Max:ra.em,Gold:ra.gold,Crashes:ra.crash
-      }));
+      });
     }
   });
   return T;
 }
-
 function dlExcel(){
   const T=tables();
   if(!DB.length)return warn('No data to export yet. Register and play first.');

@@ -77,16 +77,16 @@ Stores one consolidated row per player, keeping their status, chip totals, and o
 ---
 
 ### 2. `Poker_Responses` (Individual Poker Questions & Scores)
-Logs all 30 hands/questions answered by every user in **The Hot Seat (Poker)**:
+Logs all 10 hands/questions answered by every user in **The Hot Seat (Poker)** (5 Ethical Decision dilemmas + 5 Quantitative & Reasoning puzzles):
 | Column | Description |
 |---|---|
 | **Recorded At** | Timestamp when game completed |
 | **Participant ID** | Player's unique ID |
 | **Player Name** | Full name |
 | **Player Email** | Email address |
-| **Hand #** | Hand index (1 to 30) |
-| **Question Type** | Statement / IQ puzzle / CFO Dilemma |
-| **Dimension** | Tested competency (Integrity, People, Vision, Rigor, Risk, Reasoning) |
+| **Hand #** | Hand index (1 to 10) |
+| **Question Type** | CFO Dilemma / IQ puzzle |
+| **Dimension** | Tested competency (Ethics, Governance, Financial Math, Cognitive Logic) |
 | **Question / Statement** | Full text of the prompt / dilemma |
 | **User Answer Code** | Option chosen (1 to 5) |
 | **User Answer Text** | Complete text of user's chosen answer |

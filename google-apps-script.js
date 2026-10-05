@@ -33,38 +33,18 @@ const RALLY_QUESTIONS = [
   "Q15: When I am in a positive mood, solving problems is easy for me"
 ];
 
-// 30 Poker Questions / Hands for Column Headers
+// 10 Hot Seat Poker Questions (5 Ethical Decision Making + 5 Quantitative & Reasoning Puzzles)
 const POKER_QUESTIONS = [
-  "H01: Soften bad number in first draft so conversation stays constructive",
-  "H02: Direct, critical feedback to people close to me without hesitation",
-  "H03 [IQ]: Bat & ball cost $1.10 together. Bat costs $1.00 more than ball. Ball cost?",
-  "H04: Regularly bring the CEO strategic options nobody asked me for",
-  "H05: When loyalty to team and company policy clash, loyalty wins",
-  "H06 [Dilemma]: Capital for one project only. A: NPV $4.0M IRR 14% vs B: NPV $2.5M IRR 22%",
-  "H07: When forecast misses, first look for what was wrong in my assumptions",
-  "H08: Judge a decision by its process and information, not outcome",
-  "H09: Never felt annoyed when a colleague challenged my numbers",
-  "H10: More comfortable defending numbers than proposing where business goes",
-  "H11 [IQ]: 5 machines take 5 mins for 5 widgets, time for 100 machines for 100 widgets?",
-  "H12 [Dilemma]: Customer 18% revenue hints switch. Call is Thursday. What to do?",
-  "H13: Forecast wrong usually because circumstances changed, not assumptions",
-  "H14: Escalate questionable accounting call even without proof",
-  "H15 [Dilemma]: Board wants 8% cost out. Fastest is laying off 60 people feeding growth",
-  "H16: Decision turning out badly keeps me awake even when process sound",
-  "H17: Never taken credit for work partly someone else's",
-  "H18 [Dilemma]: Analyst says VP Sales booking revenue early on two deals. What to do?",
-  "H19: Disagreement in team usually slows us down more than it helps",
-  "H20 [IQ]: Number series: 2, 6, 12, 20, 30, ?",
-  "H21: Comfortable making major call with 70% information",
-  "H22: Presenting to board, being accurate matters more than persuasive",
-  "H23 [Dilemma]: CEO wants 12% guidance. Base is 9%, 12% has 25% chance. What to do?",
-  "H24 [Dilemma]: Covenant headroom 8% to 3%. Bank offers amendment for 50bp fee now",
-  "H25: Delay decision to get better data even if competitor moves first",
-  "H26 [IQ]: Town 1000, 500 choir (100 men). 500 non-choir (300 men). Choir chance for picked man?",
-  "H27: Judge a decision by process, not by how it turned out",
-  "H28: Never tempted to cut corner when nobody would notice",
-  "H29 [Dilemma]: Close tomorrow. $300k inventory variance unexplained. Board pack in 12h",
-  "H30 [Dilemma]: Treasury analyst says leaves unless promoted over two seniors"
+  "H01 [Ethical]: $0.2M short of consensus, $0.2M warranty reserve slightly high",
+  "H02 [Ethical]: Manager repaid $2,000 padded expenses, asks not to report",
+  "H03 [Ethical]: Brother-in-law's firm bidding on funded project",
+  "H04 [Ethical]: Unusual contracts with side letter allowing returns",
+  "H05 [Ethical]: 30% chance of covenant breach, CEO wants to hold back at bank meeting",
+  "H06 [IQ]: Invest $8,000, falls 50%, then rises 75%. Worth now?",
+  "H07 [IQ]: 1000 invoices (400 risky, 90 flagged fraud, 60 unflagged fraud). P(flagged|fraud)?",
+  "H08 [IQ]: Bat and ball cost $1.10 total. Bat costs $1.00 more than ball. Ball cost?",
+  "H09 [IQ]: 5 machines 5 min 5 widgets. Time for 100 machines to make 100 widgets?",
+  "H10 [IQ]: Lily pad doubles daily, takes 48 days for entire lake. Days for half lake?"
 ];
 
 /**
@@ -168,7 +148,7 @@ function getSummaryHeaders() {
 }
 
 /**
- * Headers for Poker_Responses sheet (1 row per player, 30 question columns)
+ * Headers for Poker_Responses sheet (1 row per player, 10 question columns)
  */
 function getPokerHeaders() {
   const headers = [
@@ -222,7 +202,8 @@ function getLogHeaders() {
 
 /**
  * Helper to get or create sheet with headers and formatting.
- * If the sheet exists but has outdated column headers, updates headers automatically.
+ * If the sheet exists but has outdated column headers (e.g. old 30-hand columns),
+ * it wipes the old structure and responses, applying the new clean 10-hand structure.
  */
 function getOrCreateSheet(ss, name, headers, bgColor, fontColor) {
   let sheet = ss.getSheetByName(name);
@@ -231,10 +212,12 @@ function getOrCreateSheet(ss, name, headers, bgColor, fontColor) {
     sheet.appendRow(headers);
     formatHeaderRow(sheet, headers.length, bgColor, fontColor);
   } else {
-    // Verify header row matches expected count; if not, update header row
     const curCols = sheet.getLastColumn();
     if (curCols !== headers.length) {
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      // Column structure changed (e.g. from 30 questions to 10 questions)
+      // Wipe old outdated responses to prevent mismatched column alignments
+      sheet.clear();
+      sheet.appendRow(headers);
       formatHeaderRow(sheet, headers.length, bgColor, fontColor);
     }
   }
@@ -252,6 +235,24 @@ function formatHeaderRow(sheet, colCount, bgColor, fontColor) {
   for (let c = 1; c <= colCount; c++) {
     sheet.setColumnWidth(c, c <= 5 ? 140 : 220);
   }
+}
+
+/**
+ * Utility to immediately reset and remove old responses in Poker_Responses sheet.
+ * Can be run manually from Google Apps Script editor.
+ */
+function resetPokerResponsesSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName("Poker_Responses");
+  if (sheet) {
+    sheet.clear();
+  } else {
+    sheet = ss.insertSheet("Poker_Responses");
+  }
+  const headers = getPokerHeaders();
+  sheet.appendRow(headers);
+  formatHeaderRow(sheet, headers.length, "#0f3b2a", "#6be3a4");
+  Logger.log("✅ Poker_Responses sheet wiped and reset with 10 question columns.");
 }
 
 /**
@@ -294,7 +295,7 @@ function updatePlayerRow(sheet, data) {
 }
 
 /**
- * Update or Insert player record in Poker_Responses (1 row per player, 30 question columns)
+ * Update or Insert player record in Poker_Responses (1 row per player, 10 question columns)
  */
 function updatePokerRow(sheet, data) {
   const p = data.participant || {};
@@ -315,7 +316,7 @@ function updatePokerRow(sheet, data) {
   ];
 
   const RS = { w: "Win", p: "Push", l: "Loss" };
-  for (let h = 1; h <= 30; h++) {
+  for (let h = 1; h <= POKER_QUESTIONS.length; h++) {
     const r = responses.find(x => x.hand == h);
     if (r) {
       const outcome = RS[r.out] || r.out || "";
@@ -504,7 +505,7 @@ function sendEmailReport(data, sheetUrl) {
             </tr>
             <tr>
               <td style="padding: 4px 0; color: #9aa1b8;">Responses Layout:</td>
-              <td style="padding: 4px 0; color: #ffd66b;">Saved as 30 question columns in 1 single row</td>
+              <td style="padding: 4px 0; color: #ffd66b;">Saved as 10 question columns in 1 single row</td>
             </tr>
           </table>
         ` : `

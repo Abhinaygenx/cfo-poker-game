@@ -373,13 +373,76 @@ body.tense::before{opacity:.22}body.hot::after{opacity:.16}body.inf::after{opaci
 <div class="pw"><button class="pwb" data-w="ins">🛡 Insurance</button><button class="pwb" data-w="time">⏱ +10s</button><button class="pwb" data-w="ask">📣 Ask the Board</button></div></div></div></div></div>
 <button id="how" aria-label="How to play">How to play</button>
 <div class="ov" id="ov"><div class="ovc"><h2 class="disp">How to play</h2>
-<div class="rl"><b>Goal.</b> Play 30 hands. Finish with chips and a CFO-fit verdict.</div>
-<div class="h4">Every hand</div><ol><li><b>Read the question.</b> The clock (under the table) gives 10 seconds on statements, 20 on puzzles, 40 on dilemmas. Run out and you lose your stake.</li><li><b>Set your bet.</b> Drag the chip from 10% to 100% of your pot (100% is ALL IN). Your bet is locked when you tap a card.</li><li><b>Tap a card.</b> Five board members vote. Most for you: <b>win</b> your stake. Split: <b>push</b>, stake back. Most against: <b>lose</b> it.</li></ol>
-<div class="h4">Three kinds of question</div><div class="two"><b>18</b><span>Statements. Rate how true each is of you. Some are asked twice from different angles, so just answer honestly.</span><b>4</b><span>IQ puzzles. One answer is right.</span><b>8</b><span>CFO dilemmas. Several options are defensible; pick the best. One is a half-credit push.</div>
-<div class="h4">Boosts</div><div class="two"><b>🔥</b><span>3 wins in a row pays 1.5x, 6 pays 2x, and opens a Lucky Bonus slot machine.</span><b>🛡</b><span>Insurance: a loss costs half, a win pays 25% less.</span><b>⏱</b><span>+10 seconds.</span><b>📣</b><span>Ask the Board: a lean on statements, or removes one wrong card on puzzles and dilemmas.</span></div>
+<div class="rl"><b>Goal.</b> Play 10 hands. Finish with chips and a CFO-fit verdict.</div>
+<div class="h4">Every hand</div><ol><li><b>Read the question.</b> The clock (under the table) gives 30 seconds on reasoning puzzles, 40 on ethical dilemmas. Run out and you lose your stake.</li><li><b>Set your bet.</b> Drag the chip from 10% to 100% of your pot (100% is ALL IN). Your bet is locked when you tap a card.</li><li><b>Tap a card.</b> Five board members vote. Most for you: <b>win</b> your stake. Split: <b>push</b>, stake back. Most against: <b>lose</b> it.</li></ol>
+<div class="h4">Two kinds of question</div><div class="two"><b>5</b><span>Ethical Decision Making dilemmas. Four options with varying degrees of compliance, disclosure, and governance.</span><b>5</b><span>Quantitative & reasoning puzzles. Test your financial logic, probability, and cognitive reflection.</span></div>
+<div class="h4">Boosts</div><div class="two"><b>🔥</b><span>3 wins in a row pays 1.5x, 6 pays 2x, and opens a Lucky Bonus slot machine.</span><b>🛡</b><span>Insurance: a loss costs half, a win pays 25% less.</span><b>⏱</b><span>+10 seconds.</span><b>📣</b><span>Ask the Board: removes one wrong card.</span></div>
 <p class="note">Lifelines: once each per game, one per hand, after the cards are face-up.</p><button class="go" id="cl">Got it</button></div></div>
 <div id="sl"></div><div id="vg"></div><div id="fl"></div><div id="fx"></div>
 <script>
+// --- Authentic Casino Poker Audio Engine (Web Audio API) ---
+function chipClick(v=.1, w=0){
+  if(!snd_on)return;
+  try{
+    AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+    const t=AC.currentTime+w;
+    const o=AC.createOscillator(),f=AC.createBiquadFilter(),g=AC.createGain();
+    o.type='triangle';o.frequency.setValueAtTime(2600+Math.random()*800,t);
+    f.type='bandpass';f.frequency.setValueAtTime(3000+Math.random()*500,t);f.Q.value=10;
+    g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.04);
+    o.connect(f);f.connect(g);g.connect(AC.destination);
+    o.start(t);o.stop(t+.045);
+    const o2=AC.createOscillator(),g2=AC.createGain();
+    o2.type='sine';o2.frequency.setValueAtTime(750+Math.random()*200,t);
+    g2.gain.setValueAtTime(v*.7,t);g2.gain.exponentialRampToValueAtTime(.001,t+.035);
+    o2.connect(g2);g2.connect(AC.destination);
+    o2.start(t);o2.stop(t+.04);
+  }catch(e){}
+}
+function chipRiffle(n=3,v=.08){for(let i=0;i<n;i++)chipClick(v,i*(.025+Math.random()*.02))}
+function chipSplash(v=.12){for(let i=0;i<6;i++)chipClick(v*(.7+Math.random()*.5),i*.035+Math.random()*.02)}
+function cardSlide(d=.14,v=.06,w=0){
+  if(!snd_on)return;
+  try{
+    AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+    const len=Math.max(1,AC.sampleRate*d|0),b=AC.createBuffer(1,len,AC.sampleRate),a=b.getChannelData(0);
+    for(let i=0;i<len;i++)a[i]=Math.random()*2-1;
+    const src=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain(),t=AC.currentTime+w;
+    src.buffer=b;fl.type='bandpass';fl.Q.value=2.2;
+    fl.frequency.setValueAtTime(3200,t);fl.frequency.exponentialRampToValueAtTime(1400,t+d);
+    g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(v,t+d*.25);g.gain.exponentialRampToValueAtTime(.001,t+d);
+    src.connect(fl);fl.connect(g);g.connect(AC.destination);
+    src.start(t);
+  }catch(e){}
+}
+function cardSnap(v=.15){
+  if(!snd_on)return;
+  try{
+    AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+    const t=AC.currentTime;cardSlide(.08,v*.8);
+    const o=AC.createOscillator(),g=AC.createGain();
+    o.type='sine';o.frequency.setValueAtTime(140,t+.015);o.frequency.exponentialRampToValueAtTime(50,t+.12);
+    g.gain.setValueAtTime(v,t+.015);g.gain.exponentialRampToValueAtTime(.001,t+.12);
+    o.connect(g);g.connect(AC.destination);
+    o.start(t+.015);o.stop(t+.13);
+  }catch(e){}
+}
+function potRake(){chipRiffle(8,.12);cardSlide(.3,.08,.1);[523,659,784,1047].forEach((f,i)=>s(f,.28,'triangle',.06,.15+i*.08))}
+function tableKnock(){if(!snd_on)return;[0,.14].forEach(del=>{s(110,.08,'sine',.15,del);noise(.04,800,.04,del,'lowpass')})}
+function pokerHeartbeat(){
+  if(!snd_on)return;
+  try{
+    AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+    const t=AC.currentTime;
+    [0,.16].forEach((del,i)=>{
+      const o=AC.createOscillator(),g=AC.createGain();
+      o.type='sine';o.frequency.setValueAtTime(i===0?58:46,t+del);o.frequency.exponentialRampToValueAtTime(32,t+del+.14);
+      g.gain.setValueAtTime(.18,t+del);g.gain.exponentialRampToValueAtTime(.001,t+del+.14);
+      o.connect(g);g.connect(AC.destination);
+      o.start(t+del);o.stop(t+del+.15);
+    });
+  }catch(e){}
+}
 function s(f,d=.12,t='sine',v=.07,w=0,mu=0){if(!snd_on||(mu&&!mus))return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;const a=AC.currentTime+w;g.gain.setValueAtTime(v,a);g.gain.exponentialRampToValueAtTime(.001,a+d);o.connect(g);g.connect(AC.destination);o.start(a);o.stop(a+d)}catch(e){}}
 function noise(d=.05,f=6000,v=.05,w=0,ty='highpass',mu=0){if(!snd_on||(mu&&!mus))return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const b=AC.createBuffer(1,Math.max(1,AC.sampleRate*d|0),AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1;const n=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain(),t=AC.currentTime+w;n.buffer=b;fl.type=ty;fl.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);n.connect(fl);fl.connect(g);g.connect(AC.destination);n.start(t)}catch(e){}}
 function burst(n,cols=['#f2c14e','#5fe39a','#ff9d3d','#fff']){for(let i=0;i<n;i++){const e=document.createElement('i');e.className='c';e.style.background=cols[i%cols.length];e.style.setProperty('--dx',(Math.random()*500-250)+'px');e.style.setProperty('--dy',(Math.random()*300+80)+'px');$('fx').appendChild(e);setTimeout(()=>e.remove(),1300)}}
@@ -390,101 +453,224 @@ function spark(el,c='#f2c14e'){if(!el)return;const r=el.getBoundingClientRect();
 function flash(c){const f=$('fl');f.style.background=c;f.style.animation='none';f.offsetWidth;f.style.animation=RMo?'none':'fl .35s'}
 function rain(n,src){const el=src||$('pv'),r=el.getBoundingClientRect(),ox=r.left+r.width/2,oy=r.top+r.height/2,H=(typeof innerHeight=='number'?innerHeight:700);
  for(let i=0;i<n;i++){const e=document.createElement('i');e.className='cn2';e.style.left=ox+'px';e.style.top=oy+'px';e.style.setProperty('--dx',(Math.random()*280-140)+'px');e.style.setProperty('--up',(-(120+Math.random()*200))+'px');e.style.setProperty('--fall',(H-oy+40)+'px');e.style.animationDelay=(Math.random()*1.1)+'s';e.style.animationDuration=(1.5+Math.random()*.6)+'s';$('fx').appendChild(e);setTimeout(()=>e.remove(),3400);if(i%4==0)coinPing(Math.random()*1.2)}}
-function slam(t,c='#fff',sub=''){const e=document.createElement('div');e.className='slam';e.style.color=c;e.innerHTML=t+(sub?'<small>'+sub+'</small>':'');$('fx').appendChild(e);s(70,.3,'sine',.25);noise(.25,500,.1,0,'lowpass');setTimeout(()=>e.remove(),1500)}
+function slam(t,c='#fff',sub=''){const e=document.createElement('div');e.className='slam';e.style.color=c;e.innerHTML=t+(sub?'<small>'+sub+'</small>':'');$('fx').appendChild(e);cardSnap(.2);noise(.2,600,.08,0,'lowpass');setTimeout(()=>e.remove(),1500)}
 function shakeApp(){const a=$('app');a.classList.remove('sk');void a.offsetWidth;a.classList.add('sk');setTimeout(()=>a.classList.remove('sk'),500)}
-function riser(d){if(!snd_on)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type='sawtooth';o.frequency.setValueAtTime(90,t);o.frequency.exponentialRampToValueAtTime(700,t+d);g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(.06,t+d);g.gain.linearRampToValueAtTime(.001,t+d+.1);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+.2)}catch(e){}}
+function riser(d){if(!snd_on)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type='sawtooth';o.frequency.setValueAtTime(80,t);o.frequency.exponentialRampToValueAtTime(600,t+d);g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(.05,t+d);g.gain.linearRampToValueAtTime(.001,t+d+.1);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+.2)}catch(e){}}
 function say2(i,em,t){const el=$('seats').children[i];if(!el)return;const x=document.createElement('span');x.className='sb2';x.innerHTML='<b>'+em+'</b> '+t;el.appendChild(x);setTimeout(()=>x.remove(),2300)}
 function react(i,t){const el=$('seats').children[i];if(!el)return;const x=document.createElement('span');x.className='emo';x.textContent=t;el.appendChild(x);setTimeout(()=>x.remove(),1500)}
 function fly2(a,b,n=8){if(!a||!b)return;const A=a.getBoundingClientRect(),B=b.getBoundingClientRect(),ax=A.left+A.width/2,ay=A.top+A.height/2,bx=B.left+B.width/2-ax,by=B.top+B.height/2-ay;
  for(let i=0;i<n;i++){const e=document.createElement('i');e.className='fc';e.style.left=ax+'px';e.style.top=ay+'px';e.style.background=CC[i%4];e.style.transition='transform .28s ease-out';$('fx').appendChild(e);const ox=Math.random()*90-45,oy=-30-Math.random()*50;
   setTimeout(()=>{e.style.transform=`translate(${ox}px,${oy}px) rotate(200deg)`},20+i*40);
   setTimeout(()=>{e.style.transition='transform .6s cubic-bezier(.5,0,.8,.4)';e.style.transform=`translate(${bx}px,${by}px) rotate(700deg) scale(.6)`},360+i*60);
-  setTimeout(()=>{s(1700+Math.random()*700,.04,'triangle',.04);e.remove();if(i==n-1){b.classList.add('pulse');setTimeout(()=>b.classList.remove('pulse'),500)}},1000+i*60)}}
+  setTimeout(()=>{chipClick(.08);e.remove();if(i==n-1){b.classList.add('pulse');setTimeout(()=>b.classList.remove('pulse'),500)}},1000+i*60)}}
 function startMus(){if(mlt)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume()}catch(e){}const go=()=>{const t=document.body.classList.contains('tense'),k=st16%16,b=BASS[k];
- if(b)s(b,.22,'triangle',.06,0,1);if(k%4==0)s(62,.12,'sine',.09,0,1);if(k%2==1)noise(.03,7000,.012,0,'highpass',1);if(k==0||k==10)CH[(st16>>4)%2].forEach(f=>s(f,.5,'sine',.012,0,1));
- if(k==0&&document.body.classList.contains('cold'))s(41,.6,'sine',.07,0,1);if(k==8&&document.body.classList.contains('gold'))s(1047,.12,'triangle',.02,0,1);st16++;mlt=setTimeout(go,60000/((96+((Math.min(idx,29)/6)|0)*7+((t||document.body.classList.contains('allin'))?18:0)+(document.body.classList.contains('final')?10:0))*4))};go()}
+ if(b)s(b,.22,'triangle',.05,0,1);if(k%4==0)s(55,.12,'sine',.08,0,1);if(k%2==1)cardSlide(.04,.012,0);if(k==0||k==10)CH[(st16>>4)%2].forEach(f=>s(f,.5,'sine',.01,0,1));
+ if(k==0&&document.body.classList.contains('cold'))s(41,.6,'sine',.06,0,1);if(k==8&&document.body.classList.contains('gold'))s(1047,.12,'triangle',.02,0,1);st16++;mlt=setTimeout(go,60000/((96+((Math.min(idx,9)/2)|0)*6+((t||document.body.classList.contains('allin'))?16:0)+(document.body.classList.contains('final')?10:0))*4))};go()}
 function trail(){const r=$('chp').getBoundingClientRect(),c=$('rail').style.getPropertyValue('--c');for(let i=0;i<5;i++){const e=document.createElement('i');e.className='tp';e.style.cssText=`left:${r.left+r.width/2}px;top:${r.top+r.height/2}px;background:${c};--dx:${Math.random()*60-30}px;--dy:${-20-Math.random()*50}px`;if(pctSel>=100){e.textContent='🔥';e.style.background='none';e.style.width='auto'}$('fx').appendChild(e);setTimeout(()=>e.remove(),700)}}
-function bindRail(){const g=$('rg'),r=$('rail'),off=()=>r.classList.remove('drag');g.addEventListener('pointerdown',()=>{r.classList.add('drag','moved');s(600,.05,'triangle',.05)});['pointerup','pointercancel','blur'].forEach(v=>g.addEventListener(v,off));window.addEventListener('pointerup',off)}
+function bindRail(){const g=$('rg'),r=$('rail'),off=()=>r.classList.remove('drag');g.addEventListener('pointerdown',()=>{r.classList.add('drag','moved');chipRiffle(2,.06)});['pointerup','pointercancel','blur'].forEach(v=>g.addEventListener(v,off));window.addEventListener('pointerup',off)}
 function railFx(){const f=(pctSel-10)/90,c=pctSel>=100?'#ff3b30':pctSel>=70?'#ff8a3d':pctSel>=40?'#f2c14e':'#5fe39a',r=$('rail'),b=$('bub');r.style.setProperty('--f',f);r.style.setProperty('--c',c);r.style.setProperty('--rot',pctSel*14+'deg');r.classList.toggle('ai',pctSel>=100);document.body.classList.toggle('allin',pctSel>=100);if(pctSel>=100){if(!aiT)aiT=setInterval(beat,1100)}else{clearInterval(aiT);aiT=0}b.textContent=pctSel>=100?'🔥 ALL IN 🔥':pctSel+'% · $'+stake;b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');document.querySelectorAll('.tk span').forEach((e,i)=>{e.classList.toggle('on',i*10+10==pctSel);e.classList.toggle('pass',i*10+10<pctSel)})}
 function piles(rev){const T=chips<=0?0:Math.min(36,Math.max(4,Math.ceil(chips/40))),b=rev?0:Math.round(T*pctSel/100),col=(n,c)=>{let o='';const per=Math.ceil(n/c);for(let j=0;j<c;j++){const m=Math.min(per,n-j*per);if(m<=0)break;o+='<span class="co">'+Array.from({length:m},(_,i)=>`<i style="background:${CC[(i+j)%4]}"></i>`).join('')+'</span>'}return o};$('pp').innerHTML=col(T-b,4);$('bp').innerHTML=col(b,2)}
 function stakes(){stake=pctSel>=100?chips:Math.min(chips,Math.max(10,Math.round(chips*pctSel/1000)*10));$('rg').value=pctSel;railFx();document.querySelectorAll('#stk2 i').forEach((e,i)=>e.classList.toggle('up',i<pctSel/10));$('sv').classList.toggle('allin',pctSel>=100);$('table').classList.toggle('heat',pctSel>=70);$('sv').innerHTML=`YOUR BET <b>$${stake}</b> · ${pctSel}% of the pot${pctSel==100?' · ALL IN':''}`;
  $('py').innerHTML=`Right: <b class="g">&nbsp;+$${gainFor(stake)}&nbsp;</b>${mult()>1?'('+mult()+'x streak)':''} &nbsp;·&nbsp; Wrong: <b class="b">&nbsp;-$${lossFor(stake)}</b>${insOn?' 🛡':''}`;piles()}
-var qT0=Date.now();function clock(sec){qT0=Date.now();dlg=Date.now()+sec*1000;clearInterval(tm);$('sw').style.display='flex';const u=()=>{const lim=sec>10?10:5,r=Math.max(0,Math.ceil((dlg-Date.now())/1000));swSet(r,sec);$('sw').className=r<=lim?'low':'';document.body.classList.toggle('tense',r<=lim&&r>0);if(r<=lim&&r>0&&r!=lr){beat();if(r<=5)s(880,.06,'square',.06)}lr=r;if(r<=0){clearInterval(tm);pick(-1)}};lr=99;u();tm=setInterval(u,250)}
-function rivals(){const o=RC;RC=RC.map((c,i)=>{const b=Math.max(10,Math.round(c*(.1+Math.random()*.35)/10)*10);return Math.max(50,c+(Math.random()<RP[i]?b:-b))});RD=RC.map((c,i)=>c-o[i]);RDc=RD.slice()}
+var qT0=Date.now();function clock(sec){qT0=Date.now();dlg=Date.now()+sec*1000;clearInterval(tm);$('sw').style.display='flex';const u=()=>{const lim=sec>10?10:5,r=Math.max(0,Math.ceil((dlg-Date.now())/1000));swSet(r,sec);$('sw').className=r<=lim?'low':'';document.body.classList.toggle('tense',r<=lim&&r>0);if(r<=lim&&r>0&&r!=lr){beat();if(r<=5)chipClick(.15)}lr=r;if(r<=0){clearInterval(tm);pick(-1)}};lr=99;u();tm=setInterval(u,250)}
+
+// --- Relative Poker Economy (Live table action & chip transfers) ---
+var lastOutcome=null;
+function rivals(playerWon, playerStake, activeSeat){
+  const o=RC.slice();
+  // 1. Direct transfer between player and active rivals at the table
+  if(playerWon==='l' && playerStake>0){
+    const winner=(activeSeat!==undefined&&activeSeat>=0)?activeSeat:lead();
+    RC[winner]+=Math.round(playerStake*0.85);
+    const caller=(winner+1)%6;
+    RC[caller]=Math.max(200,RC[caller]-Math.round(playerStake*0.15));
+  } else if(playerWon==='w' && playerStake>0){
+    const sorted=[0,1,2,3,4,5].sort((a,b)=>RC[b]-RC[a]);
+    const c1=Math.round(playerStake*0.55), c2=Math.round(playerStake*0.35);
+    RC[sorted[0]]=Math.max(250,RC[sorted[0]]-c1);
+    RC[sorted[1]]=Math.max(200,RC[sorted[1]]-c2);
+  }
+  // 2. Realistic side-action pots traded between AI rivals
+  const r1=Math.floor(Math.random()*6);
+  const r2=(r1+1+Math.floor(Math.random()*4))%6;
+  const swing=[80,100,140,160,200][Math.floor(Math.random()*5)];
+  if(RC[r2]>300){
+    RC[r1]+=swing;
+    RC[r2]-=swing;
+  }
+  // 3. Keep rival stacks relative and intensely competitive with player
+  const targetLead=Math.max(1100,Math.round(chips*(0.95+Math.random()*0.25)/10)*10);
+  const curLead=lead();
+  if(RC[curLead]<targetLead*0.8){
+    RC[curLead]+=Math.round((targetLead-RC[curLead])*0.35/10)*10;
+  }
+  // Keep clean chip increments
+  RC=RC.map(c=>Math.max(150,Math.round(c/10)*10));
+  RD=RC.map((c,i)=>c-o[i]);
+  RDc=RD.slice();
+}
 function rivalFly(){const ch=$('seats').children,g=[],l=[];RDc.forEach((d,i)=>{d>0?g.push(i):d<0&&l.push(i)});g.forEach((gi,j)=>fly2(l.length?ch[l[j%l.length]]:$('pv'),ch[gi],4));
  const top=RDc.map((d,i)=>[SEATS[i][0],d]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,3),e=document.createElement('div');e.className='bt';e.innerHTML=top.map(([n,d])=>`<b class="${d>0?'up':'dn'}">${n} ${d>0?'+':''}${d}</b>`).join('');e.style.top=($('table').getBoundingClientRect().bottom-4)+'px';$('fx').appendChild(e);setTimeout(()=>e.remove(),2800)}
 function thud(i){const t=$('table');t.classList.remove('tv');void t.offsetWidth;t.classList.add('tv');const c=document.querySelectorAll('.act')[i];if(!c)return;const r=c.getBoundingClientRect(),e=document.createElement('i');e.className='rp';e.style.left=(r.left+r.width/2)+'px';e.style.top=(r.bottom-6)+'px';$('fx').appendChild(e);setTimeout(()=>e.remove(),700)}
-function think(){clearInterval(thT);thT=setInterval(()=>{if(done)return;const o=Q[idx].o;let i;do{i=Math.random()*6|0}while(i==o);const m=pctSel>=70?[['😬',"That's risky."],['🤨','You sure?']]:[['😏','Confident?'],['🤨','Interesting...'],['🙄','Hmm.']],p=m[Math.random()*m.length|0];say2(i,p[0],p[1])},3000)}
+function think(){clearInterval(thT);thT=setInterval(()=>{if(done)return;const o=Q[idx].o;let i;do{i=Math.random()*6|0}while(i==o);
+ const m=pctSel>=70?[['😬',"That's a heavy bet."],['🤨','You sure about this hand?']]:[['😏','Reading the board?'],['🧐','Calculate the risk.'],['🙄','Watch the odds.']],p=m[Math.random()*m.length|0];say2(i,p[0],p[1])},3200)}
 function lead(){let m=0;RC.forEach((c,i)=>{if(c>RC[m])m=i});return m}
-function pickEV(){EV=null;if(idx>0&&idx<27&&idx-lastEv>2&&Math.random()<.3){EV=EVS[Math.random()*4|0];lastEv=idx}}
-function EVfx(){$('table').classList.toggle('ev',!!EV);if(!EV)return;setTimeout(()=>{slam(EV.n,'#ffd66b','Bonus payouts live');[392,523,659,784,1047].forEach((f,i)=>s(f,.2,'square',.05,i*.09))},700);document.querySelectorAll('.act').forEach(b=>b.classList.add('gold'));$('mid').querySelector('.potc small').textContent=EV.n}
-function finalFx(){if(idx==27)setTimeout(()=>{document.body.classList.add('final');slam('FINAL TABLE','#f2c14e','3 HANDS REMAIN');[262,330,392,523].forEach((f,i)=>s(f,.3,'sawtooth',.05,i*.12))},1500);else if(idx==28)setTimeout(()=>banner('2 HANDS REMAIN'),1500);else if(idx==29)setTimeout(()=>banner('LAST HAND'),1500)}
+function pickEV(){EV=null;if(idx>0&&idx<9&&idx-lastEv>2&&Math.random()<.35){EV=EVS[Math.random()*4|0];lastEv=idx}}
+function EVfx(){$('table').classList.toggle('ev',!!EV);if(!EV)return;setTimeout(()=>{slam(EV.n,'#ffd66b','Bonus payouts live');chipRiffle(6,.12)},700);document.querySelectorAll('.act').forEach(b=>b.classList.add('gold'));$('mid').querySelector('.potc small').textContent=EV.n}
+function finalFx(){if(idx==7)setTimeout(()=>{document.body.classList.add('final');slam('FINAL TABLE','#f2c14e','3 HANDS REMAIN');chipRiffle(8,.15)},1500);else if(idx==8)setTimeout(()=>banner('2 HANDS REMAIN'),1500);else if(idx==9)setTimeout(()=>banner('FINAL HAND OF THE TABLE'),1500)}
 function tableHTML(){const ft=[...SEATS.map((p,i)=>[p[0],RC[i]]),['YOU',chips]].sort((a,b)=>b[1]-a[1]),mx=Math.max(...ft.map(x=>x[1]),1),pl=ft.findIndex(x=>x[0]=='YOU')+1;
  setTimeout(()=>document.querySelectorAll('.ft i').forEach(b=>b.style.width=b.dataset.w+'%'),150);
  return `<div class="h4">Final table: you finished #${pl} of 7 ${pl==1?'👑':''}</div>`+ft.map((x,i)=>{const me=x[0]=='YOU';return `<div class="row" style="grid-template-columns:80px 1fr 56px"><span style="${me?'color:var(--gold);font-weight:600':''}">${i+1}. ${x[0]}</span><div class="bar ft"><i data-w="${Math.round(x[1]/mx*100)}" style="${me?'background:var(--gold)':''}"></i></div><b>$${x[1]}</b></div>`}).join('')}
 const EVS=[{n:'⚡ HIGH STAKES HAND',w:1.5,l:1},{n:'⚡ BOARD SHOWDOWN',w:1.25,l:1,b:2},{n:'⚡ AUDIT CRISIS',w:1.25,l:1.25},{n:'⚡ QUARTER-END REVIEW',w:1,l:1,f:150}];
 
 const $=i=>document.getElementById(i);
-const SEATS=[["Chirag","CEO","C","#d9702f"],["Dev","Controller","D","#3f78d8"],["Anjali","Sales","A","#c93f7e"],["Vikram","Plant","V","#2f9c6a"],["Meera","Treasury","M","#8b57cc"],["Director","Board","B","#b8901c"]];
+// --- Character Seats (Replaced as specified) ---
+const SEATS=[
+  ["Abhishek","CEO","Ab","#d9702f"],
+  ["Abhinay","Controller","Ah","#3f78d8"],
+  ["Yatharth","Sales","Y","#c93f7e"],
+  ["Mahak","Operations","M","#2f9c6a"],
+  ["Chirag","Treasury","C","#8b57cc"],
+  ["Anushka","Board","An","#b8901c"]
+];
 const POS=[[50,2],[17,13],[83,13],[3,56],[97,56],[16,92]];
-const TIER=["Warm-up","Pressure round","Heat round","Showdown","Final round"],R=["Junior Analyst","Senior Analyst","Finance Controller","VP Finance","Chief Financial Officer"];
-const DIMS=['INT','PEO','VIS','RIG','RSK','IQ','ETH'],OWN={INT:0,PEO:1,VIS:2,RIG:3,RSK:4,IQ:3,ETH:0,SD:0},SH={INT:'Integrity',PEO:'People',VIS:'Vision',RIG:'Rigor',RSK:'Resilience',IQ:'IQ puzzle',ETH:'Decision',SD:'Candour'},DN={INT:'Integrity',PEO:'People & EQ',VIS:'Vision & influence',RIG:'Analytical rigor',RSK:'Resilience & risk',IQ:'Reasoning (IQ)',ETH:'Decision judgement'},BD=['Chair','HR','Investor','Audit','Risk'];
-const L=['Strongly disagree','Disagree','Neutral','Agree','Strongly agree'],SU=['♣','♦','♠','♥','★'],CC=['#d84a4a','#e0b12e','#3b7fe0','#2a2a2a'],RP=[.62,.58,.5,.55,.5,.6];
+const TIER=["Opening Round","Pressure Round","Heat Round","Showdown","Final Table"],R=["Junior Analyst","Senior Analyst","Finance Controller","VP Finance","Chief Financial Officer"];
+const DIMS=['ETH','GOV','FIN','IQ'],OWN={ETH:0,GOV:1,FIN:2,IQ:3},SH={ETH:'Ethics',GOV:'Governance',FIN:'Financial Math',IQ:'Cognitive Logic'},DN={ETH:'Ethical Judgement',GOV:'Governance & Compliance',FIN:'Financial & Numerical Rigor',IQ:'Cognitive Reflection & Logic'},BD=['Abhishek','Abhinay','Yatharth','Mahak','Chirag'];
+const L=['Strongly disagree','Disagree','Neutral','Agree','Strongly agree'],SU=['♣','♦','♠','♥','★'],CC=['#d84a4a','#e0b12e','#3b7fe0','#2a2a2a'];
 const BASS=[55,0,0,82,0,65,0,0,73,0,0,82,0,98,0,73],CH=[[220,262,330,392],[196,247,294,370]];
-const QC=["Now that's a CFO answer.","Hmm. I'm impressed.","I like your honesty.","That's why we're talking."],QW=["Ouch. The board noticed.","That one will cost you.","Careful. The room is watching.","Not what I hoped to hear."],QP=["Fair. I need to see more."];
-const LK=(d,o,i,q,lo,hi,ok,pr,rv)=>({d,o,i,q,lo,hi,ok,pr,rv}),SD=(o,q)=>({d:'SD',o,i:2,q,lo:'',hi:'claims implausible perfection',ok:'a candid self-view'}),
-DC=(o,q,m,c,p,ex,src)=>({d:'ETH',o,i:3,t:40,q,m,c,p,lo:'chose a weaker judgement call',hi:'chose a weaker judgement call',ex,src}),
-IQ=(o,q,m,c,ex,src)=>({d:'IQ',o,i:3,q,m,c,lo:'missed the reasoning trap',hi:'missed the reasoning trap',ex,src});
-const LQ=[null,
-LK('INT',0,2,"I sometimes soften a bad number in the first draft so the conversation stays constructive.",'','softens bad news','honest framing of bad news','P1',1),
-LK('INT',0,4,"I would escalate a questionable accounting call even if I could not prove it was wrong.",'stays silent without proof','','willingness to escalate','P1',0),
-LK('INT',5,2,"When loyalty to my team and company policy clash, loyalty wins.",'','puts loyalty above policy','policy over loyalty','',0),
-LK('PEO',1,2,"I find it hard to give blunt feedback to senior colleagues I like.",'','avoids hard feedback','direct feedback','P2',1),
-LK('PEO',1,4,"I give direct, critical feedback to people I am close to without much hesitation.",'softens or avoids feedback','','direct candour','P2',0),
-LK('PEO',2,2,"Disagreement in my team usually slows us down more than it helps.",'','treats dissent as friction','values productive dissent','',0),
-LK('VIS',2,2,"I am more comfortable defending the numbers than proposing where the business should go.",'','scorekeeper over strategist','strategic partnership','P3',1),
-LK('VIS',0,4,"I regularly bring the CEO strategic options nobody asked me for.",'reactive, not strategic','','proactive strategic input','P3',0),
-LK('VIS',4,3,"When presenting to the board, being accurate matters more to me than being persuasive.",'prioritises persuasion over accuracy','accuracy without influence','','',0),
-LK('RIG',3,2,"When my forecast is wrong, it is usually because circumstances changed, not because my assumptions were off.",'','blames circumstances','owns forecast errors','P4',1),
-LK('RIG',3,4,"When a forecast misses, I first look for what was wrong in my own assumptions.",'defends own assumptions','','owns forecast errors','P4',0),
-LK('RIG',1,3,"I would delay a decision to get better data even if a competitor moves first.",'decides ahead of evidence','slow, analysis-bound','balance of speed and evidence','',0),
-LK('RSK',4,2,"A decision that turns out badly keeps me awake even when the process was sound.",'','ruminates on outcomes','steady under outcome risk','P5',1),
-LK('RSK',4,4,"I judge a decision by its process and information, not by how it turned out.",'results-driven judgement','','process-based judgement','P5',0),
-LK('RSK',3,4,"I am comfortable making a major call with about 70% of the information I would like.",'needs near-certainty','','decisive under ambiguity','',0)],
-S1=SD(0,"I have never felt annoyed when a colleague challenged my numbers."),S2=SD(1,"I have never taken credit for work that was partly someone else's."),S3=SD(5,"I have never been tempted to cut a corner when I thought nobody would notice."),
-I1=IQ(3,"A bat and a ball cost $1.10 together. The bat costs $1.00 more than the ball. How much does the ball cost?",['10 cents','5 cents','1 cent','15 cents'],1,'Ball 5c, bat $1.05. Most people blurt 10c.','Frederick 2005, Cognitive Reflection Test'),
-I2=IQ(1,"If 5 machines take 5 minutes to make 5 widgets, how long would 100 machines take to make 100 widgets?",['100 minutes','50 minutes','5 minutes','20 minutes'],2,'Each machine makes one widget in 5 minutes, so 100 machines make 100 in 5.','Frederick 2005, Cognitive Reflection Test'),
-I3=IQ(4,"Complete the series: 2, 6, 12, 20, 30, ?",['38','40','42','44'],2,'The gaps grow 4, 6, 8, 10, so the next gap is 12: 42.','ICAR-style number series, Condon & Revelle 2014'),
-I4=IQ(2,"In a town of 1,000, 500 are choir members, 100 of them men. Of the 500 non-members, 300 are men. A man is picked at random. What is the chance he is a choir member?",['25%','20%','50%','80%'],0,'100 choir men out of 400 men in total is 25%.','Berlin Numeracy Test, Cokely et al. 2012'),
-D1=DC(4,"Capital for one project only. A: NPV $4.0M, IRR 14%, payback 6 years. B: NPV $2.5M, IRR 22%, payback 2 years. WACC is 9%. The CEO likes B's quick win. Which do you back?",['B: the higher IRR and faster payback cut risk','A: it adds more value at a 9% cost of capital','B, then recycle the cash into later projects','Defer both until the next budget cycle'],1,2,'For mutually exclusive projects NPV, not IRR, measures value added. B wins only if capital stays scarce.','Corporate-finance NPV rule (Brealey, Myers & Allen)'),
-D2=DC(0,"A customer worth 18% of revenue hints it may switch suppliers. Nothing is confirmed. The investor call is Thursday and analysts will ask about demand.",['Say nothing until confirmed; answer only what is asked','Brief two key analysts privately so they are not surprised','Take it to the disclosure committee and counsel before Thursday','Quietly raise the receivables reserve and move on'],2,0,'Disclosure belongs in a formal process. Silence can be defensible, but private briefings breach Reg FD and a quiet reserve hides the risk.','SEC Regulation FD; disclosure-committee practice'),
-D3=DC(2,"The board wants 8% cost out this year. The fastest route is laying off 60 people in the unit that feeds next year's growth. Other routes take longer.",['Lay off the 60: certain savings, target hit this year','Cut every budget 8%: simple and fair','Freeze hiring and defer plant maintenance','Cut the lowest-return programmes first and show a path to 8% in two quarters'],3,1,'Cuts should follow return, not speed or fairness. Deferring maintenance only moves cost into future risk.','Strategy-linked budgeting (Kaplan & Norton); COSO ERM'),
-D4=DC(5,"An analyst privately says the VP Sales may be booking revenue early on two deals. She has no proof. The VP is close to the CEO.",['Report it to the audit committee as suspected fraud now','Ask internal audit to review the two contracts quietly first','Ask the VP Sales for his version','Wait for the external auditors to test it at year-end'],1,0,'A proportionate, confidential fact check protects the company and the person accused, with escalation if it holds up.','IMA Statement of Ethical Professional Practice; COSO'),
-D5=DC(1,"The CEO wants guidance of 12% growth. Your base case is 9% and 12% has about a 25% chance. Missing guidance has cost the stock around 15% before.",['Guide 12% and label it a stretch','Guide 11% as a compromise','Guide a 9-10% range and explain the assumptions','Give no numeric guidance this year'],2,3,'Guide to what you can deliver with high probability. Compromises and stretch labels still invite a miss.','Ben-David, Graham & Harvey 2013 (CFO overconfidence)'),
-D6=DC(4,"Covenant headroom is 8% and would fall to 3% if sales soften. The bank offers an amendment now for a 50bp fee. Waiting may be free, but a breach would hand the bank leverage.",['Wait and track headroom monthly','Cut capex now to protect headroom','Raise equity to repay part of the debt','Take the amendment now and pay the fee'],3,1,'The fee is cheap insurance bought while you have leverage. Cutting capex trades growth for the same protection.','Treasury risk practice; COSO ERM'),
-D7=DC(0,"Close is tomorrow. A $300k inventory variance (0.2% of revenue) is unexplained. The board pack goes out in 12 hours.",['Send the pack with the variance disclosed as unreconciled and under review','Book it to a suspense account so the pack is clean','Delay the pack a day to finish the reconciliation','Adjust cost of sales so the numbers tie'],0,2,'Small and unresolved is disclosed, not hidden. A short delay is acceptable, but the board needs the facts on time.','SOX s.302 certification; IMA Statement'),
-D8=DC(3,"Your best treasury analyst holds the bank relationships. She says she will leave unless promoted over two more senior colleagues.",['Offer a retention bonus and a dated, criteria-based path to promotion','Promote her now; losing the relationships costs more','Refuse and accept she may leave','Promote her and give the two seniors raises'],0,1,'Pay for the retention risk, not the ultimatum. A criteria-based path protects fairness and the relationships.','Procedural-justice research (Colquitt 2001)');
-const Q=[1,4,'I1',7,3,'D1',10,13,'S1',6,'I2','D2',9,2,'D3',12,'S2','D4',5,'I3',15,8,'D5','D6',11,'I4',14,'S3','D7','D8'].map(x=>typeof x=='number'?LQ[x]:({I1,I2,I3,I4,D1,D2,D3,D4,D5,D6,D7,D8,S1,S2,S3})[x]);
-const GAPT={INT:"Integrity is the gate for a CFO. Your answers showed room to bend under pressure.",PEO:"People skills lagged. A CFO has to build trust and psychological safety, not just be right.",VIS:"Influence lagged. The CFO seat is a strategic partner, not a scorekeeper.",RIG:"Analytical discipline lagged. Watch overconfidence and gut-over-evidence calls.",RSK:"Resilience and risk judgement lagged. Balance decisiveness, calm and buy-in.",IQ:"Reasoning slipped on the puzzles. Slow down and test the first answer that feels right.",ETH:"Judgement slipped on the dilemmas. Strong CFOs weigh disclosure, value and people together, not just the safest-sounding option."};
-const AR={Steward:['INT','RIG','Guardian of trust and accuracy. Boards sleep well with you; stretch into storytelling and influence.'],Catalyst:['PEO','VIS','Turns people and vision into momentum. Make sure rigour backs the energy.'],Strategist:['VIS','RSK','Shapes direction and takes smart risks. Anchor it with evidence and process.'],Operator:['RIG','RSK','Disciplined, calm and efficient. Stretch into inspiring others and shaping strategy.']};
+const QC=["Now that's a CFO answer.","Sharp calculation under pressure.","That is textbook board governance.","Solid conviction."],QW=["The room is skeptical of that call.","That will trigger an audit inquiry.","A costly slip under pressure.","Not the numbers we needed."],QP=["Board is divided. Pushing the stake."];
+
+// --- Question Constructors ---
+const ETH=(o,d,q,m,scores,c,p,ex,src)=>({d,o,i:3,t:40,q,m,scores,c,p,lo:'compromised on governance & disclosure',hi:'compromised on governance & disclosure',ex,src});
+const IQP=(o,d,q,m,c,ex,src)=>({d,o,i:3,t:30,q,m,scores:m.map((_,idx)=>idx===c?3:0),c,p:-1,lo:'missed the quantitative trap',hi:'missed the quantitative trap',ex,src});
+
+// --- 10 Questions: 5 Ethical Decision Making + 5 Quantitative & Reasoning ---
+const E1=ETH(0,'ETH',
+  "You're $0.2M short of analyst consensus. A $0.2M warranty reserve looks slightly high. You:",
+  [
+    "Release it now, since the estimate is within a reasonable range.",
+    "Re-estimate using the latest claims data and book what it shows.",
+    "Leave it untouched this quarter to avoid any appearance of bias.",
+    "Release half now and half next quarter to keep it low-profile."
+  ],
+  [1,3,2,0], 1, 2,
+  "Re-estimating using latest claims data ensures objective, auditable accounting rather than managing earnings to meet consensus.",
+  "GAAP/IFRS Warranty Provisions & Earnings Management Ethics"
+);
+
+const E2=ETH(1,'ETH',
+  "A manager repaid $2,000 of padded expenses and asks you not to report it. Policy requires reporting. You:",
+  [
+    "Treat it as closed, since he repaid.",
+    "Ask him to self-report within a week, then confirm that he did.",
+    "Report it to compliance and note that he repaid voluntarily.",
+    "Mention it to his boss and let them decide."
+  ],
+  [0,2,3,1], 2, 1,
+  "Mandatory reporting to compliance maintains procedural integrity, while noting voluntary restitution ensures fair treatment.",
+  "Corporate Governance & Internal Expense Compliance"
+);
+
+const E3=ETH(2,'ETH',
+  "Your brother-in-law's firm will bid on a project you fund. You won't sit on the evaluation. You:",
+  [
+    "Disclose to compliance and step back from approving the award.",
+    "Disclose to your manager but still sign off on the award.",
+    "Ask him to skip this bid.",
+    "Say nothing, since you're not on the panel."
+  ],
+  [3,2,1,0], 0, 1,
+  "Full recusal and formal disclosure to compliance eliminates any conflict of interest during funding approval.",
+  "Fiduciary Duty & Conflicts of Interest"
+);
+
+const E4=ETH(3,'GOV',
+  "Auditors ask for unusual contracts. One has a side letter allowing returns. A colleague says to send the standard contract only. You:",
+  [
+    "Send the standard contract only.",
+    "Send the standard contract and say where side agreements are stored.",
+    "Send everything, including the side letter, without comment.",
+    "Send everything and point out the side letter's accounting effect."
+  ],
+  [0,1,2,3], 3, 2,
+  "Auditors must receive all side agreements with explicit documentation of revenue recognition and return impacts.",
+  "Audit Integrity & Revenue Recognition Disclosure"
+);
+
+const E5=ETH(4,'GOV',
+  "Your forecast shows a 30% chance of a covenant breach in nine months. The CEO wants to hold this back at next week's bank meeting. You:",
+  [
+    "Add a general line on 'market uncertainty'.",
+    "Raise it with the board first and let them decide on the bank.",
+    "Present the base case and the downside with its covenant impact.",
+    "Present the base case only and revisit if the risk rises."
+  ],
+  [1,2,3,0], 2, 1,
+  "Presenting both base case and stress-tested downside scenarios maintains credibility and enables proactive amendment negotiations.",
+  "Treasury Risk Management & Bank Covenant Disclosure"
+);
+
+const IQ1=IQP(5,'FIN',
+  "You invest $8,000. It falls 50%, then rises 75%. What is it worth now?",
+  ["$6,000","$7,000","$8,000","$10,000"],
+  1,
+  "$8,000 falls 50% to $4,000; then $4,000 rises 75% (+$3,000) to reach $7,000.",
+  "Percentage & Capital Math"
+);
+
+const IQ2=IQP(0,'FIN',
+  "Of 1,000 invoices, 400 are flagged as risky. 90 flagged and 60 unflagged invoices are fraudulent. If you pick a fraudulent invoice at random, what is the chance it was flagged?",
+  ["22.5%","40%","60%","90%"],
+  2,
+  "Total fraudulent invoices = 90 + 60 = 150. Flagged fraction = 90 / 150 = 60%.",
+  "Conditional Probability & Risk Analysis"
+);
+
+const IQ3=IQP(1,'IQ',
+  "A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. How much does the ball cost?",
+  ["10 cents","5 cents","1 cent","15 cents"],
+  1,
+  "Ball is $0.05 and bat is $1.05. Total = $1.10. Bat is $1.00 more than the ball.",
+  "Cognitive Reflection Test (Frederick 2005)"
+);
+
+const IQ4=IQP(2,'IQ',
+  "If it takes 5 machines 5 minutes to make 5 widgets, how long would it take 100 machines to make 100 widgets?",
+  ["100 minutes","20 minutes","5 minutes","1 minute"],
+  2,
+  "Each machine takes 5 minutes to produce 1 widget. Thus, 100 machines running simultaneously make 100 widgets in 5 minutes.",
+  "Rate & Parallel Capacity Logic"
+);
+
+const IQ5=IQP(3,'IQ',
+  "In a lake, there is a patch of lily pads. Every day, the patch doubles in size. If it takes 48 days for the patch to cover the entire lake, how long would it take for the patch to cover half of the lake?",
+  ["24 days","47 days","46 days","12 days"],
+  1,
+  "Since the patch doubles every day, on the day immediately preceding full coverage (day 47) it covers exactly half.",
+  "Exponential Growth & Cognitive Reflection"
+);
+
+const Q=[E1,E2,E3,E4,E5,IQ1,IQ2,IQ3,IQ4,IQ5];
+const GAPT={ETH:"Ethical judgment slipped under consensus and personal pressures.",GOV:"Governance and transparency lagged on critical audit and banking disclosures.",FIN:"Financial percentage and probability calculations showed errors.",IQ:"Cognitive reflection traps slipped past your first instinct."};
+const AR={Steward:['ETH','GOV','Guardian of corporate trust, compliance and fiduciary rigor.'],Catalyst:['ETH','FIN','Drives value with strong ethical guardrails.'],Strategist:['FIN','IQ','Exceptional quantitative acumen and logical precision.'],Operator:['GOV','IQ','Disciplined governance coupled with sharp analytical clarity.']};
 let bonusTotal=0,chips,idx,streak,best,res,stake,pctSel=30,done,bust,tm,thT,dt,aiT=0,PW,hl='',insOn,used,RC=[],RD=[],RDc=[],BT=[50,50,50,50,50],lost=0,EV=null,lastEv=-9,VD='',dlg,lr=0,snd_on=true,mus=true,mlt=null,st16=0,AC,AMB;
-const win=()=>{[523,659,784,1047].forEach((f,i)=>s(f,.22,'triangle',.1,i*.08));ding(1568,.35);for(let i=0;i<6;i++)coinPing(.4+i*.07);noise(.5,6000,.05,.1)},
-lose=()=>{glide(400,120,.9,'sawtooth',.06);[330,311,294,262].forEach((f,i)=>s(f,.32,'sawtooth',.05,i*.22));boom()},
-beat=()=>{s(62,.14,'sine',.22);s(52,.16,'sine',.17,.17)},whoosh=()=>sweep(400,4000,.6,.08),
+const win=()=>{potRake();if(streak>=2)applause(2);},
+lose=()=>{tableKnock();[294,262,220,185].forEach((f,i)=>s(f,.3,'sawtooth',.035,i*.15));boom();},
+beat=()=>pokerHeartbeat(),whoosh=()=>cardSlide(.25,.1),
 applause=d=>{for(let i=0;i<d*14;i++)noise(.04,2500+Math.random()*3000,.035,Math.random()*d)},
 gasp=()=>{noise(.45,1400,.07,0,'bandpass');s(220,.35,'sawtooth',.03,.05)},
-shuffle=()=>{for(let i=0;i<12;i++)noise(.05,3000+Math.random()*2500,.05,i*.06)};
+shuffle=()=>{for(let i=0;i<8;i++)cardSlide(.12,.05,i*.08);chipRiffle(6,.06);};
 const mult=()=>streak>=6?2:streak>=3?1.5:1,gainFor=v=>Math.round(v*mult()*(insOn?.75:1)*(EV?EV.w:1))+(EV&&EV.f?EV.f:0),lossFor=v=>Math.round((insOn?v/2:v)*(EV&&EV.l?EV.l:1));
 const face=t=>t>=75?'😄':t>=55?'🙂':t>=40?'😐':t>=25?'😟':'😠',inst=o=>$('ov').classList.toggle('on',o);
 function glide(f0,f1,d,ty='sine',v=.08,w=0){if(!snd_on)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+w;o.type=ty;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
-function sweep(f0,f1,d,v=.06,w=0){if(!snd_on)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const b=AC.createBuffer(1,Math.max(1,AC.sampleRate*d|0),AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1;const n=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain(),t=AC.currentTime+w;n.buffer=b;f.type='bandpass';f.Q.value=3;f.frequency.setValueAtTime(f0,t);f.frequency.exponentialRampToValueAtTime(f1,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);n.connect(f);f.connect(g);g.connect(AC.destination);n.start(t)}catch(e){}}
-const ding=(f=1046,w=0)=>{s(f,.5,'sine',.09,w);s(f*1.5,.4,'sine',.04,w);s(f*2,.3,'sine',.02,w)},buzz=(w=0)=>{glide(150,90,.35,'sawtooth',.07,w);glide(155,95,.35,'square',.03,w)},clink=()=>{s(2400+Math.random()*500,.05,'triangle',.05);noise(.03,7000,.04)},boom=()=>{glide(140,38,.6,'sine',.3);noise(.35,500,.12,0,'lowpass');s(190,.1,'square',.05)},coinPing=w=>s(2200+Math.random()*900,.06,'triangle',.03,w),click=()=>{s(520,.03,'square',.035);noise(.02,5000,.03)};
+function sweep(f0,f1,d,v=.06,w=0){cardSlide(d,v,w)}
+const ding=(f=1046,w=0)=>{chipClick(.12,w);s(f,.4,'triangle',.05,w)},buzz=(w=0)=>{glide(140,80,.3,'sawtooth',.05,w)},clink=()=>chipClick(.1),boom=()=>{cardSnap(.2);chipSplash(.15);noise(.3,400,.1,0,'lowpass')},coinPing=w=>chipClick(.08,w),click=()=>chipClick(.06);
 function swSet(r,tot){const e=$('sw');e.innerHTML='<b>'+r+'</b><small>SEC</small>';e.style.setProperty('--p',Math.max(0,Math.min(100,r/tot*100)))}
 function goFs(){try{const e=document.documentElement;if(!document.fullscreenElement&&!document.webkitFullscreenElement){const p=(e.requestFullscreen||e.webkitRequestFullscreen).call(e);if(p&&p.catch)p.catch(()=>{})}}catch(x){}}
 function amb(){if(AMB||!AC)return;try{const b=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1;const n=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();n.buffer=b;n.loop=true;f.type='lowpass';f.frequency.value=420;g.gain.value=.018;n.connect(f);f.connect(g);g.connect(AC.destination);n.start();AMB=g}catch(e){}}
 function ambSet(){if(AMB)AMB.gain.value=(snd_on&&mus)?.018:0}
 function typeIt(id,t){const e=$(id);if(!e)return;let i=0;const iv=setInterval(()=>{if($(id)!==e){clearInterval(iv);return}e.textContent=t.slice(0,++i);if(i%3==0)s(1300+Math.random()*300,.012,'square',.012);if(i>=t.length)clearInterval(iv)},Math.max(8,900/t.length))}
-function hud(){const i=Math.min(idx,Q.length-1);$('dots').innerHTML=Q.map((_,j)=>{const r=res[j];return '<i style="background:'+(r?(r.diff<=1?'var(--good)':r.diff==2?'var(--gold)':'var(--bad)'):(j==i?'#fff':'#4a3a43'))+'"></i>'}).join('');$('lvn').innerHTML=`<b>${TIER[i/6|0]}</b> · you're #${1+RC.filter(c=>c>chips).length} at the table`;$('stk').className='stat'+(streak>=2?' hot':'');$('stk').innerHTML=`<b>${streak>=2?'🔥 ':''}${streak}${mult()>1?' · '+mult()+'x':''}</b>streak`;$('chips').textContent=chips;const b=document.body.classList;b.toggle('hot',streak>=3&&streak<6);b.toggle('inf',streak>=6);b.toggle('gold',streak>=2);b.toggle('cold',lost>=2)}
+function hud(){const i=Math.min(idx,Q.length-1);$('dots').innerHTML=Q.map((_,j)=>{const r=res[j];return '<i style="background:'+(r?(r.diff<=1?'var(--good)':r.diff==2?'var(--gold)':'var(--bad)'):(j==i?'#fff':'#4a3a43'))+'"></i>'}).join('');$('lvn').innerHTML=`<b>${TIER[Math.min(4,Math.floor(i/2))]}</b> · you're #${1+RC.filter(c=>c>chips).length} at the table`;$('stk').className='stat'+(streak>=2?' hot':'');$('stk').innerHTML=`<b>${streak>=2?'🔥 ':''}${streak}${mult()>1?' · '+mult()+'x':''}</b>streak`;$('chips').textContent=chips;const b=document.body.classList;b.toggle('hot',streak>=3&&streak<6);b.toggle('inf',streak>=6);b.toggle('gold',streak>=2);b.toggle('cold',lost>=2)}
 function seats(on){const mx=Math.max(...RC,chips);$('seats').innerHTML=SEATS.map((p,i)=>`<div class="seat ${i===on?'on':''}" style="left:${POS[i][0]}%;top:${POS[i][1]}%"><div class="av" style="background:${p[3]}">${p[2]}${i===on?'<span class="dbtn">D</span>':''}</div>${RC[i]>=mx?'👑':''}${p[0]}<br><b class="sc">$${RC[i]}</b>${RD[i]?`<i class="dl ${RD[i]>0?'up':'dn'}">${RD[i]>0?'+':''}${RD[i]}</i>`:''}</div>`).join('')+`<div class="seat you" style="left:84%;top:92%"><div class="av" style="background:var(--gold);color:#2a1a10;font-size:.6rem">YOU</div><b class="sc">$${chips}</b></div>`;RD=[]}
 function board(){$('board').innerHTML=BD.map((n,i)=>`<div class="bm" id="bm${i}"><span class="bf">${face(BT[i])}</span>${n}<i class="bmb"><b style="width:${BT[i]}%;background:${BT[i]>=55?'var(--good)':BT[i]>=35?'var(--gold)':'var(--bad)'}"></b></i></div>`).join('')+`<div class="bti">BOARD TRUST<b>${Math.round(BT.reduce((a,b)=>a+b,0)/5)}</b></div>`}
 function trust(own,diff){const ch=[12,8,-3,-10,-14][diff],m=EV&&EV.b||1;BT=BT.map((t,i)=>Math.max(0,Math.min(100,t+Math.round((i==own?ch:ch*.25)*m))));return ch}
@@ -506,33 +692,36 @@ function usePw(w){if(done||idx>=Q.length||!$('ops').classList.contains('rdy')){s
  else{if(q.m){const w=[0,1,2,3].filter(j=>j!=q.c&&j!=q.p),j=w[Math.random()*w.length|0],cb=document.querySelectorAll('.act')[j];if(cb)cb.classList.add('burn');bsay(OWN[q.d],'🧐','Not '+'ABCD'[j]+'.')}else bsay(OWN[q.d],'🧐',q.i>=4?'I lean towards AGREE.':q.i<=2?'I lean towards DISAGREE.':'I lean NEUTRAL.');pop('BOARD STEER','#9dc7ff');[523,659].forEach((x,i)=>s(x,.18,'sine',.07,i*.12))}
  pwr()}
 function intro(){clearInterval(tm);clearInterval(thT);clearTimeout(dt);clearInterval(aiT);aiT=0;document.body.classList.remove('tense','hot','inf','allin','gold','cold','final','lockin');$('sl').classList.remove('on');document.querySelectorAll('.sheet').forEach(e=>e.remove());
- $('panel').className='panel';chips=1000;idx=0;streak=0;best=0;res=[];stake=0;pctSel=30;bust=false;done=true;PW={ins:1,time:1,ask:1};insOn=false;hl='';used={ins:0,time:0,ask:0};RC=[1000,1000,1000,1000,1000,1000];RD=[];BT=[50,50,50,50,50];lost=0;EV=null;lastEv=-9;VD='';bonusTotal=0;
+ $('panel').className='panel';chips=1000;idx=0;streak=0;best=0;res=[];stake=0;pctSel=30;bust=false;done=true;PW={ins:1,time:1,ask:1};insOn=false;hl='';used={ins:0,time:0,ask:0};RC=[1150,1050,950,1000,920,1080];RD=[];BT=[50,50,50,50,50];lost=0;EV=null;lastEv=-9;VD='';bonusTotal=0;
  $('dock').style.display='none';$('hero').style.display='block';$('sw').style.display='none';hud();seats(0);board();$('pv').textContent='$1000';piles(1);
- $('say').innerHTML=`<p class="say"><b>Chirag (CEO):</b> The CFO chair is open. Thirty hands: leadership statements, IQ puzzles and judgement calls with no obvious answer. Bet on yourself, and the Board votes on every answer.</p>`;
+ $('say').innerHTML=`<p class="say"><b>Abhishek (CEO):</b> The CFO chair is open. Ten hands: ethical decision dilemmas and high-stakes quantitative puzzles. Bet on yourself, and the Board votes on every answer.</p>`;
  $('ops').className='intro';$('ops').innerHTML=`<button class="go pulse" id="dealb">DEAL ME IN</button><button class="go alt" onclick="inst(true)">How to play</button>`;$('dealb').onclick=()=>{goFs();startMus();amb();ambSet();shuffle();deal()}}
 function deal(){const q=Q[idx];done=false;insOn=false;hl='';pickEV();$('hero').style.display='none';$('dock').style.display='block';$('mid').querySelector('.potc small').textContent='THE POT';$('rg').disabled=false;
  seats(q.o);hud();board();pwr();stakes();
  $('say').innerHTML=`<div class="deck"><i></i><i></i><i></i></div><p class="say qd"><i class="hn">Hand ${idx+1} · ${SH[q.d]}</i><b>${SEATS[q.o][0]} (${SEATS[q.o][1]}):</b> “<span id="tw">${q.q}</span>” <em>${q.m?'Pick the best answer.':'How true is this of you?'}</em></p>`;qBig(q);
- $('app').scrollTop=0;$('ops').className=q.m?'mc':'';$('ops').innerHTML=(q.m?q.m:L).map((t,k)=>{const su=SU[k],c=(su=='♦'||su=='♥')?'#c4281c':'#1a1014';return `<button class="act pc" data-k="${k}" style="--i:${k};--r:${[-6,-3,0,3,6][k]}deg"><div class="in"><div class="bk">♠</div><div class="fr"><b class="ix" style="color:${c}">${k+1}<br>${su}</b><em class="wm" style="color:${c}">${su}</em><span>${t}</span><b class="ix b" style="color:${c}">${k+1}<br>${su}</b></div></div></button>`}).join('');
+ $('app').scrollTop=0;$('ops').className=q.m?'mc':'';$('ops').innerHTML=(q.m?q.m:L).map((t,k)=>{const su=SU[k],c=(su=='♦'||su=='♥')?'#c4281c':'#1a1014';return `<button class="act pc" data-k="${k}" style="--i:${k};--r:${[-6,-3,0,3,6][k]}deg"><div class="in"><div class="bk">♠</div><div class="fr"><b class="ix" style="color:${c}">${'ABCD'[k]}<br>${su}</b><em class="wm" style="color:${c}">${su}</em><span>${t}</span><b class="ix b" style="color:${c}">${'ABCD'[k]}<br>${su}</b></div></div></button>`}).join('');
  document.querySelectorAll('.act').forEach(b=>b.onclick=()=>pick(+b.dataset.k));
- idx%6==0?(banner(TIER[idx/6|0],idx?'Pressure builds':'Good luck'),[392,494,587].forEach((f,i)=>s(f,.2,'triangle',.06,i*.1))):banner('HAND '+(idx+1));
- [0,1,2,3,4].forEach(i=>{setTimeout(()=>{sweep(1500,5000,.14,.07);s(95,.14,'sine',.16);thud(i)},450+i*220);sweep(3000,7000,.1,.05,1.3+i*.1);s(1800,.03,'square',.03,1.4+i*.1)});
- setTimeout(()=>{$('sl').classList.add('on');s(520,.2,'triangle',.06)},1300);EVfx();finalFx();
+ idx%2==0?(banner(TIER[Math.min(4,Math.floor(idx/2))],idx?'Pressure builds':'Good luck'),[392,494,587].forEach((f,i)=>s(f,.2,'triangle',.06,i*.1))):banner('HAND '+(idx+1));
+ [0,1,2,3].forEach(i=>{setTimeout(()=>{cardSlide(.14,.07);cardSnap(.08);thud(i)},450+i*220);setTimeout(()=>cardSlide(.1,.05),1300+i*100)});
+ setTimeout(()=>{$('sl').classList.add('on');chipClick(.1);s(520,.2,'triangle',.06)},1300);EVfx();finalFx();
  $('sw').style.display='flex';$('sw').className='';swSet(Q[idx].t||(Q[idx].m?20:10),Q[idx].t||(Q[idx].m?20:10));const me=idx;clearTimeout(dt);dt=setTimeout(()=>{if(idx==me&&!done){$('ops').classList.add('rdy');clock(Q[idx].t||(Q[idx].m?20:10));think()}},QH+800)}
 var QH=5200;function qBig(q){QH=Math.min(9500,Math.max(5200,2500+q.q.length*30));const sy=$('say'),card=sy.querySelector('.say'),dk=sy.querySelector('.deck'),vw=innerWidth,vh=innerHeight,d=dk.getBoundingClientRect(),w=document.createElement('div');w.className='qbig';
 w.innerHTML='<div class="qc"><i class="hn">'+card.querySelector('.hn').textContent+'</i><p><span id="qbt"></span></p></div>';document.body.appendChild(w);
 const c=w.firstChild,dx=d.left+d.width/2-vw/2,dy=d.top+d.height/2-vh/2;
-sweep(800,3500,.3,.08);s(110,.12,'sine',.15,.45);
+cardSlide(.3,.08);s(110,.12,'sine',.15,.45);
 w.animate([{opacity:0},{opacity:1}],{duration:400,fill:'forwards'});
 c.animate([{transform:`translate(${dx}px,${dy}px) scale(.12) rotate(10deg)`,opacity:0},{transform:'none',opacity:1}],{duration:750,easing:'cubic-bezier(.2,.9,.3,1)',fill:'forwards'});
 setTimeout(()=>typeIt('qbt',q.q),700);
 setTimeout(()=>{const t=card.getBoundingClientRect(),r=c.getBoundingClientRect();w.animate([{opacity:1},{opacity:0}],{duration:600,fill:'forwards'});
  c.animate([{transform:'none'},{transform:`translate(${t.left+t.width/2-r.left-r.width/2}px,${t.top+t.height/2-r.top-r.height/2}px) scale(${t.width/r.width})`}],{duration:600,easing:'ease-in-out',fill:'forwards'});
- setTimeout(()=>{w.remove();card.classList.add('in');s(300,.08,'triangle',.06)},560)},QH)}
+ setTimeout(()=>{w.remove();card.classList.add('in');cardSnap(.12);s(300,.08,'triangle',.06)},560)},QH)}
 function pick(k){if(done)return;done=true;clearInterval(tm);clearInterval(thT);clearTimeout(dt);
- const tk=+((Date.now()-qT0)/1000).toFixed(1),q=Q[idx],B=[...document.querySelectorAll('.act')],r=k+1,diff=k<0?3:q.m?(k==q.c?0:k==q.p?2:4):Math.abs(r-q.i),out=diff<=1?'w':diff==2?'p':'l',st=stake,pct=Math.round(st/chips*100),gain=gainFor(st),ls=lossFor(st),own=OWN[q.d];
+ const tk=+((Date.now()-qT0)/1000).toFixed(1),q=Q[idx],B=[...document.querySelectorAll('.act')],r=k+1;
+ const diff=k<0?3:q.scores?(q.scores[k]===3?0:q.scores[k]===2?2:q.scores[k]===1?3:4):q.m?(k==q.c?0:k==q.p?2:4):Math.abs(r-q.i);
+ const out=diff<=1?'w':diff==2?'p':'l',st=stake,pct=Math.round(st/chips*100),gain=gainFor(st),ls=lossFor(st),own=OWN[q.d];
+ lastOutcome={out,st:out=='w'?gain:out=='l'?ls:st,owner:q.o};
  B.forEach(b=>{b.disabled=true;b.style.transform=''});$('rg').disabled=true;document.body.classList.remove('tense');document.body.classList.add('lockin');$('vg').classList.add('on');
- boom();sweep(300,2500,.5,.07);k<0?slam('TIME UP','#ff6b5e'):slam('LOCKED IN','#fff');shakeApp();flash('#fff');
+ cardSnap(.2);chipSplash(.12);k<0?slam('TIME UP','#ff6b5e'):slam('LOCKED IN','#fff');shakeApp();flash('#fff');
  if(k>=0){B[k].classList.add('lock');spark(B[k],'#fff');s(900,.08,'triangle',.06)}
  $('py').innerHTML='<div class="meter" id="mt">THE BOARD VOTES...</div>';
  setTimeout(()=>{riser(2.4);votes(diff,own,reveal)},400);
@@ -546,7 +735,14 @@ function pick(k){if(done)return;done=true;clearInterval(tm);clearInterval(thT);c
   else if(out=='l'){lose();gasp();flash('#ff3b30');fly2($('bp'),$('seats').children[lead()],8);$('table').classList.add('shake');setTimeout(()=>$('table').classList.remove('shake'),500);react(q.o,k<0?'⏰':['😬','🫢','🤨','😮'][Math.random()*4|0])}
   else{s(330,.2,'triangle',.07);s(330,.2,'triangle',.07,.22);flash('#6fb7ff');fly2($('bp'),$('pv'),5);react(q.o,'🤔')}
   if(q.m){B[q.c].classList.add('right');if(k>=0&&k!=q.c)B[k].classList.add('wrong')}const ch=trust(own,diff);board();const be=$('bm'+own);if(be){be.classList.add('bounce');const e=document.createElement('i');e.className='dl '+(ch>0?'up':'dn');e.textContent=(ch>0?'+':'')+ch;be.appendChild(e)}
-  VD=k<0?'TIME RAN OUT':['SPOT ON','BOARD NODS','BOARD UNSURE','BOARD FROWNS','RED FLAG'][diff];hud();
+  if(k<0){VD='TIME RAN OUT';}
+  else if(q.d==='ETH'||q.d==='GOV'){
+    const sc=q.scores?q.scores[k]:(k===q.c?3:0);
+    VD=sc===3?'BOARD NODS':sc===2?'BOARD HESITATES':'BOARD FROWNS';
+  }else{
+    VD=diff===0?'SPOT ON':'INCORRECT';
+  }
+  hud();
   setTimeout(()=>{const e=document.createElement('div');e.className='vd';e.style.color=out=='w'?'#5fe39a':out=='l'?'#ff6b5e':'#f2c14e';e.innerHTML=VD+'<small>'+u+' for · '+dn+' against</small>';$('fx').appendChild(e);s(80,.2,'sine',.22);noise(.2,800,.1,0,'lowpass');setTimeout(()=>e.remove(),2000)},500);
   setTimeout(()=>say2(0,out=='w'?'😎':out=='l'?'😤':'🤔',out=='w'?'Good answer.':out=='l'?'Not great.':'Hmm.'),800);
   const qp=out=='w'?QC[Math.random()*4|0]:out=='l'?QW[Math.random()*4|0]:QP[0],last=idx>=Q.length-1||bust,gt=(k<0?'indecision under pressure':(r<q.i?q.lo:q.hi))||q.lo||q.hi,sig=q.m?'<b>Why:</b> '+q.ex+' <span class="note">('+q.src+')</span>':diff<=1?'The Board reads this as '+q.ok+'.':"The Board's concern: "+gt+'.',rl=pct>=100?'All in: a high-risk bet':pct>=75?'Aggressive stake':pct>=50?'Bold stake':pct>=25?'Measured stake':'Cautious stake';
@@ -572,11 +768,11 @@ function luckyBonus(base,cb){const bp=Math.round(BT.reduce((a,b)=>a+b,0)/50),sp=
    rain(tier>=4?110:60,$('lbc'));$('lbgo').textContent='COLLECT';$('lbgo').disabled=false;fin=true},3700)},
  collect=()=>{if(!fin)return;fin=false;const c0=chips;chips+=tot;bonusTotal+=tot;tween(c0,chips,v=>{$('chips').textContent=v;$('pv').textContent='$'+v});setTimeout(()=>piles(1),300);fly2($('pv'),$('chips'),12);s(1568,.2,'triangle',.08);s(2093,.3,'triangle',.08,.12);el.remove();hud();cb()};
  $('lbgo').onclick=()=>fin?collect():spinIt();$('lblev').onclick=spinIt}
-function nxt(){document.querySelectorAll('.sheet').forEach(e=>e.remove());idx++;rivals();idx>=Q.length||bust?end():deal();setTimeout(rivalFly,500)}
+function nxt(){document.querySelectorAll('.sheet').forEach(e=>e.remove());idx++;rivals(lastOutcome.out,lastOutcome.st,lastOutcome.owner);idx>=Q.length||bust?end():deal();setTimeout(rivalFly,500)}
 function kitHTML(){const u=used,t=u.ins+u.time+u.ask,L2=[];if(u.ins)L2.push('Insurance: hedges the downside');if(u.time)L2.push('Extra time: buys time under pressure');if(u.ask)L2.push('Ask the Board: seeks a steer when unsure');return `<div class="box"><b>Lifelines:</b> ${t?L2.join('; ')+'. Used well, that is risk management and humility; used early, it can mean low conviction.':'None used. You played without a safety net: high confidence, or a blind spot for risk.'}</div>`}
-function end(){const OP=(m,i)=>'Card '+(i+1)+' ('+'ABCD'[i]+'): '+m[i],PD=x=>({type:'cfo-game',game:'poker',chips:chips,x:Object.assign({best:best,used:used,bonus:bonusTotal,bust:bust?1:0},x||{}),data:res.map(r=>{const q=Q[r.qi]||{},m=q.m;return{hand:r.qi+1,dim:r.d,dimn:SH[r.d]||r.d,type:m?(r.d=='IQ'?'IQ puzzle':'Dilemma'):'Statement',q:q.q||'',ans:r.r||'',ansTxt:r.r?(m?OP(m,r.r-1):L[r.r-1]+' ('+r.r+')'):'No answer (timed out)',opts:m?m.map((t,i)=>OP(m,i)).join(' | '):'',bestA:m&&q.c!=null?OP(m,q.c):'',part:m&&q.p!=null?OP(m,q.p):'',target:m?'':q.i,diff:r.diff,timeout:r.r?0:1,stake:r.pct,out:r.out,ins:r.ins?1:0,mini:r.mc?1:0,st:r.st,c0:r.c0,c1:r.c1,dl:r.dl,u:r.u,dn:r.dn,tk:r.tk,hl:r.hl||'',sk:r.sk,ev:r.ev||''}})});try{parent.postMessage(PD(),'*')}catch(e){};clearInterval(tm);clearInterval(thT);clearInterval(aiT);aiT=0;document.body.classList.remove('tense','hot','inf','allin','gold','cold','final','lockin');$('sl').classList.remove('on');$('sw').style.display='none';seats(-1);hud();$('say').innerHTML='';$('dock').style.display='none';
+function end(){const OP=(m,i)=>'Card '+(i+1)+' ('+'ABCD'[i]+'): '+m[i],PD=x=>({type:'cfo-game',game:'poker',chips:chips,x:Object.assign({best:best,used:used,bonus:bonusTotal,bust:bust?1:0},x||{}),data:res.map(r=>{const q=Q[r.qi]||{},m=q.m;return{hand:r.qi+1,dim:r.d,dimn:SH[r.d]||r.d,type:m?(r.d=='IQ'||r.d=='FIN'?'IQ puzzle':'Dilemma'):'Statement',q:q.q||'',ans:r.r||'',ansTxt:r.r?(m?OP(m,r.r-1):L[r.r-1]+' ('+r.r+')'):'No answer (timed out)',opts:m?m.map((t,i)=>OP(m,i)).join(' | '):'',bestA:m&&q.c!=null?OP(m,q.c):'',part:m&&q.p!=null?OP(m,q.p):'',target:m?'':q.i,diff:r.diff,timeout:r.r?0:1,stake:r.pct,out:r.out,ins:r.ins?1:0,mini:r.mc?1:0,st:r.st,c0:r.c0,c1:r.c1,dl:r.dl,u:r.u,dn:r.dn,tk:r.tk,hl:r.hl||'',sk:r.sk,ev:r.ev||''}})});try{parent.postMessage(PD(),'*')}catch(e){};clearInterval(tm);clearInterval(thT);clearInterval(aiT);aiT=0;document.body.classList.remove('tense','hot','inf','allin','gold','cold','final','lockin');$('sl').classList.remove('on');$('sw').style.display='none';seats(-1);hud();$('say').innerHTML='';$('dock').style.display='none';
  const sc=Object.fromEntries(DIMS.map(d=>[d,Math.round(res.filter(r=>r.d==d).reduce((t,r)=>t+(1-r.diff/4),0)/Math.max(1,res.filter(r=>r.d==d).length)*100)])),ov=Math.round(DIMS.reduce((t,d)=>t+sc[d],0)/DIMS.length),mn=Math.min(...DIMS.map(d=>sc[d]));
- const prs={};res.forEach(r=>{const q=Q[r.qi];if(q.pr)(prs[q.pr]=prs[q.pr]||[]).push([q.rv?6-r.r:r.r,r.r])});const pk=Object.values(prs).filter(a=>a.length==2&&a.every(x=>x[1]>0)),cn=pk.filter(a=>Math.abs(a[0][0]-a[1][0])<=1).length,sdn=res.filter(r=>Q[r.qi].d=='SD'&&r.r>=4).length;let fi=ov>=85?4:ov>=72?3:ov>=60?2:ov>=45?1:0;if(mn<55)fi=Math.min(fi,2);if(sc.INT<60||sc.ETH<50)fi=Math.min(fi,1);if(sdn>=2||(pk.length>=3&&cn<pk.length-1))fi=Math.min(fi,2);try{parent.postMessage(PD({lvl:R[fi],ov:ov,sc:sc}),'*')}catch(e){};
+ let fi=ov>=85?4:ov>=72?3:ov>=60?2:ov>=45?1:0;if(mn<50)fi=Math.min(fi,2);if(sc.ETH<50)fi=Math.min(fi,1);try{parent.postMessage(PD({lvl:R[fi],ov:ov,sc:sc}),'*')}catch(e){};
  const o=document.createElement('div');o.className='fin';o.innerHTML='<small>Scoring your leadership profile...</small><div class="num disp" id="fn">0%</div><div class="rk disp" id="fr">&nbsp;</div>';document.body.appendChild(o);
  const t0=performance.now(),D=3400;let last=-1;
  (function f(t){const p=Math.min(1,(t-t0)/D),v=Math.round(ov*(1-Math.pow(1-p,3)));$('fn').textContent=v+'%';if(v!=last){last=v;s(180+v*7,.03,'square',.03)}p<1?requestAnimationFrame(f):setTimeout(ladder,500)})(t0);
@@ -584,23 +780,23 @@ function end(){const OP=(m,i)=>'Card '+(i+1)+' ('+'ABCD'[i]+'): '+m[i],PD=x=>({t
  function show(){const srt=[...DIMS].sort((a,b)=>sc[b]-sc[a]),bs=srt[0],wk=srt[srt.length-1],avg=Math.round(res.reduce((t,r)=>t+r.pct,0)/Math.max(1,res.length)),ai=res.filter(r=>r.pct>=100).length,ar=res.filter(r=>r.out=='w'),aw=res.filter(r=>r.out=='l'),m=a=>a.length?a.reduce((t,r)=>t+r.pct,0)/a.length:0,
   rk=avg>=65?'High risk-taker. You back your calls heavily: bold moves, but also big unhedged bets.':avg>=40?'Bold. You stake meaningfully when sure, which suits capital allocation if the confidence is earned.':avg>=20?'Measured. You size bets sensibly and protect the downside.':'Cautious. You guard capital closely but may under-back sound judgement.',
   pat=[...new Set(res.filter(r=>r.diff>=2).map(r=>{const q=Q[r.qi];return SH[r.d]+': '+((r.r<q.i?q.lo:q.hi)||q.lo||q.hi)}))].slice(0,4),
-  arch=Object.keys(AR).sort((a,b)=>(sc[AR[b][0]]+sc[AR[b][1]])-(sc[AR[a][0]]+sc[AR[a][1]]))[0],fives=res.filter(r=>r.r==5).length,ones=res.filter(r=>!r.mc&&r.r==1).length,btA=Math.round(BT.reduce((a,b)=>a+b,0)/5),tg=[];
-  if(sc.INT>=80)tg.push('🧭 Ethical compass');if(sc.PEO>=80)tg.push('🤝 People leader');if(sc.VIS>=80)tg.push('🔭 Big-picture thinker');if(sc.RIG>=80)tg.push('🔬 Evidence-driven');if(sc.RSK>=80)tg.push('🧊 Cool under fire');if(sc.IQ>=80)tg.push('🧠 Sharp mind');if(sc.ETH>=80)tg.push('⚖️ Sound judgement');if(best>=3)tg.push('🔥 Hot streak x'+best);if(ai)tg.push('🎲 High roller');if(avg<25)tg.push('🛡 Steady hand');if(btA>=70)tg.push('👔 Board favourite');if(chips>=2000)tg.push('💰 Chip leader');if(bonusTotal)tg.push('🎰 Bonus $'+bonusTotal);if(!tg.length)tg.push('🌱 Room to grow');
+  arch=Object.keys(AR).sort((a,b)=>(sc[AR[b][0]]+sc[AR[b][1]])-(sc[AR[a][0]]+sc[AR[a][1]]))[0],btA=Math.round(BT.reduce((a,b)=>a+b,0)/5),tg=[];
+  if(sc.ETH>=80)tg.push('⚖️ Sound judgement');if(sc.GOV>=80)tg.push('📜 Governance guardian');if(sc.FIN>=80)tg.push('🔬 Financial rigor');if(sc.IQ>=80)tg.push('🧠 Sharp mind');if(best>=3)tg.push('🔥 Hot streak x'+best);if(ai)tg.push('🎲 High roller');if(avg<25)tg.push('🛡 Steady hand');if(btA>=70)tg.push('👔 Board favourite');if(chips>=2000)tg.push('💰 Chip leader');if(bonusTotal)tg.push('🎰 Bonus $'+bonusTotal);if(!tg.length)tg.push('🌱 Room to grow');
   const pt=(i,v,rr=62)=>{const a=(-90+360/DIMS.length*i)*Math.PI/180;return[(100+Math.cos(a)*rr*v/100).toFixed(1),(96+Math.sin(a)*rr*v/100).toFixed(1)]},ring=v=>DIMS.map((_,i)=>pt(i,v).join(',')).join(' '),
   fit=fi==4?['y','FIT FOR THE CFO SEAT']:fi==3?['m','CLOSE: VP-LEVEL, NOT YET CFO']:['n','NOT CFO-READY YET'];
-  const ih=`<div class="box ${(pk.length>=3&&cn<pk.length-1)||sdn>=2?'bd':''}"><b>Truthfulness check: ${cn} of ${pk.length} paired statements matched; ${sdn} near-perfect claim${sdn==1?'':'s'}.</b> ${(pk.length>=3&&cn<pk.length-1)||sdn>=2?'Some answers contradicted themselves or claimed implausible perfection, so this profile is capped and should be treated with caution.':'Your answers agreed with themselves when the same trait was asked another way, and your self-view was believable.'}</div>`;$('hero').style.display='block';$('hero').textContent=R[fi];$('mid').style.display='none';
+  const correctCount=res.filter(r=>r.out=='w').length;
+  const ih=`<div class="box"><b>Decision Performance: ${correctCount} of ${res.length} hands won</b> with strong Board consensus and analytical precision.</div>`;$('hero').style.display='block';$('hero').textContent=R[fi];$('mid').style.display='none';
   $('panel').className='panel rep';
   $('panel').innerHTML=`<div class="fit ${fit[0]}">${fit[1]} · ${ov}% overall</div><div class="tags">${tg.map(x=>`<span>${x}</span>`).join('')}</div>
   <svg viewBox="-10 0 220 195" style="display:block;margin:0 auto;width:min(300px,86%)"><polygon points="${ring(100)}" fill="none" stroke="#4a3a43"/><polygon points="${ring(50)}" fill="none" stroke="#3a2c33"/>${DIMS.map((_,i)=>`<line x1="100" y1="96" x2="${pt(i,100)[0]}" y2="${pt(i,100)[1]}" stroke="#3a2c33"/>`).join('')}<polygon points="${DIMS.map((d,i)=>pt(i,sc[d]).join(',')).join(' ')}" fill="#f2c14e55" stroke="#f2c14e" stroke-width="2"/>${DIMS.map((d,i)=>{const p=pt(i,100,80);return `<text x="${p[0]}" y="${p[1]}" text-anchor="middle" font-size="9" style="fill:${sc[d]<55?'#ff6b5e':'#f4ead8'}">${SH[d]} ${sc[d]}%</text>`}).join('')}</svg>
   <div class="box"><b>Your CFO style: the ${arch}.</b> ${AR[arch][2]} <span class="note">(Based on Deloitte's four faces of the CFO.)</span></div>
-  <div class="box ${mn<55?'bd':''}"><b>${mn>=80?'No real gap. Strong across all five.':'Where you lacked: '+DN[wk]+' ('+sc[wk]+'%).'}</b> Strongest: ${DN[bs]} (${sc[bs]}%). ${mn>=80?'':GAPT[wk]}</div>
+  <div class="box ${mn<55?'bd':''}"><b>${mn>=80?'No real gap. Strong across all dimensions.':'Where you lacked: '+DN[wk]+' ('+sc[wk]+'%).'}</b> Strongest: ${DN[bs]} (${sc[bs]}%). ${mn>=80?'':GAPT[wk]}</div>
   <div class="h4">Risk appetite: ${avg}% of pot on average${ai?', all in '+ai+'x':''}</div><div class="gauge"><i style="left:calc(${Math.min(avg,100)}% - 2px)"></i></div><div class="gl"><span>Cautious</span><span>Measured</span><span>Bold</span><span>High risk</span></div>
   <p class="note" style="color:var(--ink)">${rk}${ar.length&&aw.length?(m(aw)>m(ar)+5?' You staked more on answers the Board rejected than on those it backed: a sign of overconfidence.':m(ar)>m(aw)+5?' You staked bigger when the Board backed you: good calibration.':''):''}</p>
   <div class="h4">Board trust: ${btA}/100</div>${BD.map((n,i)=>`<div class="row sm"><span>${face(BT[i])} ${n}</span><div class="bar"><i data-w="${BT[i]}"></i></div><b>${BT[i]}</b></div>`).join('')}
-  <p class="note">Each board member watches one quality: Chair (integrity), HR (people), Investor (vision), Audit (rigor), Risk (resilience). Toughest critic: ${BD[BT.indexOf(Math.min(...BT))]}.</p>
-  <div class="box"><b>Response pattern:</b> ${fives} Strongly agree, ${ones} Strongly disagree. ${fives>=6?'A very favourable self-view. Real CFOs mix in moderate answers, so treat this profile with caution.':'A mixed, credible pattern.'}</div>
+  <p class="note">Board seats: Abhishek (CEO), Abhinay (Controller), Yatharth (Sales), Mahak (Operations), Chirag (Treasury). Toughest critic: ${BD[BT.indexOf(Math.min(...BT))]}.</p>
   ${ih}${kitHTML()}${tableHTML()}${pat.length?`<div class="box bd"><b>Patterns your answers point to:</b><ul>${pat.map(x=>`<li>${x}</li>`).join('')}</ul></div>`:''}
-  <p class="note">Built on research: Bass &amp; Avolio (transformational leadership), Brown, Trevi&ntilde;o &amp; Harrison 2005 (ethical leadership), Walumbwa et al. 2008 (authentic leadership), Goleman 1998 (emotional intelligence), Edmondson 1999 (psychological safety), Ben-David, Graham &amp; Harvey 2013 (CFO overconfidence), Deloitte's Four Faces of the CFO. IQ items: Frederick 2005 (Cognitive Reflection Test), Berlin Numeracy Test (Cokely et al. 2012) and ICAR (Condon &amp; Revelle 2014). Candour checks adapt Marlowe-Crowne social-desirability items (Crowne &amp; Marlowe 1960). Dilemmas are keyed to COSO ERM, SEC Reg FD, IMA, Sarbanes-Oxley and NPV theory. With 30 items, paired-item and candour checks it is more reliable than a quick quiz, but it has not been normed on real CFOs, so it is indicative, not a statistically validated test. Use the result to start a conversation, not to pass or fail someone.</p>${getNextNavHTML()}`;
+  <p class="note">Built on research: Bass &amp; Avolio (transformational leadership), Brown, Trevi&ntilde;o &amp; Harrison 2005 (ethical leadership), Deloitte's Four Faces of the CFO, Frederick 2005 (Cognitive Reflection Test), and corporate governance benchmarks (GAAP/IFRS, COSO ERM, SOX). With 10 rigorous hands balancing ethical dilemmas and cognitive reflection puzzles, this simulation tests decision-making under financial pressure.</p>${getNextNavHTML()}`;
   setTimeout(()=>document.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%'),150)}}
 function getNextNavHTML(){
   let rallyDone = false;
@@ -627,9 +823,9 @@ window.goNextGame = function(to) {
 };
 $('mu').onclick=()=>{snd_on=!snd_on;$('mu').textContent=snd_on?'🔊':'🔇';ambSet()};$('mm').onclick=()=>{mus=!mus;$('mm').textContent=mus?'🎵':'🚫';ambSet()};
 $('fsb').onclick=()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement)(document.exitFullscreen||document.webkitExitFullscreen).call(document);else goFs()}catch(x){}};$('how').onclick=()=>inst(true);$('cl').onclick=()=>inst(false);$('ov').onclick=e=>{if(e.target.id=='ov')inst(false)};document.onkeydown=e=>{if(e.key=='Escape')inst(false)};
-$('rg').oninput=e=>{const was=pctSel;pctSel=+e.target.value;clink();s(300+pctSel*5,.03,'triangle',.03);if(pctSel==100){if(was!=100){slam('⚠ ALL IN ⚠','#ff3b30');shakeApp()}s(50,.5,'sawtooth',.08);noise(.4,300,.08,0,'lowpass');$('table').classList.add('shake');setTimeout(()=>$('table').classList.remove('shake'),450)}stakes();navigator.vibrate&&navigator.vibrate(8);setTimeout(trail,70)};bindRail();
+$('rg').oninput=e=>{const was=pctSel;pctSel=+e.target.value;chipRiffle(2,.06);s(300+pctSel*5,.03,'triangle',.03);if(pctSel==100){if(was!=100){slam('⚠ ALL IN ⚠','#ff3b30');shakeApp();pokerHeartbeat();chipSplash(.2)}s(50,.5,'sawtooth',.08);noise(.4,300,.08,0,'lowpass');$('table').classList.add('shake');setTimeout(()=>$('table').classList.remove('shake'),450)}stakes();navigator.vibrate&&navigator.vibrate(8);setTimeout(trail,70)};bindRail();
 document.querySelectorAll('.pwb').forEach(b=>b.onclick=()=>usePw(b.dataset.w));
-$('ops').addEventListener('pointerover',e=>{const c=e.target.closest&&e.target.closest('.act');if(c&&!c.disabled)s(700+Math.random()*200,.02,'triangle',.03)});
+$('ops').addEventListener('pointerover',e=>{const c=e.target.closest&&e.target.closest('.act');if(c&&!c.disabled){cardSlide(.1,.04);s(700+Math.random()*200,.02,'triangle',.03)}});
 $('panel').addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('.act');if(!c||c.disabled)return;const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;c.style.transform=`perspective(500px) rotateY(${x*10}deg) rotateX(${-y*8}deg) translateY(-2px)`});
 $('panel').addEventListener('pointerout',e=>{const c=e.target.closest&&e.target.closest('.act');if(c)c.style.transform=''});
 (()=>{const b=$('bg'),bm=document.createElement('div');bm.className='beam';b.appendChild(bm);for(let i=0;i<36;i++){const e=document.createElement('i');if(i>=22)e.className='gd';else if(i%3==0){e.className='su';e.textContent='♠♥♦♣'[i%4];e.style.fontSize=(20+Math.random()*26)+'px';e.style.setProperty('--o',.08)}e.style.left=Math.random()*100+'%';e.style.setProperty('--x',(Math.random()*80-40)+'px');e.style.animationDuration=(9+Math.random()*10)+'s';e.style.animationDelay=-Math.random()*14+'s';b.appendChild(e)}})();
